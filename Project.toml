@@ -1,0 +1,13 @@
+name = "SegregatedVMSSolver"
+uuid = "90220dfc-fac3-4908-b895-51c1a1f4cb85"
+authors = ["Carlo Brunelli"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
