@@ -46,6 +46,7 @@ function init_params(params::Dict{Symbol,Any})
     verifykey(params,:benchmark; val = true) # do not print the results
     verifykey(params,:M; val = 20)
     verifykey(params,:t_endramp; val = 0.0)
+    verifykey(params,:TI; val = 0.0)
     verifykey(params,:mesh_file; val = " ")
     verifykey(params,:restart)
     verifykey(params,:restart_file; val = " ")
