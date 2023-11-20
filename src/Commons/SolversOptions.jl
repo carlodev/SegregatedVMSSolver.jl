@@ -3,11 +3,6 @@ function vel_kspsetup(ksp)
     @check_error_code GridapPETSc.PETSC.KSPSetOptionsPrefix(ksp[],"vel_")
     @check_error_code GridapPETSc.PETSC.KSPSetFromOptions(ksp[])
 
-    # @check_error_code GridapPETSc.PETSC.KSPSetType(ksp[], GridapPETSc.PETSC.KSPPREONLY)
-    # @check_error_code GridapPETSc.PETSC.KSPGetPC(ksp[], pc)
-    # @check_error_code GridapPETSc.PETSC.PCSetType(pc[], GridapPETSc.PETSC.PCJACOBI)  
-    # @check_error_code GridapPETSc.PETSC.KSPSetTolerances(ksp[], 1e-10,0.0,1e5,1e4)  
-
   end
 
   function pres_kspsetup(ksp)
@@ -15,23 +10,14 @@ function vel_kspsetup(ksp)
     @check_error_code GridapPETSc.PETSC.KSPSetOptionsPrefix(ksp[],"pres_")
     @check_error_code GridapPETSc.PETSC.KSPSetFromOptions(ksp[])
 
-    # @check_error_code GridapPETSc.PETSC.KSPSetType(ksp[], GridapPETSc.PETSC.KSPGMRES)
-    # @check_error_code GridapPETSc.PETSC.KSPGetPC(ksp[], pc)
-    # @check_error_code GridapPETSc.PETSC.PCSetType(pc[], GridapPETSc.PETSC.PCGAMG)
-    # @check_error_code GridapPETSc.PETSC.KSPSetTolerances(ksp[],1e-10, 1e-8,1e4,1000)
-
   end
 
+function petsc_options_default()
+  return petsc_options()
+end
 
-  # function vel_kspsetup(ksp)
-  #   @check_error_code GridapPETSc.PETSC.KSPSetOptionsPrefix(ksp[],"vel_")
-  #   @check_error_code GridapPETSc.PETSC.KSPSetReusePreconditioner(ksp[], GridapPETSc.PETSC.PETSC_TRUE)
-    
-
-  # end
-  
-  # function pres_kspsetup(ksp)
-  #   @check_error_code GridapPETSc.PETSC.KSPSetOptionsPrefix(ksp[],"pres_")
-  #   @check_error_code GridapPETSc.PETSC.KSPSetReusePreconditioner(ksp[], GridapPETSc.PETSC.PETSC_TRUE)
-
-  # end
+function petsc_options(; vel_ksp="gmres", vel_pc="gamg", pres_ksp = "cg", pres_pc = "gamg")
+  return " -vel_ksp_type $(vel_ksp) -vel_pc_type $(vel_pc) -vel_ksp_rtol 1.e-10 -vel_ksp_converged_reason \
+  -pres_ksp_type $(pres_ksp) -pres_pc_type $(pres_pc)  -pres_ksp_rtol 1.e-6 -pres_ksp_converged_reason \
+  -ksp_atol 0.0"
+end
