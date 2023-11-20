@@ -1,1 +1,11 @@
 /Manifest.toml
+.vscode
+.VSCodeCounter
+.gitignore
+*.msh
+*.csv
+
+#Exception
+!Cylinder_2D.msh 
+!DU89_2D_A1_M.msh
+!BL_DU89_2D_A1_M.csv
