@@ -2,9 +2,7 @@
 
 
 function run_airfoil_test()
-    petsc_options = " -vel_ksp_type gmres -vel_pc_type gamg -vel_ksp_rtol 1.e-10 -vel_ksp_converged_reason \
-                      -pres_ksp_type cg -pres_pc_type gamg  -pres_ksp_rtol 1.e-6 -pres_ksp_converged_reason \
-                      -ksp_atol 0.0"
+
    
    params = Dict(
          :N => 100,
@@ -20,7 +18,7 @@ function run_airfoil_test()
          :backend => with_debug,  #or with_mpi() with_debug()
          :rank_partition=>(2,2),
          :ν => 0.001,
-         :petsc_options => petsc_options,
+         :petsc_options => petsc_options_default(),
          :method=>:VMS,
          :Cᵢ => [4, 36],
          :benchmark=>false,
@@ -30,7 +28,7 @@ function run_airfoil_test()
          :ρ=>1.0,
          :Re=> 1_000,
          :c=> 1.0,
-         :restart=> false,
+         :restart=> true,
          :restart_file=>"BL_DU89_2D_A1_M.csv",     
    )
    

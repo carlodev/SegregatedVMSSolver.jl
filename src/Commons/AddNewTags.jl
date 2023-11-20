@@ -17,9 +17,7 @@ function add_centre_tag!(model, tag_coordinate::Point)
     end
 
     function create_center_tag!(model::GridapDistributed.DistributedDiscreteModel)
-        # map_parts(model.models) do model
-        #     create_center_tag!(model)
-        # end
+
      map(model.models) do model
             create_center_tag!(model)
         end

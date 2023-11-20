@@ -2,10 +2,10 @@ push!(LOAD_PATH,joinpath("..","src"))
 
 using Documenter, DocumenterCitations, SegregatedVMSSolver
 
-# bib = CitationBibliography(joinpath(@__DIR__, "src", "docs.bib"); style=:numeric)
+bib = CitationBibliography(joinpath(@__DIR__, "src", "docs.bib"); style=:numeric)
 
 
-makedocs(;
+makedocs(bib;
     sitename = "SegregatedVMSSolver.jl",
     modules = [SegregatedVMSSolver],
     pages = [

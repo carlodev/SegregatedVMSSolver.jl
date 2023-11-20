@@ -28,7 +28,10 @@ include(joinpath("Commons","AddNewTags.jl"))
 include(joinpath("Commons","StabParams.jl"))
 include(joinpath("Commons","LinearUtilities.jl"))
 include(joinpath("Commons","StabilizedEquations.jl"))
+
 include(joinpath("Commons","SolversOptions.jl"))
+export petsc_options_default,petsc_options
+
 include(joinpath("Commons","MatrixCreation.jl"))
 include(joinpath("Commons","Restart.jl"))
 include(joinpath("Commons","ExportUtilities.jl"))
