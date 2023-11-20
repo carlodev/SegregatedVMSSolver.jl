@@ -19,7 +19,19 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-julia = "1"
+julia = "1.8.2"
+CSV = "0.10.11"
+DataFrames = "1.6.1"
+FillArrays = "1.7.0"
+Gridap = "0.17.20"
+GridapDistributed = "0.3.2"
+GridapGmsh = "0.7.0"
+GridapPETSc = "0.5.0"
+MPI = "0.20.16	"
+Parameters = "0.12.3"
+PartitionedArrays = "0.3.4"
+Revise = "3.5.9"
+
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
