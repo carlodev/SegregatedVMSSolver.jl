@@ -32,14 +32,14 @@ end
 
 
 function uh_r(p::VectorValue{2, Float64}, params::Dict{Symbol, Any}, idx::Int)
-@unpack restart_df = params
-  VectorValue(restart_df.uh_0[idx][1], restart_df.uh_1[idx][1])
+@unpack restart_df, initial_rescale_factor = params
+  VectorValue(initial_rescale_factor .* restart_df.uh_0[idx][1], initial_rescale_factor .* restart_df.uh_1[idx][1])
 end
 
 
 function uh_r(p::VectorValue{3, Float64}, params::Dict{Symbol, Any}, idx::Int)
-  @unpack restart_df = params
-  VectorValue(restart_df.uh_0[idx][1], restart_df.uh_1[idx][1],restart_df.uh_2[idx][1])
+  @unpack restart_df, initial_rescale_factor = params
+  VectorValue(initial_rescale_factor .* restart_df.uh_0[idx][1], initial_rescale_factor .* restart_df.uh_1[idx][1],initial_rescale_factor .* restart_df.uh_2[idx][1])
 end
 
 

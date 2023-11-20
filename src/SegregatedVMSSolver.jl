@@ -22,7 +22,7 @@ using Gridap.Arrays
 using Gridap.CellData
 
 include("Main.jl")
-include(joinpath("Commons","Initialize_Parameters.jl"))
+include(joinpath("Commons","InitializeParameters.jl"))
 include(joinpath("Commons","CommonsProcedures.jl"))
 include(joinpath("Commons","AddNewTags.jl"))
 include(joinpath("Commons","StabParams.jl"))

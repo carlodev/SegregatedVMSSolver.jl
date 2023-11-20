@@ -1,3 +1,8 @@
+"""
+  print_model(params::Dict{Symbol, Any})
+
+It prints the model mesh
+"""
 function print_model(params::Dict{Symbol, Any})
   @unpack printmodel, model, case = params
   if printmodel
@@ -7,6 +12,8 @@ end
 
 
 """
+  creation_fe_spaces(params::Dict{Symbol,Any}, u_diri_tags, u_diri_values, p_diri_tags, p_diri_values)
+
 It creates the finite elements spaces accordingly to the previously generated dirichelet tags
 """
 function creation_fe_spaces(params::Dict{Symbol,Any}, u_diri_tags, u_diri_values, p_diri_tags, p_diri_values)
@@ -25,8 +32,11 @@ function creation_fe_spaces(params::Dict{Symbol,Any}, u_diri_tags, u_diri_values
 
     return V, U, P, Q, Y, X
 end
+"""
+  create_initial_conditions(params::Dict{Symbol,Any})
 
-
+It creates the initial conditions for velocity and pressure. If `restart` is `true` then the velocity and the pressure field are interpoled on the specified DataFrame.  
+"""
 function create_initial_conditions(params::Dict{Symbol,Any})
     @unpack U,P,u0, D, restart,t0,Ω, printinitial = params
 
@@ -56,8 +66,11 @@ function create_initial_conditions(params::Dict{Symbol,Any})
   return uh0,ph0
 end
 
+"""
+  create_PETSc_setup(M::AbstractMatrix,ksp_setup::Function)
 
-
+Wrapper for creating PETSc symbolic and numeric setup for `GridapPETSc`  
+"""
 function create_PETSc_setup(M::AbstractMatrix,ksp_setup::Function)
       solver = PETScLinearSolver(ksp_setup)
       ss = symbolic_setup(solver, M)
@@ -67,7 +80,11 @@ function create_PETSc_setup(M::AbstractMatrix,ksp_setup::Function)
       return ns
 end
 
+"""
+  solve_case(params::Dict{Symbol,Any})
 
+It solves iteratively the velocity and pressure system.
+"""
 function solve_case(params::Dict{Symbol,Any})
 
 @unpack M, petsc_options, time_step, θ, dt,t0, case, benchmark, method, trials, tests, 
@@ -237,4 +254,4 @@ save_path = "$(case)_$(tn)_.vtu"
 end #end GridapPETSc
 
 
-end
+end #end solve_case

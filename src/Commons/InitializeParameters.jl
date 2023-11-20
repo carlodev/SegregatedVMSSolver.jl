@@ -1,11 +1,22 @@
-function verifykey(params,keyname; val = false)
+"""
+    verifykey(params::Dict{Symbol,Any},keyname; val = false)
+
+It check if the dictionary params has the entry `keyname`. If not it adds the new entry with the value val. It is used to add default values
+"""
+function verifykey(params::Dict{Symbol,Any},keyname; val = false)
     if !haskey(params, keyname)
         merge!(params,Dict(keyname=>val))
     end
 end
 
+"""
+    init_params(params::Dict{Symbol,Any})
 
-function init_params(params)
+It initialize the parametes of the simulations. Default values are added if not specified by the user.
+In case of a restarting simulation it reads the file and create a `initial_rescale_factor`<1 for CFL ramping initialization.
+
+"""
+function init_params(params::Dict{Symbol,Any})
 
     @unpack D,rank_partition,case,t0,dt,tF = params
 

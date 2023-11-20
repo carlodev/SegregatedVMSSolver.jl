@@ -1,4 +1,8 @@
+"""
+  allocate_Mat_inv_ML(Mat_ML::PSparseMatrix) 
 
+It allocates a zero vector where to store the inverse of the lumped matrix
+"""
 function allocate_Mat_inv_ML(Mat_ML::PSparseMatrix) 
   return pzeros(Mat_ML.row_partition)
 end
@@ -9,6 +13,11 @@ function allocate_Mat_inv_ML(Mat_ML::SparseMatrixCSC)
   return zeros(l)
 end
 
+"""
+  inv_lump_vel_mass!(Mat_inv_ML::PVector,Mat_ML::PSparseMatrix)
+
+It computes the lumped matrix, takes the inverse of the diagonal elements.
+"""
 function inv_lump_vel_mass!(Mat_inv_ML::PVector,Mat_ML::PSparseMatrix)
     values = map(Mat_ML.matrix_partition) do val
         N = maximum(rowvals(val))
@@ -38,6 +47,11 @@ function inv_lump_vel_mass!(Mat_inv_ML::Vector, Mat_ML::SparseMatrixCSC)
   
 end
 
+"""
+  initialize_vectors(matrices::Tuple,uh0,ph0)
+
+It initializes vectors where velocity, pressure, acceleration and all the increments will be stored.
+"""
 function initialize_vectors(matrices::Tuple,uh0,ph0)
   Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices
   vec_pm = GridapDistributed.change_ghost(get_free_dof_values(ph0), Mat_Aup)
@@ -63,7 +77,13 @@ function initialize_matrices_and_vectors(trials,tests, t::Real, u_adv, params; m
   return matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=method)
 end
 
-function matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=:SUPG)
+
+"""
+  matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=:VMS)
+
+It updates matrices and vectors
+"""
+function matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=:VMS)
 
   if method==:VMS
     Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs = segregated_equations_VMS!(u_adv, params)

@@ -1,4 +1,9 @@
+"""
+  cconv(uadv, ∇u) 
 
+Wrapper for the convective term
+  ``u(\\nabla u)``  
+"""
 cconv(uadv, ∇u) = uadv ⋅ (∇u)
 
 val(x) = x
@@ -6,7 +11,11 @@ val(x::Gridap.Fields.ForwardDiff.Dual) = x.value
 
 
 
+"""
+  segregated_equations_SUPG!(u_adv, params)
 
+It provides the SUPG segregated and linearized equations following the model proposed by [Janssens2014](@cite)
+"""
 function segregated_equations_SUPG!(u_adv, params)
     @unpack ν, dt, dΩ, D, Ω, θ = params
 
@@ -56,7 +65,11 @@ function segregated_equations_SUPG!(u_adv, params)
   end
     
 
+  """
+  segregated_equations_SUPG!(u_adv, params)
 
+It provides the VMS segregated and linearized equations 
+"""
  function segregated_equations_VMS!(u_adv, params)
     @unpack ν, dt, dΩ, θ, Ω, Cᵢ = params
 
