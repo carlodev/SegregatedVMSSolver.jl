@@ -76,6 +76,9 @@ export restart_ph_field
 include(joinpath("Commons","Restart.jl"))
 
 
+include(joinpath("..","utils","ReadAirfoilResults.jl"))
+include(joinpath("..","utils","WallDistance.jl"))
+
 include(joinpath("Commons","ExportUtilities.jl"))
 
 #TaylorGreen
