@@ -4,7 +4,6 @@
     find_idx(p::VectorValue{2, Float64}, params)
 
 For a given point `p` it search on the `restart_file` provided by the user the closer node and provides the index of such node.
-It takes into account also the channel periodic case, changing the coordiantes of the periodic directions. 
 """
 
 function find_idx(p::VectorValue{2, Float64}, params)
@@ -20,7 +19,6 @@ end
     find_idx(p::VectorValue{3, Float64}, params)
 
 For a given point `p` it search on the `restart_file` provided by the user the closer node and provides the index of such node.
-It takes into account also the channel periodic case, changing the coordiantes of the periodic directions. 
 """
 function find_idx(p::VectorValue{3, Float64}, params)
   norm_v = map((x,y,z)->  norm([p[1]-x, p[2]-y,p[3]-z]),  params[:restart_df].Points_0, params[:restart_df].Points_1, params[:restart_df].Points_2)
@@ -99,8 +97,6 @@ function restart_ph_field(params::Dict{Symbol, Any})
   
   init_pres = DataFrames.haskey(params[:restart_df],:ph)
 
-  # p0(x, t::Real) = (init_pres) ?   ph_restart(x, params) : 0.0
-  # p0(t::Real) = x -> p0(x, t::Real)
   p0(x) = (init_pres) ?   ph_restart(x, params) : 0.0
 
   return p0
