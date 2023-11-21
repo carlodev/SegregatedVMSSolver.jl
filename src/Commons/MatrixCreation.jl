@@ -58,14 +58,14 @@ function initialize_vectors(matrices::Tuple,uh0,ph0)
   vec_um = GridapDistributed.change_ghost(get_free_dof_values(uh0), Mat_Auu)
 
 
-  vec_am = pzeros(Mat_ML)
-  vec_sum_pm = pzeros(Mat_Aup)
-  Δa_star = pzeros(Mat_Apu)
-  Δpm1 = pzeros(Mat_S)
-  Δa = pzeros(Mat_Tpu)
+  vec_am = pazeros(Mat_ML)
+  vec_sum_pm = pazeros(Mat_Aup)
+  Δa_star = pazeros(Mat_Apu)
+  Δpm1 = pazeros(Mat_S)
+  Δa = pazeros(Mat_Tpu)
 
-  b1 = pzeros(Vec_Au)
-  b2 = pzeros(Vec_Ap)
+  b1 = pazeros(Vec_Au)
+  b2 = pazeros(Vec_Ap)
   ũ_vector = create_ũ_vector(vec_um)
 
   return vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector

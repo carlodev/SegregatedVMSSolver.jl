@@ -42,12 +42,12 @@ function GridapDistributed.change_ghost(a::PVector,b::AbstractArray)
   GridapDistributed.change_ghost(a,PRange(b))
 end
 
-function pzeros(M::PSparseMatrix)
-  pzeros(M.col_partition)
+function pazeros(M::PSparseMatrix)
+  PartitionedArrays.pzeros(M.col_partition)
 end
 
-function pzeros(a::PVector)
-  pzeros(a.index_partition)
+function  pazeros(a::PVector)
+  PartitionedArrays.pzeros(a.index_partition)
 end
 
 

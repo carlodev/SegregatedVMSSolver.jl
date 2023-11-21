@@ -141,8 +141,8 @@ for (ntime,tn) in enumerate(time_step)
       time_solve = @elapsed begin 
 
 
-        vec_am .= pzeros(Mat_ML)
-        vec_sum_pm .= pzeros(Mat_Aup)
+        vec_am .= pazeros(Mat_ML)
+        vec_sum_pm .= pazeros(Mat_Aup)
         
         norm_Δa0 = 10
         norm_Δp0 = 10
@@ -153,8 +153,8 @@ for (ntime,tn) in enumerate(time_step)
       
       while (m<= M) && (err_norm_Δa0<a_err_threshold)
 
-        Δpm1 .=  pzeros(Mat_S)
-        Δa_star .= pzeros(Mat_ML)
+        Δpm1 .=  pazeros(Mat_S)
+        Δa_star .= pazeros(Mat_ML)
 
         vec_um = GridapDistributed.change_ghost(vec_um, Mat_Auu)
         vec_pm = GridapDistributed.change_ghost(vec_pm, Mat_Aup)
