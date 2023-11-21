@@ -13,6 +13,6 @@ walltag = ["airfoil","wake"]
 
 u_start = get_wall_distance(mesh_file, D, u_in, Re, chord, walltag)
 
-@test u_start <: AbstractVector
+@test typeof(u_start) <: AbstractVector
 
 end #end module
