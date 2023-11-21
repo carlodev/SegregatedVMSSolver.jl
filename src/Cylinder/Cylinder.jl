@@ -8,7 +8,6 @@ function run_cylinder(params,distribute)
     mesh_file_path = joinpath(@__DIR__, "../../models", params[:mesh_file])
     
     model = GmshDiscreteModel(parts, mesh_file_path)
-    writevtk(model,"Cylinder")
 
    
 
