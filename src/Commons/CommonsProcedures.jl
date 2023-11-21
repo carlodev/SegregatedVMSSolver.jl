@@ -88,7 +88,7 @@ It solves iteratively the velocity and pressure system.
 function solve_case(params::Dict{Symbol,Any})
 
 @unpack M, petsc_options, time_step, θ, dt,t0, case, benchmark, method, trials, tests, 
-Ω, matrix_freq_update, a_err_threshold = params
+Ω, matrix_freq_update, a_err_threshold, log_dir = params
 @unpack U,P,u0 = params
 
 
@@ -106,7 +106,10 @@ if case == "TaylorGreen"
 end
 
 if case == "Airfoil"
-  local_unique_idx = get_nodes(params)
+  @unpack parts,Γ = params
+  local_unique_idx =  get_local_unique_idx(parts, Γ)
+  global_unique_idx = export_nodes_glob(parts, Γ)
+  export_n_Γ(params, local_unique_idx, global_unique_idx)
 end
 
 GridapPETSc.with(args=split(petsc_options)) do
@@ -233,7 +236,7 @@ println("Solution computed at time $tn")
 uh_tn = FEFunction(U(tn), vec_um)
 ph_tn = FEFunction(P(tn), vec_pm)
 save_path = "$(case)_$(tn)_.vtu"
-  if !benchmark && (mod(ntime,100)==0 || ntime<10) 
+  if !benchmark && (mod(ntime,100)==0 || print_on_request(log_dir)) 
 
 
     if case == "TaylorGreen"
@@ -245,7 +248,7 @@ save_path = "$(case)_$(tn)_.vtu"
   end
 
   if case == "Airfoil"
-    export_fields(params, local_unique_idx, tn, uh_tn, ph_tn)
+    export_fields(params, local_unique_idx, global_unique_idx, tn, uh_tn, ph_tn)
   end
 
 

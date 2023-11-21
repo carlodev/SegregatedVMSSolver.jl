@@ -50,11 +50,11 @@ function init_params(params::Dict{Symbol,Any})
     verifykey(params,:mesh_file; val = " ")
     verifykey(params,:restart)
     verifykey(params,:restart_file; val = " ")
-
+    verifykey(params,:log_dir; val = "Log") #Default directort for printing on request
 
     if params[:restart]
         @unpack restart_file, t_endramp, t0 = params
-        restart_path = joinpath(@__DIR__, "../../restarts", restart_file)
+        restart_path = joinpath(@__DIR__, "..","..","restarts", restart_file)
         restart_df = DataFrame(CSV.File(restart_path))
         
         initial_rescale_factor = 1.0
