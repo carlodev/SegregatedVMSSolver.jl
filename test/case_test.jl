@@ -5,7 +5,7 @@ function run_case_test(case::String; meshfile=" ", t_endramp=1.0, Reynolds=1000)
 
    
    params = Dict(
-         :N => 100,
+         :N => 32,
          :D => 2, #Dimension
          :order => 1, 
          :t0 => 0.0,
@@ -15,7 +15,7 @@ function run_case_test(case::String; meshfile=" ", t_endramp=1.0, Reynolds=1000)
          :θ => 0.5,
          :u_in=> 1.0,
         
-         :backend => with_debug,  #or with_mpi() with_debug()
+         :backend => with_debug,  #or with_mpi()
          :rank_partition=>(2,2),
          :ν => 0.001,
          :petsc_options => petsc_options_default(),
