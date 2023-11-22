@@ -10,6 +10,12 @@ export average_field
 export extract_airfoil_features
 export compute_CL_CD
 
+
+"""
+    get_nodes(path::String)
+
+It provides a `DataFrame` with the nodes of the `Airfoil` boundary
+"""
 function get_nodes(path::String)
     f_path = readdir(path)
     idx_n = findfirst(x->occursin("nodes", x), f_path)
@@ -18,6 +24,11 @@ function get_nodes(path::String)
     return df_nodes
 end
 
+"""
+    get_nodes(path::String)
+
+It provides a `DataFrame` with the normals vectors at the surface of the `Airfoil` boundary    
+"""
 function get_normals(path::String)
     f_path = readdir(path)
     idx_n = findfirst(x->occursin("n_Γ", x), f_path)
@@ -27,7 +38,12 @@ function get_normals(path::String)
 end
 
 
+"""
+    average_field(path::String, field_name::String, nodes::DataFrame; offset=1, offend_ = 0)
 
+It computes the time-average and also the spanwise averge (z direction). `field_name` can be `ph` for pressure or `friction` for friction.
+It is possible to skip a certain amount of initial time-step when averaging setting the `offset`.
+"""
 function average_field(path::String, field_name::String, nodes::DataFrame; offset=1, offend_ = 0)
     f_path = readdir(path)
     idx_n = findall(x->occursin(field_name, x), f_path)
@@ -76,9 +92,9 @@ end
 
 
 
-"""
-It provides a Vector of length = airfoil points in 2D. Each element is a vector, where the elements have the same x and y.
-"""
+# find_z_aligned(df::DataFrame)
+# It provides a Vector of length = airfoil points in 2D. Each element is a vector, where the elements have the same x and y.
+# 
 function find_z_aligned(df::DataFrame)
     zpoints = findall(x-> x == 0, df.z)
 
@@ -97,7 +113,11 @@ function find_z_aligned(df::DataFrame)
 end
 
 
+"""
+    extract_airfoil_features(nodes::DataFrame, n_Γ0::DataFrame, Ph::DataFrame, Friction::DataFrame; u0::Float64, μ::Float64, rho::Float64, α::Float64, chord::Float64)
 
+It provides the airfoil features like pressure and friction coefficient splitted between top and bottom. The nodes and results are orderded for growing x coordinates.
+"""
 function extract_airfoil_features(nodes::DataFrame, n_Γ0::DataFrame, Ph::DataFrame, Friction::DataFrame; u0::Float64, μ::Float64, rho::Float64, α::Float64, chord::Float64)
     q = 0.5 .* u0^2 * rho
     p1 = [0.0, 0.0] #leading edge
@@ -167,7 +187,9 @@ else
 
 end
 
-
+#  is_above(p; p1, p2)
+#  It recognize if a specific point coordinate `p` is on the top or bottom side. It use a threshold line which is a cuibic function passing by the trailing `p2` and leading ´p1´ edges.
+#  
 function is_above(p; p1, p2)
     der = p2[2]/p2[1] .* -0.20 #derivative in trailing edge Manage the (-0.20) factor
     c = -der/8 + der #derivative in leading edge
@@ -186,7 +208,12 @@ function is_above(p; p1, p2)
         end
     end
 
+"""
+    compute_CL_CD(top_nodesx,bottom_nodesx,top_nodesy,bottom_nodesy,cp_top,cp_bottom,
+    friction_top,friction_bottom; chord = 1.0)
 
+It computes lift and drag coefficients
+"""
 function compute_CL_CD(top_nodesx,bottom_nodesx,top_nodesy,bottom_nodesy,cp_top,cp_bottom,
     friction_top,friction_bottom; chord = 1.0)
 
