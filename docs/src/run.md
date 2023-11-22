@@ -10,9 +10,6 @@ Problem Settings:
 - `:Re` Reynolds number. 
 - `:ν` kinematic viscosity. It can be overwritten in order to satisfy the Reynolds, in this case a warning informs the user.
 - `:ρ` density. It used just to compute the force. The advice is to keep it `1.0` and just set the Reynolds.
-<!-- - `:body_force` is non-zero generally just for the case of a periodic channel.
-- `:periodic` used only in the `"Channel"` case. It can be set `true` or `false` -->
-
 
 Time settings
 - `:t0` starting time.
@@ -41,16 +38,15 @@ Partitioning Settings
 - `:rank_partition` tuple which set the number of division on each axes to split the geometry to the processors.  For non cartesian problems it does not matter how the cores are split into the dimensions as long as `prod(rank_partition)` is equal to the `MPI` ranks.
 - `backend` can be `with_debug()` (can be run in the `REPL`) or `with_mpi()`. 
 
-Restarting Settings
+Restart Settings
 - `:restart` can be `true` or `false`. If `false` the initial conditions are computed internally using `:u_in` or analytical solution (`"TaylorGreen"`). 
 - `:restart_file` is used only if `:restart`is true. It is a `.csv` file created from ParaView using the SpreadSheet. It has the list of fo velocity and pressure in each node. It is better to run `clean grid` in Paraview before for get rid of duplicate points.
 
-<!-- Turbulence Settings
-For creating turbulence the package [`SyntheticEddyMethod`](https://github.com/carlodev/SyntheticEddyMethod.jl) is used.
-- `:start_condition` for the channel, still work in progress.
-- `:TI` Turbulence Intensity for the inlet. If it is set `0.0` it means no turbulence.
-- `:Vbox => turbulence_box()` contains the information of the virtual box where the Eddies are created. More details in the documentation of [`SyntheticEddyMethod`](https://github.com/carlodev/SyntheticEddyMethod.jl). The parameters can be adjsuted in `Turbulence_Settings.jl` file. 
-- `:Re_filename` it contains the string of the Reynolds stress file, which is a `.xlsx` file. If you want to create turbulence from the `:TI` parameters set it to `"none"` -->
+Monitor Settings
+- `:log_dir` select the folder path where the simulation while running check if there is the file `PrintSim.txt`. If the file exists the simulation will start creating `.pvtu` files at the end of every time step. The contenent of the file does not matter. By default the directory is `/Log`
+
+
+
 
 
 ```Example
@@ -93,4 +89,7 @@ The example above run in the `REPL` emulating a parallel run over 4 processors (
 
 
 !!! info "numeric info" 
-    Changing the backend to `with_mpi()` allows it to run in MPI. 
+    Changing the backend to `with_mpi()` allows it to run in MPI. `with_debug` is useful to debug the code.
+
+!!! info "numeric info" 
+    Creating `Log/PrintSim.txt` allows to monitor the current state of the simulation. 

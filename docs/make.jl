@@ -11,8 +11,17 @@ makedocs(bib;
     pages = [
         "Introduction" => "index.md",
         "Running Simulation" => "run.md",
+        "MPI run" => "mpi.md",
+        "Cases" =>[
+        "Taylor Green" => "Cases/taylorgreen.md",
+        "Lid Driven Cavity Flow" => "Cases/liddriven.md",
+        "Cylinder" => "Cases/cylinder.md",
+        "Airfoil" => "Cases/airfoil.md"],
+        "Restart" => "restart.md",
+
         "Post Processing" => "post_proc.md",
         "Boundary Layer Initialization" => "blinit.md",
+        
         "API information" => "api_info.md",
         "References" => "references.md",
     ],
