@@ -1,17 +1,30 @@
-"""
-    conv_VectorValue(v::VectorValue)
+module ExportUtility
 
-Convert VectorValue (Gridap Type) to a Vector
-"""
+using Gridap
+using GridapDistributed
+using CSV
+using DataFrames
+using Parameters
+
+
+export conv_to_df
+export print_on_request
+export export_fields
+
+# """
+#     conv_VectorValue(v::VectorValue)
+
+# Convert VectorValue (Gridap Type) to a Vector
+# """
 function conv_VectorValue(v::VectorValue)
     [v...]
 end
 
-"""
-    get_dimension(vv::Vector)
+# """
+#     get_dimension(vv::Vector)
 
-It provides the dimension
-"""
+# It provides the dimension
+# """
 function get_dimension(vv::Vector)
     D = 0
     if length(vv) > 0
@@ -55,11 +68,11 @@ function conv_to_df(vv::Vector{Float64})
     return df
 end
 
-"""
-    export_time_step(t::Float64, vv::Vector, fname::String, part::Int64)
+# """
+#     export_time_step(t::Float64, vv::Vector, fname::String, part::Int64)
 
-Save .csv file, one for each processor
-"""
+# Save .csv file, one for each processor
+# """
 function export_time_step(t::Float64, vv::Vector, fname::String, part::Int64)
     df = conv_to_df(vv)
 
@@ -69,11 +82,11 @@ function export_time_step(t::Float64, vv::Vector, fname::String, part::Int64)
     CSV.write(filename, df)
 end
 
-"""
-    export_time_step(t::Float64, vv::Vector, fname::String)
+# """
+#     export_time_step(t::Float64, vv::Vector, fname::String)
 
-Save .csv file global nodes
-"""
+# Save .csv file global nodes
+# """
 function export_time_step(t::Float64, vv::Vector, fname::String)
     df = conv_to_df(vv)
     mkpath("Results")
@@ -93,11 +106,11 @@ function extract_global_unique(dfield, parts, global_unique_idx, timestep::Float
 end
 
 
-"""
-    get_local_unique_idx(parts, trian)
+# """
+#     get_local_unique_idx(parts, trian)
 
-For each part (aka processors), only non-duplicated nodes indexes are extracted.
-"""
+# For each part (aka processors), only non-duplicated nodes indexes are extracted.
+# """
 function get_local_unique_idx(parts, trian)
     f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
@@ -120,12 +133,12 @@ end
 
 
 
-"""
-    export_nodes_glob(parts, trian)
+# """
+#     export_nodes_glob(parts, trian)
 
-It gathers on MAIN procs (==1) the non-duplicates nodes for each procs. It computes the non-duplicate global indexes.
-It also extracts non-duplicated nodes.
-"""
+# It gathers on MAIN procs (==1) the non-duplicates nodes for each procs. It computes the non-duplicate global indexes.
+# It also extracts non-duplicated nodes.
+# """
 function export_nodes_glob(parts, trian)
     f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
@@ -156,11 +169,11 @@ end
 
 
 
-"""
-    export_n_Γ(params::Dict{Symbol,Any}, local_unique_idx, global_unique_idx)
+# """
+#     export_n_Γ(params::Dict{Symbol,Any}, local_unique_idx, global_unique_idx)
 
-Export tangent and normal vectors at the corresponding points.
-"""
+# Export tangent and normal vectors at the corresponding points.
+# """
 function export_n_Γ(params::Dict{Symbol,Any}, local_unique_idx, global_unique_idx)
     #get unique values in each processor
 
@@ -227,11 +240,11 @@ function export_fields(params::Dict{Symbol,Any}, local_unique_idx, global_unique
     end
 end
 
-"""
-    rotation(n::VectorValue{2,Float64})
+# """
+#     rotation(n::VectorValue{2,Float64})
 
-It rotates by π/2 the n vector
-"""
+# It rotates by π/2 the n vector
+# """
 function rotation(n::VectorValue{2,Float64})
     n1,n2 = [n...]
     VectorValue(-n2,n1)
@@ -242,25 +255,12 @@ function rotation(n::VectorValue{3,Float64})
     VectorValue(-n2,n1,n3)
 end
 
-function get_nodes(params::Dict{Symbol,Any})
-    @unpack force_tags,parts, Γ = params
-    if force_tags !== nothing
-        local_unique_idx =  export_nodes(parts, Γ)
-        export_n_Γ(params, local_unique_idx)
-    else
-        local_unique_idx = nothing
-    end
 
-    return local_unique_idx
-end
+# """
+#     forces_domain(model, force_tags, degree)
 
-
-
-"""
-    forces_domain(model, force_tags, degree)
-
-For a given `force_tags` in the `model` it provides the triangulation, the measure and the normal vector.
-"""
+# For a given `force_tags` in the `model` it provides the triangulation, the measure and the normal vector.
+# """
 function forces_domain!(params)
     @unpack model,force_tags = params
     degree = 4
@@ -293,4 +293,6 @@ function print_on_request(log_dir::String)
     end
     
     return flag
-    end
+end
+
+end
