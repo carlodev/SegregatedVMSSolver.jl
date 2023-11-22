@@ -38,5 +38,5 @@ function run_airfoil_test()
    
    end
    
-   #mpiexecjl --project=. -n 4 julia run_SegregatedSolver.jl
+   #mpiexecjl --project=. -n 4 julia airfoil_test.jl
    

@@ -35,3 +35,6 @@ function run_case_test(case::String; meshfile=" ", t_endramp=1.0, Reynolds=1000)
    @test SegregatedVMSSolver.main(params) == true
    
    end
+
+
+#mpiexecjl --project=. -n 4 julia case_test.jl
