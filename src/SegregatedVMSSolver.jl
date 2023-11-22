@@ -28,6 +28,8 @@ export init_params
 export verifykey
 include(joinpath("Commons","InitializeParameters.jl"))
 
+include(joinpath("Commons","ExportUtility.jl"))
+
 export print_model
 export creation_fe_spaces
 export create_initial_conditions
@@ -76,10 +78,13 @@ export restart_ph_field
 include(joinpath("Commons","Restart.jl"))
 
 
+
+
 include(joinpath("utils","ReadAirfoilResults.jl"))
+
+
 include(joinpath("utils","WallDistance.jl"))
 
-include(joinpath("Commons","ExportUtilities.jl"))
 
 #TaylorGreen
 include(joinpath("TaylorGreen","TaylorGreen.jl"))
