@@ -3,7 +3,9 @@ using Parameters,PartitionedArrays
 using Revise
 using Test
 
+
 @testset "Commons" begin include("CommonsTests/CommonsTests.jl") end
+
 
 @testset "Case Test" begin include("case_test.jl") 
     run_case_test("TaylorGreen")
@@ -15,4 +17,5 @@ end
     run_airfoil_test()
 end
 
+@testset "Utils" begin include("UtilsTests/UtilsTests.jl") end
 
