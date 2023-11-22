@@ -1,3 +1,4 @@
+using SegregatedVMSSolver.ExportUtility
 include("BoundaryConditions.jl")
 
 function run_airfoil(params,distribute)
