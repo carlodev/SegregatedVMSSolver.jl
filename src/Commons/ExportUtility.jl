@@ -10,6 +10,7 @@ using Parameters
 export conv_to_df
 export print_on_request
 export export_fields
+export forces_domain!
 
 # """
 #     conv_VectorValue(v::VectorValue)
