@@ -3,10 +3,18 @@ module WallDistance
     using LinearAlgebra: norm
     using GridapGmsh
     using GridapPETSc
+    using DataFrames
+    using CSV
+    using SegregatedVMSSolver.ExportUtility
+    
+    import SegregatedVMSSolver.ExportUtility: conv_VectorValue
+    
+    
+    export get_initial_conditions
 
-    export get_wall_distance
 
-    function get_wall_distance(mesh_file::String, D::Int64, u_in::Float64, Re::Real, chord::Float64, walltag)
+
+  function get_wall_distance(mesh_file::String, D::Int64, u_in::Float64, Re::Real, chord::Float64, walltag)
         
 
 
@@ -31,9 +39,7 @@ module WallDistance
     Ω = Triangulation(model)
     dΩ = Measure(Ω, degree)
     
-    
-    
-    
+        
     function intialize_picard_iteration(solver,Vg,V0,dΩ )
       flux(∇u) = ∇u
       f(x) = 1
@@ -142,17 +148,50 @@ module WallDistance
           
           u_start = get_free_dof_values(u_start_FEFun)
           
-          return u_start,u_start_oper,u_start_FEFun
+          return u_start,u_start_FEFun,Ω
     
       end
     end
     
     u_start,u_start_oper,u_start_FEFun = initial_velocity_wall_distance(walltag)
-    return u_start
-end
+    return u_start,u_start_oper,u_start_FEFun
+
+  end
     
+  function export_intial_csv(Ω, uh_FE)
+    f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
+
+    ref_grids = map(f, Gridap.Geometry.get_reffes(Ω ))
+    visgrid = Gridap.Visualization.VisualizationGrid(Ω , ref_grids)
+    visgrid_ = conv_VectorValue.(visgrid.sub_grid.node_coordinates)
+    unique_idx = unique(i -> visgrid_[i], eachindex(visgrid_))
     
+    nodes_model = visgrid_[unique_idx] #Coordinate of unique node
     
+    pdata = Gridap.Visualization._prepare_pdata(Ω, Dict("uh"=>uh_FE), visgrid.cell_to_refpoints)
+    uh_start = pdata["uh"][unique_idx]
+    
+    df_nodes = conv_to_df(nodes_model)
+    df_uh = conv_to_df(uh_start)
+    rename!(df_uh,["uh_0","uh_1","uh_2"])
+    
+    df_export = hcat(df_nodes,df_uh)
+    filename = joinpath("BoundaryLayerInit.csv")
+    CSV.write(filename, df_export)
+    return df_export
+  end
+
+"""
+    get_initial_conditions(mesh_file::String, D::Int64, u_in::Float64, Re::Real, chord::Float64, walltag)
+
+It creates the `.vtu` file with the boundary layer initialization and also the `.csv` file which can be used to start a simulation over an airfoil.
+It return a dataframe where for each nodes are provided the coordinates and the velocity vector components.
+"""
+  function get_initial_conditions(mesh_file::String, D::Int64, u_in::Float64, Re::Real, chord::Float64, walltag)
+    u_start,uh_FE,Ω = get_wall_distance(mesh_file, D, u_in, Re, chord, walltag)
+    df_start = export_intial_csv(Ω, uh_FE)
+    return df_start
+ end
 
 
 end #end module
