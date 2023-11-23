@@ -5,12 +5,15 @@ using GridapDistributed
 using CSV
 using DataFrames
 using Parameters
-
+using PartitionedArrays
 
 export conv_to_df
 export print_on_request
 export export_fields
 export forces_domain!
+export get_local_unique_idx
+export export_nodes_glob
+export export_n_Γ
 
 # """
 #     conv_VectorValue(v::VectorValue)
