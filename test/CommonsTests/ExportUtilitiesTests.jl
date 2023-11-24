@@ -1,4 +1,4 @@
-# module ExportUtilitiesTests
+module ExportUtilityTests
 
 using SegregatedVMSSolver
 using PartitionedArrays
@@ -38,4 +38,4 @@ end
 
 
 
-# end
+end

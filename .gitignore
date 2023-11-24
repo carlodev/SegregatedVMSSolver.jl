@@ -4,6 +4,9 @@
 .gitignore
 *.msh
 *.csv
+docs/build
+*.vtu
+/Results
 
 #Exception
 !Cylinder_2D.msh 
