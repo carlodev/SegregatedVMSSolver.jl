@@ -4,7 +4,8 @@ using Test
 using DataFrames
 using SegregatedVMSSolver.WallDistance
 
-mesh_file = "models/DU89_2D_A1_M.msh"
+mesh_file = joinpath(@__DIR__, "../../models", "DU89_2D_A1_M.msh")
+
 D = 2
 u_in = 1.0
 Re = 500e3
