@@ -51,6 +51,7 @@ function init_params(params::Dict{Symbol,Any})
     verifykey(params,:restart)
     verifykey(params,:restart_file; val = " ")
     verifykey(params,:log_dir; val = "Log") #Default directort for printing on request
+    verifykey(params,:newtag; val = nothing) #Default directort for printing on request
 
     if params[:restart]
         @unpack restart_file, t_endramp, t0 = params
