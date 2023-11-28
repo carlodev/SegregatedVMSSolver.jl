@@ -10,7 +10,6 @@ using PartitionedArrays
 export conv_to_df
 export print_on_request
 export export_fields
-# export forces_domain!
 export get_local_unique_idx
 export export_nodes_glob
 export export_n_Γ
@@ -121,7 +120,7 @@ function get_local_unique_idx(params)
     local_unique_idx = nothing
     f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
-    if export_tags !== nothing
+    if !isnothing(export_tags)
         @unpack name_tags, Γ_, n_Γ_ = export_tags
         local_unique_idx = []
         for (name_tag, Γ, n_Γ) in zip(name_tags, Γ_, n_Γ_)
@@ -157,7 +156,7 @@ function export_nodes_glob(params::Dict{Symbol,Any})
     f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
     global_unique_idx = nothing
 
-    if export_tags !== nothing
+    if !isnothing(export_tags)
         @unpack name_tags, Γ_, n_Γ_ = export_tags
         global_unique_idx = []
 
@@ -208,7 +207,7 @@ function export_n_Γ(params::Dict{Symbol,Any})
 
     f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
-    if export_tags !== nothing
+    if !isnothing(export_tags)
         @unpack name_tags, Γ_, n_Γ_, local_unique_idx_, global_unique_idx_ = export_tags
 
         for (name_tag, Γ, n_Γ,local_unique_idx, global_unique_idx) in zip(name_tags, Γ_, n_Γ_,local_unique_idx_, global_unique_idx_)
@@ -248,7 +247,7 @@ function export_fields(params::Dict{Symbol,Any},  tt::Float64, uh0, ph0)
     @unpack parts, export_tags = params
     f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
-    if export_tags !== nothing
+    if !isnothing(export_tags)
         @unpack name_tags, Γ_, n_Γ_, local_unique_idx_, global_unique_idx_ = export_tags
 
         for (name_tag, Γ, n_Γ,local_unique_idx, global_unique_idx) in zip(name_tags, Γ_, n_Γ_,local_unique_idx_, global_unique_idx_)
