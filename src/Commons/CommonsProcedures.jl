@@ -87,6 +87,8 @@ It solves iteratively the velocity and pressure system.
 """
 function solve_case(params::Dict{Symbol,Any})
 
+create_export_tags!(params)
+
 @unpack M, petsc_options, time_step, θ, dt,t0, case, benchmark, method, trials, tests, 
 Ω, matrix_freq_update, a_err_threshold, log_dir = params
 @unpack U,P,u0 = params
@@ -105,12 +107,10 @@ if case == "TaylorGreen"
   @unpack u0,p0 = params
 end
 
-if case == "Airfoil"
-  @unpack parts,Γ = params
-  local_unique_idx =  get_local_unique_idx(parts, Γ)
-  global_unique_idx = export_nodes_glob(parts, Γ)
-  export_n_Γ(params, local_unique_idx, global_unique_idx)
-end
+get_local_unique_idx(params)
+export_nodes_glob(params)
+export_n_Γ(params)
+
 
 GridapPETSc.with(args=split(petsc_options)) do
   ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
@@ -247,9 +247,8 @@ save_path = "$(case)_$(tn)_.vtu"
     end
   end
 
-  if case == "Airfoil"
-    export_fields(params, local_unique_idx, global_unique_idx, tn, uh_tn, ph_tn)
-  end
+    export_fields(params, tn, uh_tn, ph_tn)
+
 
 
 

@@ -22,7 +22,7 @@ function run_taylorgreen(params, distribute)
 
   # hf_gen!(params)
   velocity, pa, ωa = analytical_solution(diameter, Vs, Ua, Va, params[:ν])
-  merge!(params, Dict(:model => model, :force_tags=>nothing, :parts=>parts))
+  merge!(params, Dict(:model => model, :parts=>parts))
   V, Q, U, P, Y, X, model = CreateTGSpaces(model, params, pa) #We update model with the new label of the center point
   print_model(params)
 
@@ -39,7 +39,6 @@ function run_taylorgreen(params, distribute)
     :Ω => Ω,
     :dΩ => dΩ,
     :degree => degree,
-    :force_params => nothing,
     :p0 => pa, :u0 => velocity)
 
   merge!(params, new_dict)

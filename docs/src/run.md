@@ -29,9 +29,12 @@ Print Settings
 - `:printmodel` can be `true` or `false`. If `true` mesh is saved as a .pvtu file.
 - `:printinitial` can be `true` or `false`. If `true` saves the flowfield at `t0`. It is useful when restarting from a previous solution.
 - `:benchmark`  can be `true` or `false`. If `true` it does not print the solution, and it gives the time needed for computing the iteration form the 2nd till the end. The first iteration is not taken into account for computing the time because of precompilation.
+- `:name_tags` specify the boundary names to export, eg: `:name_tags=>["airfoil","inlet"]`
+
 
 Mesh Settings
 - `:mesh_file` is a string with the name of the `.msh` that can be read. By default it points to the folder `/models` of the package.
+
 
 
 Partitioning Settings

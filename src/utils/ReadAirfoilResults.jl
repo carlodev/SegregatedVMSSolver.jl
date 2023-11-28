@@ -16,9 +16,9 @@ export compute_CL_CD
 
 It provides a `DataFrame` with the nodes of the `Airfoil` boundary
 """
-function get_nodes(path::String)
+function get_nodes(path::String; tagname="airfoil")
     f_path = readdir(path)
-    idx_n = findfirst(x->occursin("nodes", x), f_path)
+    idx_n = findfirst(x->occursin("$(tagname)_nodes", x), f_path)
     nodes_file_path = joinpath(path, f_path[idx_n])
     df_nodes = DataFrame(CSV.File(nodes_file_path))
     return df_nodes
@@ -29,9 +29,9 @@ end
 
 It provides a `DataFrame` with the normals vectors at the surface of the `Airfoil` boundary    
 """
-function get_normals(path::String)
+function get_normals(path::String; tagname="airfoil")
     f_path = readdir(path)
-    idx_n = findfirst(x->occursin("n_Γ", x), f_path)
+    idx_n = findfirst(x->occursin("$(tagname)_n_Γ", x), f_path)
     normals_file_path = joinpath(path, f_path[idx_n])
     df_normals = DataFrame(CSV.File(normals_file_path))
     return df_normals
@@ -44,9 +44,10 @@ end
 It computes the time-average and also the spanwise averge (z direction). `field_name` can be `ph` for pressure or `friction` for friction.
 It is possible to skip a certain amount of initial time-step when averaging setting the `offset`.
 """
-function average_field(path::String, field_name::String, nodes::DataFrame; offset=1, offend_ = 0)
+function average_field(path::String, field_name::String, nodes::DataFrame; offset=1, offend_ = 0, tagname="airfoil")
     f_path = readdir(path)
-    idx_n = findall(x->occursin(field_name, x), f_path)
+    file_name = tagname * "_" * field_name
+    idx_n = findall(x->occursin(file_name, x), f_path)
     field_file_path = joinpath.(path, f_path[idx_n])
     
     offend = (offend_==0) ? length(field_file_path) : offend_

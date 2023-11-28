@@ -23,13 +23,15 @@ function run_airfoil_test()
          :Cᵢ => [4, 36],
          :benchmark=>false,
          :t_endramp=> 5.0,
-         :mesh_file => "DU89_2D_A1_M.msh",
+         :mesh_file => "sd7003s_2D_test.msh",
          :TI => 0.001,
          :ρ=>1.0,
          :Re=> 1_000,
          :c=> 1.0,
-         :restart=> true,
-         :restart_file=>"BL_DU89_2D_A1_M.csv",     
+         :restart=> false,
+         :restart_file=>"BL_DU89_2D_A1_M.csv",
+         :printmodel=>false,
+         :name_tags=>["airfoil","inlet"]
    )
    
    

@@ -19,7 +19,6 @@ tag_coordinate = (D==2) ? VectorValue(0.5,0.5) : VectorValue(0.5,0.5,0.5)
 
 SegregatedVMSSolver.add_centre_tag!(model, tag_coordinate)
 labels = get_face_labeling(model)
-println(labels.labels.items[1].tag_to_name)
 
 @test !isempty(findall(x->x=="centre", labels.labels.items[1].tag_to_name))
 

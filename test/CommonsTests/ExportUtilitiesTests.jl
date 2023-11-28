@@ -21,7 +21,7 @@ function export_utilities_test(rank_partition,distribute)
 
     Γ = BoundaryTriangulation(model; tags="boundary") 
     n_Γ = get_normal_vector(Γ)
-    params = Dict(:Γ=>Γ,:n_Γ=>n_Γ, :parts=>parts, :force_tags=>["boundary"])
+    params = Dict(:Γ=>Γ,:n_Γ=>n_Γ, :parts=>parts)
 
     global_unique_idx = SegregatedVMSSolver.export_nodes_glob(parts, Γ)
     local_unique_idx = SegregatedVMSSolver.get_local_unique_idx(parts, Γ)

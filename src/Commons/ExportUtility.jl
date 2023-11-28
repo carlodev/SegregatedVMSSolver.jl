@@ -10,11 +10,12 @@ using PartitionedArrays
 export conv_to_df
 export print_on_request
 export export_fields
-export forces_domain!
+# export forces_domain!
 export get_local_unique_idx
 export export_nodes_glob
 export export_n_Γ
 
+export create_export_tags!
 # """
 #     conv_VectorValue(v::VectorValue)
 
@@ -101,36 +102,44 @@ end
 
 function extract_global_unique(dfield, parts, global_unique_idx, timestep::Float64, fieldname::String)
     gfield = gather(dfield)
-    map(gfield,parts) do g, part
-        if part ==1 #On Main procs
+    map(gfield, parts) do g, part
+        if part == 1 #On Main procs
             values_uniques = g.data[global_unique_idx]
-            export_time_step(timestep, values_uniques, fieldname)          
+            export_time_step(timestep, values_uniques, fieldname)
         end
     end
 end
-
 
 # """
 #     get_local_unique_idx(parts, trian)
 
 # For each part (aka processors), only non-duplicated nodes indexes are extracted.
 # """
-function get_local_unique_idx(parts, trian)
+function get_local_unique_idx(params)
+
+    @unpack parts, export_tags = params
+    local_unique_idx = nothing
     f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
-    #export nodes
-    local_unique_idx = map(parts, trian.trians) do part, ttrian
-        ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
-        visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
-        visgrid_ = conv_VectorValue.(visgrid.sub_grid.node_coordinates)
-        nodes_tri = unique(visgrid_) #Coordinate of unique nodes
- 
-        unique_idx = unique(i -> visgrid_[i], eachindex(visgrid_)) #Indexes of unique nodes on each part
-        # export_time_step(0.0, nodes_tri, "nodes", part)
+    if export_tags !== nothing
+        @unpack name_tags, Γ_, n_Γ_ = export_tags
+        local_unique_idx = []
+        for (name_tag, Γ, n_Γ) in zip(name_tags, Γ_, n_Γ_)
 
-        return unique_idx
-    end
+            #export nodes
+            local_unique_idx_ = map(Γ.trians) do ttrian
+                ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
+                visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
+                visgrid_ = conv_VectorValue.(visgrid.sub_grid.node_coordinates)
+                nodes_tri = unique(visgrid_) #Coordinate of unique nodes
 
+                unique_idx = unique(i -> visgrid_[i], eachindex(visgrid_)) #Indexes of unique nodes on each part
+                return unique_idx
+            end
+            push!(local_unique_idx,local_unique_idx_)
+        end #end for
+        merge!(export_tags, Dict(:local_unique_idx_=>local_unique_idx))
+    end #end if 
     return local_unique_idx
 end
 
@@ -143,30 +152,44 @@ end
 # It gathers on MAIN procs (==1) the non-duplicates nodes for each procs. It computes the non-duplicate global indexes.
 # It also extracts non-duplicated nodes.
 # """
-function export_nodes_glob(parts, trian)
+function export_nodes_glob(params::Dict{Symbol,Any})
+    @unpack parts, export_tags = params
     f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
+    global_unique_idx = nothing
 
-    #export nodes
-    local_unique_nodes = map(parts, trian.trians) do part, ttrian
-        ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
-        visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
-        visgrid_ = conv_VectorValue.(visgrid.sub_grid.node_coordinates)
-        nodes_tri = unique(visgrid_)
-        return nodes_tri
-    end
+    if export_tags !== nothing
+        @unpack name_tags, Γ_, n_Γ_ = export_tags
+        global_unique_idx = []
 
-    glun = gather(local_unique_nodes)
+        for (name_tag, Γ, n_Γ) in zip(name_tags, Γ_, n_Γ_)
+            #export nodes
+            local_unique_nodes = map(Γ.trians) do ttrian
+                ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
+                visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
+                visgrid_ = conv_VectorValue.(visgrid.sub_grid.node_coordinates)
+                nodes_tri = unique(visgrid_)
+                return nodes_tri
+            end
 
-    global_unique_idx = 0.0
-    map(glun,parts) do g,part
-        if part ==1 #On Main procs
+            glun = gather(local_unique_nodes)
 
-            nodes_uniques = unique(g.data)
-            export_time_step(0.0, nodes_uniques, "nodes")
+            global_unique_idx_ = 0.0
+            map(glun, parts) do g, part
+                if part == 1 #On Main procs
 
-            global_unique_idx = unique(i -> g.data[i], eachindex(g.data)) 
-        end
-    end
+                    nodes_uniques = unique(g.data)
+                    export_time_step(0.0, nodes_uniques, "$(name_tag)_nodes")
+
+                    global_unique_idx_ = unique(i -> g.data[i], eachindex(g.data))
+                end
+            end
+
+            push!(global_unique_idx,global_unique_idx_)
+        end #end for
+
+        merge!(export_tags, Dict(:global_unique_idx_=>global_unique_idx))
+
+    end #end if  export_tags !== nothing
     return global_unique_idx
 end
 
@@ -178,34 +201,39 @@ end
 
 # Export tangent and normal vectors at the corresponding points.
 # """
-function export_n_Γ(params::Dict{Symbol,Any}, local_unique_idx, global_unique_idx)
+function export_n_Γ(params::Dict{Symbol,Any})
     #get unique values in each processor
 
-    @unpack Γ,n_Γ, parts,force_tags = params
+    @unpack export_tags,parts = params
 
-    if force_tags !== nothing
-        f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
+    f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
-        n_Γ = - n_Γ #pointing from the body to the outside
-        t_Γ = rotation∘n_Γ #extract tangent
+    if export_tags !== nothing
+        @unpack name_tags, Γ_, n_Γ_, local_unique_idx_, global_unique_idx_ = export_tags
 
-        cellfields = Dict( "n_Γ" => n_Γ, "t_Γ"=>t_Γ)
+        for (name_tag, Γ, n_Γ,local_unique_idx, global_unique_idx) in zip(name_tags, Γ_, n_Γ_,local_unique_idx_, global_unique_idx_)
+           
+            n_Γ = -n_Γ #pointing from the body to the outside
+            t_Γ = rotation ∘ n_Γ #extract tangent
 
-        fdat = GridapDistributed._prepare_fdata(Γ.trians, cellfields)
-        for field in keys(cellfields)
-        fieldh = map(parts, Γ.trians, fdat, local_unique_idx) do part, ttrian, cf, unique_idx
-            ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
-            visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
-            pdata = Gridap.Visualization._prepare_pdata(ttrian, cf, visgrid.cell_to_refpoints)
-            field_h = 0.0
-            
-            field_h = pdata[field][unique_idx]
-            # export_time_step(0.0, field_h, field, part)
-            return field_h
+            cellfields = Dict("$(name_tag)_n_Γ" => n_Γ, "$(name_tag)_t_Γ" => t_Γ)
+
+            fdat = GridapDistributed._prepare_fdata(Γ.trians, cellfields)
+            for field in keys(cellfields)
+                fieldh = map(Γ.trians, fdat, local_unique_idx) do ttrian, cf, unique_idx
+                    ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
+                    visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
+                    pdata = Gridap.Visualization._prepare_pdata(ttrian, cf, visgrid.cell_to_refpoints)
+                    field_h = 0.0
+
+                    field_h = pdata[field][unique_idx]
+                    return field_h
+                end
+                extract_global_unique(fieldh, parts, global_unique_idx, 0.0, field)
             end
-         extract_global_unique(fieldh, parts, global_unique_idx, 0.0, field)
-    end #for
-    
+
+        end #for
+
     end #end if
 end
 
@@ -214,34 +242,38 @@ end
 
 Export pressure and friction (not multiplied by viscosity) - airfoil simulations oriented
 """
-function export_fields(params::Dict{Symbol,Any}, local_unique_idx, global_unique_idx, tt::Float64, uh0, ph0)
+function export_fields(params::Dict{Symbol,Any},  tt::Float64, uh0, ph0)
     #get unique values in each processor
 
-    @unpack Γ,n_Γ, parts,force_tags = params
+    @unpack parts, export_tags = params
+    f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
-    if force_tags !== nothing
-        f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
+    if export_tags !== nothing
+        @unpack name_tags, Γ_, n_Γ_, local_unique_idx_, global_unique_idx_ = export_tags
 
-        n_Γ = - n_Γ #pointing from the body to the outside
-        t_Γ = rotation∘n_Γ #extract tangent
+        for (name_tag, Γ, n_Γ,local_unique_idx, global_unique_idx) in zip(name_tags, Γ_, n_Γ_,local_unique_idx_, global_unique_idx_)
+            n_Γ = -n_Γ #pointing from the body to the outside
+            t_Γ = rotation ∘ n_Γ #extract tangent
 
-        friction = (transpose(∇(uh0))⋅n_Γ) ⋅ t_Γ
+            friction = (transpose(∇(uh0)) ⋅ n_Γ) ⋅ t_Γ
 
-        cellfields = Dict("ph" => ph0, "friction" => friction)
+            cellfields = Dict("$(name_tag)_ph" => ph0, "$(name_tag)_friction" => friction)
 
-        fdat = GridapDistributed._prepare_fdata(Γ.trians, cellfields)
+            fdat = GridapDistributed._prepare_fdata(Γ.trians, cellfields)
 
-        for field in keys(cellfields)
-            fieldh = map(parts, Γ.trians, fdat, local_unique_idx) do part, ttrian, cf, unique_idx
-                ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
-                visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
-                pdata = Gridap.Visualization._prepare_pdata(ttrian, cf, visgrid.cell_to_refpoints)
-                field_h = pdata[field][unique_idx]
-            return field_h 
-            end #end map
-            extract_global_unique(fieldh, parts, global_unique_idx, tt, field)
-        end #end for
-    end
+            for field in keys(cellfields)
+                fieldh = map(Γ.trians, fdat, local_unique_idx) do ttrian, cf, unique_idx
+                    ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
+                    visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
+                    pdata = Gridap.Visualization._prepare_pdata(ttrian, cf, visgrid.cell_to_refpoints)
+                    field_h = pdata[field][unique_idx]
+                    return field_h
+                end #end map
+                extract_global_unique(fieldh, parts, global_unique_idx, tt, field)
+            end #end for field in keys(cellfields)
+
+        end #for () in zip ()
+    end #end if
 end
 
 # """
@@ -250,33 +282,41 @@ end
 # It rotates by π/2 the n vector
 # """
 function rotation(n::VectorValue{2,Float64})
-    n1,n2 = [n...]
-    VectorValue(-n2,n1)
+    n1, n2 = [n...]
+    VectorValue(-n2, n1)
 end
 
 function rotation(n::VectorValue{3,Float64})
-    n1,n2,n3 = [n...]
-    VectorValue(-n2,n1,n3)
+    n1, n2, n3 = [n...]
+    VectorValue(-n2, n1, n3)
 end
 
 
-# """
-#     forces_domain(model, force_tags, degree)
 
-# For a given `force_tags` in the `model` it provides the triangulation, the measure and the normal vector.
-# """
-function forces_domain!(params)
-    @unpack model,force_tags = params
-    degree = 4
+"""
+    create_export_tags!(params::Dict{Symbol,Any})
 
-    Γ = BoundaryTriangulation(model; tags=force_tags) 
-    dΓ = Measure(Γ,degree)
-    n_Γ = get_normal_vector(Γ)
-    force_params = Dict(:Γ => Γ, :dΓ => dΓ, :n_Γ => n_Γ)
-    merge!(params,force_params)
+For each name_tags specified, it creates the boundary triangulation and the normal vector fields
+"""
+function create_export_tags!(params::Dict{Symbol,Any})
+
+    @unpack model,name_tags = params
+    export_tags = nothing # If no name tags are specified to export
+    if !isnothing(name_tags)
+        Γ = []
+        n_Γ = []
+        for nt in name_tags
+            Γ_tmp = BoundaryTriangulation(model; tags=nt)
+            n_Γ_tmp = get_normal_vector(Γ_tmp)
+            push!(Γ,Γ_tmp)
+            push!(n_Γ,n_Γ_tmp)
+        end
+        export_tags = Dict(:name_tags => name_tags, :Γ_ => Γ, :n_Γ_ => n_Γ)
+    end
+    merge!(params, Dict(:export_tags=>export_tags))
+
 
 end
-
 
 """
     print_on_request(log_dir::String)
@@ -286,16 +326,16 @@ If in the directory `log_dir` exists and there is the `PrintSim.txt` file return
 function print_on_request(log_dir::String)
     flag = false
     current_dir = readdir()
-    log_idx = findfirst(x->x==log_dir, current_dir)
-    
+    log_idx = findfirst(x -> x == log_dir, current_dir)
+
     if !isnothing(log_idx)
         log_dir = readdir(current_dir[log_idx])
-        print_idx = findfirst(x->x =="PrintSim.txt", log_dir)
+        print_idx = findfirst(x -> x == "PrintSim.txt", log_dir)
         if !isnothing(print_idx)
             flag = true
         end
     end
-    
+
     return flag
 end
 
