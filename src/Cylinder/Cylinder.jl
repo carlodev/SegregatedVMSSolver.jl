@@ -13,7 +13,7 @@ function run_cylinder(params,distribute)
 
 
     u_diri_tags, u_diri_values, p_diri_tags, p_diri_values, u0 = bc_cylinder(params) 
-    merge!(params, Dict(:u0 => u0, :model => model))
+    merge!(params, Dict(:u0 => u0, :model => model,:parts=>parts))
     print_model(params)
 
     V, U, P, Q, Y, X = creation_fe_spaces(params, u_diri_tags, u_diri_values, p_diri_tags, p_diri_values)
