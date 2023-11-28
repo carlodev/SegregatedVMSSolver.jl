@@ -23,7 +23,7 @@ function run_airfoil_test()
          :Cᵢ => [4, 36],
          :benchmark=>false,
          :t_endramp=> 5.0,
-         :mesh_file => "sd7003s_2D_test.msh",
+         :mesh_file => "DU89_2D_A1_M.msh",
          :TI => 0.001,
          :ρ=>1.0,
          :Re=> 1_000,
