@@ -8,7 +8,8 @@ function create_new_tag!(model::GridapDistributed.DistributedDiscreteModel, tagn
     map(model.models) do model
        create_new_tag!(model,tagname::String,is_tag)
        end
-   end
+println("New tag $tagname added to the model")
+end
 
    function create_new_tag!(model,tagname::String, is_tag::Function)
        labels = get_face_labeling(model)
