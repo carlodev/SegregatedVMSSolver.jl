@@ -5,7 +5,7 @@ function run_cylinder(params,distribute)
 
     parts  = distribute(LinearIndices((prod(rank_partition),)))
 
-    mesh_file_path = joinpath(@__DIR__, "../../models", params[:mesh_file])
+    mesh_file_path = params[:mesh_file]
     
     model = GmshDiscreteModel(parts, mesh_file_path)
 
