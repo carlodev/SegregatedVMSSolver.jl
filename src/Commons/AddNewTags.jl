@@ -54,9 +54,7 @@ end
 
 
 function add_new_tag!(model, range_coordinate::Tuple, tagname::String)
-    println("In add new tag")
-  
-    function is_tag(x::Vector{VectorValue{2,Float64}})
+   function is_tag(x::Vector{VectorValue{2,Float64}})
         @assert length(range_coordinate) == 2 "Range new tags not the same dimension of the problem"
         range_x = getindex(range_coordinate,1)
         range_y = getindex(range_coordinate,2)
@@ -71,8 +69,7 @@ function add_new_tag!(model, range_coordinate::Tuple, tagname::String)
         range_x = getindex(range_coordinate,1)
         range_y = getindex(range_coordinate,2)
         range_z = getindex(range_coordinate,3)
-        x = getindex(x,1)
-        println("x = $x")
+
         return getindex.(x,1) .> range_x[1] && getindex.(x,1) .< range_x[2] && 
                getindex.(x,2) .> range_y[1] && getindex.(x,2) .< range_y[2] && 
                getindex.(x,3) .> range_z[1] && getindex.(x,3) .< range_z[2]
@@ -87,7 +84,6 @@ end
 
 function add_new_tag!(model, params)
 @unpack newtag = params
-println("unpack newtag")
     if !isnothing(newtag)
         @unpack range_coordinate, tagname = newtag
         add_new_tag!(model, range_coordinate, tagname)
