@@ -9,6 +9,7 @@ function run_airfoil(params,distribute)
     mesh_file_path =  params[:mesh_file]
     
     model = GmshDiscreteModel(parts, mesh_file_path)
+    println("model read completed")
     add_new_tag!(model, params)
     
 
