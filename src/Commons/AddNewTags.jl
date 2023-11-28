@@ -11,7 +11,7 @@ function create_new_tag!(model::GridapDistributed.DistributedDiscreteModel, tagn
 println("New tag $tagname added to the model")
 end
 
-   function create_new_tag!(model,tagname::String, is_tag::Function)
+function create_new_tag!(model,tagname::String, is_tag::Function)
        labels = get_face_labeling(model)
        model_nodes = DiscreteModel(Polytope{0}, model)
        cell_nodes_coords = get_cell_coordinates(model_nodes)
@@ -26,7 +26,7 @@ end
 
        add_tag!(labels, tagname, [new_entity])
  
-   end
+end
 
 
 """
@@ -54,7 +54,7 @@ end
 
 
 function add_new_tag!(model, range_coordinate::Tuple, tagname::String)
-    
+    println("In add new tag")
   
     function is_tag(x::Vector{VectorValue{2,Float64}})
         @assert length(range_coordinate) == 2 "Range new tags not the same dimension of the problem"
@@ -63,18 +63,19 @@ function add_new_tag!(model, range_coordinate::Tuple, tagname::String)
        x = getindex(x,1)
 
         return getindex.(x,1) .> range_x[1] && getindex.(x,1) .< range_x[2] && 
-         getindex.(x,2) .> range_y[1] && getindex.(x,2) .< range_y[2]
+               getindex.(x,2) .> range_y[1] && getindex.(x,2) .< range_y[2]
     end
 
     function is_tag(x::Vector{VectorValue{3,Float64}})
         @assert length(range_coordinate) == 3 "Range new tags not the same dimension of the problem"
-        range_x = getindex.(range_coordinate,1)
-        range_y = getindex.(range_coordinate,2)
-        range_z = getindex.(range_coordinate,3)
-        
-        getindex.(x,1) .> range_x[1] && getindex.(x,1) .< range_x[2] && 
-        getindex.(x,2) .> range_y[1] && getindex.(x,2) .< range_y[2] && 
-        getindex.(x,3) .> range_z[1] && getindex.(x,3) .< range_z[2]
+        range_x = getindex(range_coordinate,1)
+        range_y = getindex(range_coordinate,2)
+        range_z = getindex(range_coordinate,3)
+        x = getindex(x,1)
+        println("x = $x")
+        return getindex.(x,1) .> range_x[1] && getindex.(x,1) .< range_x[2] && 
+               getindex.(x,2) .> range_y[1] && getindex.(x,2) .< range_y[2] && 
+               getindex.(x,3) .> range_z[1] && getindex.(x,3) .< range_z[2]
     end
 
 
@@ -82,12 +83,12 @@ function add_new_tag!(model, range_coordinate::Tuple, tagname::String)
 
     return model
 end
-using Gridap
 
 
 function add_new_tag!(model, params)
 @unpack newtag = params
-    if newtag != nothing
+println("unpack newtag")
+    if !isnothing(newtag)
         @unpack range_coordinate, tagname = newtag
         add_new_tag!(model, range_coordinate, tagname)
     end
