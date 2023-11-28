@@ -69,7 +69,8 @@ function add_new_tag!(model, range_coordinate::Tuple, tagname::String)
         range_x = getindex(range_coordinate,1)
         range_y = getindex(range_coordinate,2)
         range_z = getindex(range_coordinate,3)
-
+        x = getindex(x,1)
+        
         return getindex.(x,1) .> range_x[1] && getindex.(x,1) .< range_x[2] && 
                getindex.(x,2) .> range_y[1] && getindex.(x,2) .< range_y[2] && 
                getindex.(x,3) .> range_z[1] && getindex.(x,3) .< range_z[2]
