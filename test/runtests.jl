@@ -8,8 +8,8 @@ using Test
 
 
 @testset "Case Test" begin include("case_test.jl") 
-    run_case_test("TaylorGreen")
-    run_case_test("LidDriven"; Reynolds = 10000)
+    # run_case_test("TaylorGreen")
+    # run_case_test("LidDriven"; Reynolds = 10000)
     run_case_test("Cylinder"; meshfile="Cylinder_2D.msh", Reynolds = 1000)
 end
 

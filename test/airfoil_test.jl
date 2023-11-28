@@ -3,7 +3,8 @@
 
 function run_airfoil_test()
 
-   
+   mesh_file = joinpath(@__DIR__, "..", "models", "DU89_2D_A1_M.msh")
+   restart_file = joinpath(@__DIR__, "..", "restarts", "BL_DU89_2D_A1_M.csv")
    params = Dict(
          :N => 100,
          :D => 2, #Dimension
@@ -23,13 +24,13 @@ function run_airfoil_test()
          :Cᵢ => [4, 36],
          :benchmark=>false,
          :t_endramp=> 5.0,
-         :mesh_file =>  joinpath(@__DIR__, "..", "models", "DU89_2D_A1_M.msh")  ,
+         :mesh_file =>  mesh_file  ,
          :TI => 0.001,
          :ρ=>1.0,
          :Re=> 1_000,
          :c=> 1.0,
          :restart=> false,
-         :restart_file=> joinpath(@__DIR__, "..", "restarts", "BL_DU89_2D_A1_M.csv"),
+         :restart_file=> restart_file,
          :printmodel=>false,
          :name_tags=>["airfoil","inlet"]
    )

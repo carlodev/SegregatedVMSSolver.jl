@@ -2,7 +2,7 @@
 
 
 function run_case_test(case::String; meshfile=" ", t_endramp=1.0, Reynolds=1000)
-      joinpath(@__DIR__, "..", "models", meshfile)
+      mesh_file = joinpath(@__DIR__, "..", "models", meshfile)
    
    params = Dict(
          :N => 32,
@@ -23,7 +23,7 @@ function run_case_test(case::String; meshfile=" ", t_endramp=1.0, Reynolds=1000)
          :Cᵢ => [4, 36],
     
          :t_endramp=>t_endramp,
-         :mesh_file => meshfile,
+         :mesh_file => mesh_file,
          :Re=> Reynolds,
          
          :c=> 1.0,
