@@ -33,7 +33,6 @@ function wrap_vector(vv,p::Int64)
 for i in 1:l
     for j in 1:p
         idx = (i-1)*p + j
-        println(idx)
         V[i][j] = vv[idx]
     end
 end    
@@ -132,8 +131,6 @@ function extract_global_unique(dfield, parts, global_unique_idx, timestep::Float
     gfield = gather(dfield)
     map(gfield, parts) do g, part
         if part == 1 #On Main procs
-            println(length(g.data))
-            println(global_unique_idx)
             values_uniques = g.data[global_unique_idx]
             export_time_step(timestep, values_uniques, fieldname)
         end
@@ -308,6 +305,8 @@ function export_fields(params::Dict{Symbol,Any},  tt::Float64, uh0, ph0)
 end
 
 
+
+
 # """
 #     rotation(n::VectorValue{2,Float64})
 
@@ -328,7 +327,7 @@ end
 """
     create_export_tags!(params::Dict{Symbol,Any})
 
-For each name_tags specified, it creates the boundary triangulation and the normal vector fields
+For each ´name_tags´ it creates the ´export_tags´ dictionary
 """
 function create_export_tags!(params::Dict{Symbol,Any})
 
@@ -339,8 +338,6 @@ function create_export_tags!(params::Dict{Symbol,Any})
         n_Γ = []
         for nt in name_tags
             Γ_tmp = BoundaryTriangulation(model; tags=nt)
-            println("write boundary file")
-            writevtk(Γ_tmp,"$nt")
             n_Γ_tmp = get_normal_vector(Γ_tmp)
             push!(Γ,Γ_tmp)
             push!(n_Γ,n_Γ_tmp)
