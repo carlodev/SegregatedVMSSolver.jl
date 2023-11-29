@@ -278,15 +278,16 @@ function export_fields(params::Dict{Symbol,Any},  tt::Float64, uh0, ph0)
 
     if !isnothing(export_tags)
         @unpack name_tags, Γ_, n_Γ_, local_unique_idx_, global_unique_idx_ = export_tags
-
-        for (name_tag, Γ, n_Γ,local_unique_idx, global_unique_idx) in zip(name_tags, Γ_, n_Γ_,local_unique_idx_, global_unique_idx_)
+        @unpack fieldexport = params
+        for (name_tag, Γ, n_Γ,local_unique_idx, global_unique_idx,fieldexp) in zip(name_tags, Γ_, n_Γ_,local_unique_idx_, global_unique_idx_,fieldexport)
             n_Γ = -n_Γ #pointing from the body to the outside
             t_Γ = rotation ∘ n_Γ #extract tangent
 
             friction = (transpose(∇(uh0)) ⋅ n_Γ) ⋅ t_Γ
 
-            cellfields = Dict("$(name_tag)_ph" => ph0, "$(name_tag)_friction" => friction)
-
+            # cellfields = Dict("$(name_tag)_ph" => ph0, "$(name_tag)_friction" => friction)
+            println(fieldexp)
+            cellfields = create_cellfield(name_tag,uh0,ph0,friction,fieldexp)
             fdat = GridapDistributed._prepare_fdata(Γ.trians, cellfields)
 
             for field in keys(cellfields)
@@ -305,6 +306,22 @@ function export_fields(params::Dict{Symbol,Any},  tt::Float64, uh0, ph0)
 end
 
 
+function create_cellfield(name_tag::String,uh,ph,friction,fieldexp)
+    cellfields = Dict()
+    for fe in fieldexp
+        if fe == "uh"
+            cf = Dict("$(name_tag)_uh" => uh)
+        elseif fe=="ph"
+            cf = Dict("$(name_tag)_ph" => ph)
+        elseif fe=="friction"
+            cf = Dict("$(name_tag)_friction" => friction)
+        else
+            @error "export field $fe not recognized as valid, use uh,ph,friction"
+        end
+        merge!(cellfields,cf)
+    end
+    return cellfields
+end
 
 
 # """
