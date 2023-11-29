@@ -10,6 +10,9 @@ using Test
   include("StabilizedEquationsTests.jl")
   include("MatrixCreationTests.jl")
   include("RestartTests.jl")
+
+
+  
 end
 
 
