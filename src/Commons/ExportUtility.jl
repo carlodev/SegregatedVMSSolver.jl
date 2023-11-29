@@ -15,6 +15,35 @@ export export_nodes_glob
 export export_n_Γ
 
 export create_export_tags!
+
+
+
+function unwrap_vector(a)
+    V = Float64[]
+for v in a
+    append!(V,v...)
+end    
+return V
+end
+
+function wrap_vector(vv,p::Int64)
+    L = length(vv)
+    l = Int(L/p)
+    V = [Vector{Float64}(undef,p) for _ in 1:l]
+for i in 1:l
+    for j in 1:p
+        idx = (i-1)*p + j
+        println(idx)
+        V[i][j] = vv[idx]
+    end
+end    
+
+return V
+end
+
+
+
+
 # """
 #     conv_VectorValue(v::VectorValue)
 
@@ -103,6 +132,8 @@ function extract_global_unique(dfield, parts, global_unique_idx, timestep::Float
     gfield = gather(dfield)
     map(gfield, parts) do g, part
         if part == 1 #On Main procs
+            println(length(g.data))
+            println(global_unique_idx)
             values_uniques = g.data[global_unique_idx]
             export_time_step(timestep, values_uniques, fieldname)
         end
@@ -131,12 +162,12 @@ function get_local_unique_idx(params)
                 visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
                 visgrid_ = conv_VectorValue.(visgrid.sub_grid.node_coordinates)
                 nodes_tri = unique(visgrid_) #Coordinate of unique nodes
-
                 unique_idx = unique(i -> visgrid_[i], eachindex(visgrid_)) #Indexes of unique nodes on each part
                 return unique_idx
             end
             push!(local_unique_idx,local_unique_idx_)
         end #end for
+
         merge!(export_tags, Dict(:local_unique_idx_=>local_unique_idx))
     end #end if 
     return local_unique_idx
@@ -151,48 +182,49 @@ end
 # It gathers on MAIN procs (==1) the non-duplicates nodes for each procs. It computes the non-duplicate global indexes.
 # It also extracts non-duplicated nodes.
 # """
-function export_nodes_glob(params::Dict{Symbol,Any})
-    @unpack parts, export_tags = params
+function export_nodes_glob(parts, trian, tagname,D)
     f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
-    global_unique_idx = nothing
 
-    if !isnothing(export_tags)
-        @unpack name_tags, Γ_, n_Γ_ = export_tags
-        global_unique_idx = []
+    #export nodes
+    local_unique_nodes = map(trian.trians) do ttrian
+        ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
+        visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
+        visgrid_ = conv_VectorValue.(visgrid.sub_grid.node_coordinates)
+        nodes_tri = unique(visgrid_)
+        return unwrap_vector(nodes_tri)
+    end
 
-        for (name_tag, Γ, n_Γ) in zip(name_tags, Γ_, n_Γ_)
-            #export nodes
-            local_unique_nodes = map(Γ.trians) do ttrian
-                ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
-                visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
-                visgrid_ = conv_VectorValue.(visgrid.sub_grid.node_coordinates)
-                nodes_tri = unique(visgrid_)
-                return nodes_tri
-            end
+    
+    glun = gather(local_unique_nodes)
 
-            glun = gather(local_unique_nodes)
+    global_unique_idx = 0.0
+    map(glun,parts) do g,part
+        if part ==1 #On Main procs
+            gg =  wrap_vector(g.data,D)
+            nodes_uniques = unique(gg)
 
-            global_unique_idx_ = 0.0
-            map(glun, parts) do g, part
-                if part == 1 #On Main procs
-
-                    nodes_uniques = unique(g.data)
-                    export_time_step(0.0, nodes_uniques, "$(name_tag)_nodes")
-
-                    global_unique_idx_ = unique(i -> g.data[i], eachindex(g.data))
-                end
-            end
-
-            push!(global_unique_idx,global_unique_idx_)
-        end #end for
-
-        merge!(export_tags, Dict(:global_unique_idx_=>global_unique_idx))
-
-    end #end if  export_tags !== nothing
+            export_time_step(0.0, nodes_uniques, "$(tagname)_nodes")
+            global_unique_idx = unique(i -> g.data[i], eachindex(gg)) 
+        end
+    end
     return global_unique_idx
 end
 
 
+function export_nodes_glob(params::Dict{Symbol,Any})
+    @unpack parts, export_tags, model,D = params
+  
+    global_unique_idx = nothing
+
+    if !isnothing(export_tags)
+        global_unique_idx = []
+        @unpack name_tags, Γ_, n_Γ_ = export_tags
+        for (name_tag, Γ) in zip(name_tags, Γ_)
+            push!(global_unique_idx,export_nodes_glob(parts, Γ,name_tag,D))
+        end
+        merge!(export_tags, Dict(:global_unique_idx_=>global_unique_idx))
+    end
+end
 
 
 # """
@@ -275,6 +307,7 @@ function export_fields(params::Dict{Symbol,Any},  tt::Float64, uh0, ph0)
     end #end if
 end
 
+
 # """
 #     rotation(n::VectorValue{2,Float64})
 
@@ -306,6 +339,8 @@ function create_export_tags!(params::Dict{Symbol,Any})
         n_Γ = []
         for nt in name_tags
             Γ_tmp = BoundaryTriangulation(model; tags=nt)
+            println("write boundary file")
+            writevtk(Γ_tmp,"$nt")
             n_Γ_tmp = get_normal_vector(Γ_tmp)
             push!(Γ,Γ_tmp)
             push!(n_Γ,n_Γ_tmp)
@@ -313,8 +348,6 @@ function create_export_tags!(params::Dict{Symbol,Any})
         export_tags = Dict(:name_tags => name_tags, :Γ_ => Γ, :n_Γ_ => n_Γ)
     end
     merge!(params, Dict(:export_tags=>export_tags))
-
-
 end
 
 """
@@ -339,3 +372,6 @@ function print_on_request(log_dir::String)
 end
 
 end
+
+
+
