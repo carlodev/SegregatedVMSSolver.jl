@@ -36,7 +36,7 @@ function run_airfoil_test(backend)
          :restart=> false,
          :restart_file=> restart_file,
          :printmodel=>false,
-         :name_tags=>["airfoil"]
+         :name_tags=>["airfoil"],
          :fieldexport=>[("ph","friction")]
    )
    
