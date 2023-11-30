@@ -35,12 +35,10 @@ Different software packages have been developed in the field of fluid dynamics i
 ## Results
 
 ![Taylor-Green vortices, velocity x direction field](images/TGx.png){ width=40%  }
-
 ![lid-driven cavity flow, velocity field, Reynolds 10 000](images/Ldx.png){ width=40%  }
 
-![Cylinder velocity flow-field, Reynolds 1000](images/docs/Cyx.png){ width=40%  }
-
-![Velocity field on DU89 airfoil at Reynolds 250 000, angle of attack 5°](images/DU89U.png){ width=40%  }
+![Cylinder velocity flow-field, Reynolds 1000](images/Cyx.png){ width=40%  }
+![Velocity field on DU89 airfoil at Reynolds 250 000, angle of attack 1°](images/DU89U.png){ width=40%  }
 
 Figure \ref{fig:cfsd7003} shows the comparison of the time averaged results obtained using the LS-VMS, compared with the results obtained by Calderer et al. [@Calderer:2013] and Galbraith [@Galbraith:2008].
 
