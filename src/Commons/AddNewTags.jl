@@ -14,9 +14,12 @@ end
 function create_new_tag!(model,tagname::String, is_tag::Function)
        labels = get_face_labeling(model)
        new_entity = num_entities(labels) + 1
-
-       Dmax = length(labels.d_to_dface_to_entity)
-
+        if tagname == "centre"
+            Dmax =1
+        else
+            Dmax = length(labels.d_to_dface_to_entity)
+        end
+        
     for D = 1:1:Dmax
        model_nodes = DiscreteModel(Polytope{D-1}, model)
        cell_nodes_coords = get_cell_coordinates(model_nodes)
