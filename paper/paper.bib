@@ -1,0 +1,59 @@
+@article{Badia:2020,
+  doi = {10.21105/joss.02520},
+  url = {https://doi.org/10.21105/joss.02520},
+  year = {2020},
+  publisher = {The Open Journal},
+  volume = {5},
+  number = {52},
+  pages = {2520},
+  author = {Santiago Badia and Francesc Verdugo},
+  title = {Gridap: An extensible Finite Element toolbox in Julia},
+  journal = {Journal of Open Source Software}
+}
+
+@article{Verdugo:2022,
+  doi = {10.1016/j.cpc.2022.108341},
+  url = {https://doi.org/10.1016/j.cpc.2022.108341},
+  year = {2022},
+  month = jul,
+  publisher = {Elsevier {BV}},
+  volume = {276},
+  pages = {108341},
+  author = {Francesc Verdugo and Santiago Badia},
+  title = {The software design of Gridap: A Finite Element package based on the Julia {JIT} compiler},
+  journal = {Computer Physics Communications}
+}
+
+@article{BadiaD:2022,
+  doi = {10.21105/joss.04157},
+  url = {https://doi.org/10.21105/joss.04157},
+  year = {2022},
+  publisher = {The Open Journal},
+  volume = {7},
+  number = {74},
+  pages = {4157},
+  author = {Santiago Badia and Alberto F. Martín and Francesc Verdugo},
+  title = {GridapDistributed: a massively parallel finite element toolbox in Julia},
+  journal = {Journal of Open Source Software}
+}
+
+@article{Calderer:2013,
+   abstract = {This paper presents three-level residual-based turbulence models for the incompressible Navier-Stokes equations. Employing the variational multiscale (VMS) framework, the velocity and pressure fields are decomposed into two overlapping hierarchical scales, thereby leading to a system of coupled mixed field problems. The mixed problem at the fine scales is stabilized via a subsequent VMS application that results in a further decomposition of the fine-scale velocity field into level-I and level-II scales. The level-II scales are modeled using higher-order bubble functions that are then variationally embedded in the level-I formulation to stabilize it. The level-I problem is modeled via a second set of bubble functions that are linearly independent of the bubbles employed at level-II. Finally, the resulting level-I fine-scales are variationally embedded in the coarse-scale formulation. This yields a residual-based turbulence model for the larger or coarser-scales. A significant feature of the proposed method is that it results in a concurrent top-down and bottom up two-way nesting of the scales. In addition, the resulting turbulence model does not possess any embedded tunable parameters. Another attribute of the formulation is that the fine scales at every level are driven by the residuals of the Euler-Lagrange equations of the coarser scales at the preceding levels, thereby resulting in a method that is variationally consistent. Various algorithmic generalizations of the method are presented that lead to computationally economic residual-based turbulence models. The proposed telescopic depth in scales approach helps make these models accurate for low order tetrahedral and hexahedral elements, a feature that is facilitated by the higher-order bubble functions over element interiors and it results in an enhanced representation of the fine-scale terms modeling the fine viscous effects. From a computational perspective this method results in easy-to-implement equal-order pressure-velocity elements, and possesses the desirable p-refinement feature. Numerical performance of the method is assessed on turbulent channel flow problems at Re = 395 and Re = 590. Also presented are the results for turbulent SD-7003 airfoil at Re = 60, 000 and comparison is made with the published experimental data and numerical results. © 2012 Elsevier B.V.},
+   author = {Ramon Calderer and Arif Masud},
+   doi = {10.1016/j.cma.2012.09.015},
+   issn = {00457825},
+   journal = {Computer Methods in Applied Mechanics and Engineering},
+   keywords = {Bubble functions,Large eddy simulation,Residual-based turbulence models,Stabilized finite elements,Tetrahedral elements,Variational multiscale method},
+   month = {2},
+   pages = {238-253},
+   title = {Residual-based variational multiscale turbulence models for unstructured tetrahedral meshes},
+   volume = {254},
+   year = {2013},
+}
+
+@misc{Galbraith:2008,
+   abstract = {The formation and burst of a laminar separation bubble has long been known to be detrimental to the performance of airfoils operating at low Reynolds numbers (Re < 10 5). With increasing interest on Micro Air Vehicles (MAV), further understanding of the formation and subsequent turbulent breakdown of laminar separation bubbles is required for improved handling, stability, and endurance of MAV's. An investigation of flow past an SD7003 airfoil over the Reynolds number range 10 4 < Re < 9x10 4 is presented. This airfoil was selected due to its robust, thin laminar separating bubble, and the availability of high-resolution experimental data. A high-order implicit large-eddy simulation (ILES) approach is shown capable of capturing the laminar separation, transition, and subsequent three-dimensional breakdown. The ILES methodology also predicts without change in parameters the passage into full airfoil stall at high incidence. Results of the computations and comparison with experimental data are analyzed and discussed. Good agreement is generally found between experiment and computations for separation, reattachment, and transition locations, as well as aerodynamic loads. Nomenclature C = Chord length Cp = Time-and spanwise-mean coefficient of pressure, () 2 / 2 ∞ ∞ ∞ − U p p ρ C f = Time-and spanwise-mean skin friction coefficient, n u ∂ ∂ Re 2 µ E t = Total specific energy F I , G I , H I = Inviscid vector fluxes F v , G v , H v = Viscous vector fluxes I, J, K = Coordinate grid indices in the circumferential, surface normal, and spanwise directions J = Jacobian of coordinate transformation M = Mach number Pr = Prandtl number; 0.72 for air Q = Vector of dependent variables Re = Reference Reynolds number, ∞ ∞ ∞ µ ρ / C U T = Non-dimensional static temperature U, V, W = Contravariant velocity components U ∞ = Freestream reference speed X, Y, Z = Non-dimensional Cartesian coordinates h b = Maximum laminar separation bubble height 2 k = Heat transfer coefficient n = Wall normal direction p = Non-dimensional static pressure q i = Component of heat flux vector t = Non-dimensional time u, v, w = Non-dimensional Cartesian velocity components in x, y, z directions v u ′ ′ = Reynolds shear stress v u uv − x s , x t , x r = Separation, transition, and reattachment locations ∆t = Non-dimensional time step α = Angle of attack γ = Specific heat ratio; 1.4 for air δ = Kronecker delta function δ ξ2, δ η2, δ ζ2 = Second-and sixth-order finite difference operators in ξ, η, and ζ directions δ ξ6, δ η6, δ ζ6 µ = Non-dimensional molecular viscosity coefficient ξ, η, ζ = Control coordinates ξ t , ξ x , ξ y , ξ z , = Metric coefficients of the coordinate transformation η t , η x , η y , η z , ζ t , ζ x , ζ y , ζ z ρ = Non-dimensional density ω = Non-dimensional frequency 2 ∇ = Laplace Operator Subscripts ∞ = Freestream reference conditions Superscripts − = Time mean quantities ' = Fluctuating components},
+   author = {Marshall C Galbraith and Miguel R Visbal and Graduate Student},
+   title = {Implicit Large Eddy Simulation of Low Reynolds Number Flow Past the SD7003 Airfoil},
+   year = {2008},
+}
