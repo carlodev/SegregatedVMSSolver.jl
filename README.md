@@ -9,6 +9,8 @@
 
 *SegregatedVMSSolver.jl for solving incompressible Navier-Stokes using stabilized Finite Element Method, in specific Streamline-Upwind Petrov-Galerkin (SUPG) and Variational MultiScale method (VMS)*
 
+![Julia flow](docs/figs/DU89.gif)
+
 ## Introduction
 The package solves the incompressible Navier-Stokes equations using SUPG and VMS method. VMS has been originally introduced by [Hughes2000](@cite). In specific, a linearized and segregated version of the SUPG (following the steps illustrated by [Janssens2014](@cite)) and VMS is solved. 
 
