@@ -1,7 +1,11 @@
 
+using Test
+using SegregatedVMSSolver
+using Gridap
+using GridapDistributed
+using PartitionedArrays
 
-
-function run_case_test(case::String; meshfile=" ", t_endramp=1.0, Reynolds=1000)
+function run_case_test(case::String, backend; meshfile=" ", t_endramp=1.0, Reynolds=1000)
       mesh_file = joinpath(@__DIR__, "..", "models", meshfile)
    
    params = Dict(
@@ -15,7 +19,7 @@ function run_case_test(case::String; meshfile=" ", t_endramp=1.0, Reynolds=1000)
          :θ => 0.5,
          :u_in=> 1.0,
         
-         :backend => with_debug,  #or with_mpi()
+         :backend => backend,  #with_debug or with_mpi()
          :rank_partition=>(2,2),
          :ν => 0.001,
          :petsc_options => petsc_options_default(),

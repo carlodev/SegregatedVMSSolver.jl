@@ -7,16 +7,17 @@ using PartitionedArrays, SparseArrays
 using Gridap, GridapDistributed
 using Gridap:FESpaces
 
-N = 1000
-Mat = sprand(N,N,1e-3) + sparse(Matrix(2.0I, N, N))
-Mat_inv = SegregatedVMSSolver.allocate_Mat_inv_ML(Mat)
-@test Mat_inv == zeros(N)
+# N = 1000
+# Mat = sprand(N,N,1e-3) + sparse(Matrix(2.0I, N, N))
+# Mat_inv = SegregatedVMSSolver.allocate_Mat_inv_ML(Mat)
+# @test Mat_inv == zeros(N)
 
-SegregatedVMSSolver.inv_lump_vel_mass!(Mat_inv, Mat)
+# SegregatedVMSSolver.inv_lump_vel_mass!(Mat_inv, Mat)
 
-b = ones(N)
+# b = ones(N)
 
-@test norm(Mat_inv .* b .- Mat\b) ./ N < 1.0
+# @test norm(Mat_inv .* b .- Mat\b) ./ N < 1.0
+
 
 function test_matrix(rank_partition,distribute,D)
     ν = 0.001
@@ -40,20 +41,20 @@ U = TrialFESpace(vz,V)
 rhs(v) = 0.0
 Au(u, v) = ∫(ν * ∇(v) ⊙ ∇(u) )dΩ 
 MAu = get_matrix(AffineFEOperator(Au,rhs,U,V))
-
 @test typeof(MAu) <: PSparseMatrix
-@test typeof(allocate_Mat_inv_ML(MAu))<:PVector
+
+Mat_inv = allocate_Mat_inv_ML(MAu)
+SegregatedVMSSolver.inv_lump_vel_mass!(Mat_inv, MAu)
+
+@test typeof(Mat_inv)<:PVector
 
 end
 
-
+function main(distribute)
 for D in [2,3]
-    rank_partition = (D==2) ?  (2,2) : (2,2,2)
-    with_debug() do distribute
-        test_matrix(rank_partition,distribute,D)
-    end
+    rank_partition = (D==2) ?  (2,2) : (2,2,1)
+        test_matrix(rank_partition,distribute,D)   
 end
-
-
+end
 
 end

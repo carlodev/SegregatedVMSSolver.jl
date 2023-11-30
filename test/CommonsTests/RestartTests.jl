@@ -5,6 +5,7 @@ using Gridap
 using GridapDistributed
 using PartitionedArrays
 
+function main(distribute)
 params = Dict(
     :N => 100,
     :D => 2, #Dimension
@@ -38,6 +39,6 @@ idx_v = SegregatedVMSSolver.find_idx(VectorValue(0.0,0.0), params)
 
 @test typeof(idx_v) == Int64
 @test(typeof(SegregatedVMSSolver.uh_r(VectorValue(0.0,0.0), params, idx_v))<:VectorValue)
-
+end
 
 end #end module

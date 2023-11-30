@@ -1,7 +1,11 @@
 
+using Test
+using SegregatedVMSSolver
+using Gridap
+using GridapDistributed
+using PartitionedArrays
 
-
-function run_airfoil_test()
+function run_airfoil_test(backend)
 
    mesh_file = joinpath(@__DIR__, "..", "models", "DU89_2D_A1_M.msh")
    restart_file = joinpath(@__DIR__, "..", "restarts", "BL_DU89_2D_A1_M.csv")
@@ -16,7 +20,7 @@ function run_airfoil_test()
          :θ => 0.5,
          :u_in=> 1.0,
          :M=> 20, #internal iterations
-         :backend => with_debug,  #or with_mpi() with_debug()
+         :backend => backend,  #or with_mpi() with_debug()
          :rank_partition=>(2,2),
          :ν => 0.001,
          :petsc_options => petsc_options_default(),
@@ -24,7 +28,7 @@ function run_airfoil_test()
          :Cᵢ => [4, 36],
          :benchmark=>false,
          :t_endramp=> 5.0,
-         :mesh_file =>  mesh_file  ,
+         :mesh_file =>  mesh_file,
          :TI => 0.001,
          :ρ=>1.0,
          :Re=> 1_000,

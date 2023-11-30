@@ -3,6 +3,9 @@ module LinearUtilitiesTests
 using Test
 using SegregatedVMSSolver
 using LinearAlgebra
+using PartitionedArrays
+
+function main(distribute)
 v = rand(10)
 
 vv = SegregatedVMSSolver.create_ũ_vector(v)
@@ -19,7 +22,7 @@ SegregatedVMSSolver.update_ũ_vector!(vv,new_v)
 
 @test vv == [new_v,v,v,v]
 
-
+end
 
 
 end

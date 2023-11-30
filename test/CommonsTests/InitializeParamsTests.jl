@@ -3,7 +3,9 @@ module InitializeParamsTests
 using Test
 using SegregatedVMSSolver
 using Parameters
+using PartitionedArrays
 
+function main(distribute)
 c = 1.0
 ρ=1.0
 u_in= 1.0
@@ -33,5 +35,6 @@ SegregatedVMSSolver.init_params(params)
 @test restart == false
 @test restart_file == " "
 @test ν == c*ρ*u_in/Re
+end
 
 end
