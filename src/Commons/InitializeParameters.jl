@@ -41,7 +41,12 @@ function init_params(params::Dict{Symbol,Any})
 
     verifykey(params,:printmodel)
     verifykey(params,:printinitial)
-    verifykey(params,:matrix_freq_update; val = 20) #Matrix update every 20 time steps
+    if case == "TaylorGreen"
+        verifykey(params,:matrix_freq_update; val = 1) #Matrix update every 20 time steps
+    else
+        verifykey(params,:matrix_freq_update; val = 20) #Matrix update every 20 time steps
+
+    end
     verifykey(params,:a_err_threshold; val = 200) #Norm on accelaration vector reduced by a factor of 200
     verifykey(params,:benchmark; val = true) # do not print the results
     verifykey(params,:M; val = 20)
