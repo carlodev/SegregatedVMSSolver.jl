@@ -9,7 +9,7 @@ using DataFrames
 res_path = "Results/"
 
 
-nodes = get_nodes(res_path; tagname="V75")
+nodes = get_nodes(res_path)
 @test typeof(nodes) <: DataFrame
 
 normals = get_normals(res_path)
@@ -28,7 +28,7 @@ u0 = 1.0
 c = 1.0
 rho = 1.0
 μ = u0*c*rho/Re
-α = 0.0
+α = 1.0
 
 
 top_nodesx,bottom_nodesx,top_nodesy,bottom_nodesy,cp_top,cp_bottom,

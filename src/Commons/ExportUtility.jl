@@ -285,7 +285,6 @@ function export_fields(params::Dict{Symbol,Any},  tt::Float64, uh0, ph0)
 
             friction = (transpose(∇(uh0)) ⋅ n_Γ) ⋅ t_Γ
 
-            # cellfields = Dict("$(name_tag)_ph" => ph0, "$(name_tag)_friction" => friction)
             cellfields = create_cellfield(name_tag,uh0,ph0,friction,fieldexp)
             fdat = GridapDistributed._prepare_fdata(Γ.trians, cellfields)
 

@@ -1,5 +1,8 @@
 module MPITests
 
+using Test
+using MPI
+
 #project directory
 pdir = joinpath(@__DIR__,"..","..",".")
 
