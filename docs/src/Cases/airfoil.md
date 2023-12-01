@@ -1,11 +1,13 @@
 # Airfoil
-![SD7003 profile at Reynolds 60000](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/sd7003.png)
 
 It is one of the most complex and intersting case. The user has to create a proper mesh in [`gmsh`](https://gmsh.info/) setting the following physical boundaries:
 - `inlet` for the inlet
 - `outlet` for the outlet
 - `airfoil` for the airfoil walls
 - `limits` for the top and bottom boundaries
+
+!!! info ".geo file" 
+    In the folder `models/geofile/` is possible to find some `.geo` file created using [`gmsh`](https://gmsh.info/) both for 3D and 2D simulations. Different parameters can be modified: angle of attack, domain dimension, mesh divisions... feel free to explore it.
 
 The velocity at the inlet is incresed from `0.0` arriving to the target value `u_in` at `:t_endramp`. This increase the numeric stability. If `:t_endramp` = `:t0` the velocity at the inlet will be immediately `:u_in`. For numeric stability is better to keep `u_in = 1.0`, then fix the Reynolds and so the viscosity will be automatically computed as: `ν = 1/Reynolds`
 
@@ -20,6 +22,8 @@ By setting `t_endramp > t0` automatically the code will create an inlet velocity
 ```julia
 uin(t) = (t < t_endramp) ? (u_in .*(t/t_endramp)) : u_in
 ```
+
+
 
 
 ### Boundary Layer initialization
