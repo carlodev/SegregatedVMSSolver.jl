@@ -75,7 +75,7 @@ function init_params(params::Dict{Symbol,Any})
 
     #Check
     if !isnothing(params[:name_tags])
-        @assert haskey(params, fieldexport)
+        @assert haskey(params, :fieldexport)
         @assert length(params[:name_tags]) == length(params[:fieldexport])
     end
 
