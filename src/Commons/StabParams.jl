@@ -59,13 +59,10 @@ The inverse of the cell-map-field. It is evaluted in the middle of the refernce 
     ξₖ = get_cell_map(trian)
     Jt = lazy_map(Broadcasting(∇), ξₖ)
     inv_Jt = lazy_map(Operation(inv), Jt)
-  
-    if D == 2
-      eval_point = Point(0.5, 0.5)
-    else
-      eval_point = Point(0.5, 0.5, 0.5)
-    end
-  
+    
+    eval_point = Point(0.5 .* ones(D)) #(0.5,0.5) or (0.5,0.5,0.5)
+
+ 
     d = lazy_map(evaluate, inv_Jt, Fill(eval_point, num_cells(trian)))
     return d
   end
@@ -93,6 +90,16 @@ Compute GG
     return GG
   end
 
+
+## It sums up over the rows of the tensor value
+# D == 2 (d[1] + d[3])^2 + (d[2] + d[4])^2
+#D == 3 (d[1] + d[4] + d[7])^2 + (d[2] + d[5] + d[8])^2 + (d[3] + d[6] + d[9])^2
+function gg_operation(d::TensorValue)
+    D = size(t1)[1] #get dimension, 2 or 3
+    Imat = collect(Int64.(I(D)))
+    sum(map(r -> t1⊙TensorValue(repeat(r,D)...), eachrow(Imat)).^2)
+end
+
 """
   compute_GG(trian::Gridap.Geometry.BodyFittedTriangulation, params)
 
@@ -103,21 +110,10 @@ Compute gg
 
     d = compute_d(trian, params) #trian == Ω
 
-    function gg_operation(d)
-  
-      if D == 2
-  
-        return (d[1] + d[3])^2 + (d[2] + d[4])^2
-  
-  
-      elseif D == 3
-  
-        return (d[1] + d[4] + d[7])^2 + (d[2] + d[5] + d[8])^2 + (d[3] + d[6] + d[9])^2
-  
-      end
-  
-    end
+    
   
     gg = lazy_map(Broadcasting(gg_operation), d)
     return gg
   end
+
+
