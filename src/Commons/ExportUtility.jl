@@ -72,19 +72,10 @@ end
 Convert a Vector{Vector} to a DataFrame. It is used for export nodes, normals.
 """
 function conv_to_df(vv::Vector)
-    d = get_dimension(vv)
-    n = length(vv)
-    x = zeros(n)
-    y = zeros(n)
-    z = zeros(n)
-    for (i, val) in enumerate(vv)
-        x[i] = val[1]
-        y[i] = val[2]
-        if d == 3
-            z[i] = val[3]
-        end
-
-    end
+    D = get_dimension(vv)
+    x = getindex.(vv,1)
+    y = getindex.(vv,2)
+    z = (D==2) ? zeros(length(x)) : getindex.(vv,3)
     df = DataFrame(x=x, y=y, z=z)
     return df
 end
@@ -137,6 +128,14 @@ function extract_global_unique(dfield, parts, global_unique_idx, timestep::Float
     end
 end
 
+
+function get_visgrid(ttrian)
+    f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
+    ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
+    visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
+    return visgrid
+end
+
 # """
 #     get_local_unique_idx(parts, trian)
 
@@ -146,19 +145,16 @@ function get_local_unique_idx(params)
 
     @unpack parts, export_tags = params
     local_unique_idx = nothing
-    f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
     if !isnothing(export_tags)
-        @unpack name_tags, Γ_, n_Γ_ = export_tags
+        @unpack Γ_ = export_tags
         local_unique_idx = []
-        for (name_tag, Γ, n_Γ) in zip(name_tags, Γ_, n_Γ_)
+        for (Γ) in zip(Γ_)
 
             #export nodes
             local_unique_idx_ = map(Γ.trians) do ttrian
-                ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
-                visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
+                visgrid = get_visgrid(ttrian)
                 visgrid_ = conv_VectorValue.(visgrid.sub_grid.node_coordinates)
-                nodes_tri = unique(visgrid_) #Coordinate of unique nodes
                 unique_idx = unique(i -> visgrid_[i], eachindex(visgrid_)) #Indexes of unique nodes on each part
                 return unique_idx
             end
@@ -180,12 +176,10 @@ end
 # It also extracts non-duplicated nodes.
 # """
 function export_nodes_glob(parts, trian, tagname,D)
-    f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
     #export nodes
     local_unique_nodes = map(trian.trians) do ttrian
-        ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
-        visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
+        visgrid = get_visgrid(ttrian)
         visgrid_ = conv_VectorValue.(visgrid.sub_grid.node_coordinates)
         nodes_tri = unique(visgrid_)
         return unwrap_vector(nodes_tri)
@@ -215,7 +209,7 @@ function export_nodes_glob(params::Dict{Symbol,Any})
 
     if !isnothing(export_tags)
         global_unique_idx = []
-        @unpack name_tags, Γ_, n_Γ_ = export_tags
+        @unpack name_tags, Γ_ = export_tags
         for (name_tag, Γ) in zip(name_tags, Γ_)
             push!(global_unique_idx,export_nodes_glob(parts, Γ,name_tag,D))
         end
@@ -234,7 +228,6 @@ function export_n_Γ(params::Dict{Symbol,Any})
 
     @unpack export_tags,parts = params
 
-    f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
     if !isnothing(export_tags)
         @unpack name_tags, Γ_, n_Γ_, local_unique_idx_, global_unique_idx_ = export_tags
@@ -249,8 +242,7 @@ function export_n_Γ(params::Dict{Symbol,Any})
             fdat = GridapDistributed._prepare_fdata(Γ.trians, cellfields)
             for field in keys(cellfields)
                 fieldh = map(Γ.trians, fdat, local_unique_idx) do ttrian, cf, unique_idx
-                    ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
-                    visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
+                    visgrid = get_visgrid(ttrian)
                     pdata = Gridap.Visualization._prepare_pdata(ttrian, cf, visgrid.cell_to_refpoints)
                     field_h = 0.0
 
@@ -274,7 +266,6 @@ function export_fields(params::Dict{Symbol,Any},  tt::Float64, uh0, ph0)
     #get unique values in each processor
 
     @unpack parts, export_tags = params
-    f = (reffe) -> Gridap.Geometry.UnstructuredGrid(reffe)
 
     if !isnothing(export_tags)
         @unpack name_tags, Γ_, n_Γ_, local_unique_idx_, global_unique_idx_ = export_tags
@@ -290,8 +281,7 @@ function export_fields(params::Dict{Symbol,Any},  tt::Float64, uh0, ph0)
 
             for field in keys(cellfields)
                 fieldh = map(Γ.trians, fdat, local_unique_idx) do ttrian, cf, unique_idx
-                    ref_grids = map(f, Gridap.Geometry.get_reffes(ttrian))
-                    visgrid = Gridap.Visualization.VisualizationGrid(ttrian, ref_grids)
+                    visgrid = get_visgrid(ttrian)
                     pdata = Gridap.Visualization._prepare_pdata(ttrian, cf, visgrid.cell_to_refpoints)
                     field_h = pdata[field][unique_idx]
                     return field_h
