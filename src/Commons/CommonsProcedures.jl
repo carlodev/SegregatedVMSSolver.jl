@@ -90,7 +90,7 @@ function solve_case(params::Dict{Symbol,Any})
 create_export_tags!(params)
 
 @unpack M, petsc_options, time_step, θ, dt,t0, case, benchmark, method, trials, tests, 
-Ω, matrix_freq_update, a_err_threshold, log_dir = params
+Ω, matrix_freq_update, a_err_threshold, log_dir, save_sim_dir = params
 @unpack U,P,u0 = params
 
 
@@ -111,6 +111,7 @@ get_local_unique_idx(params)
 export_nodes_glob(params)
 export_n_Γ(params)
 
+mkpath(save_sim_dir)
 
 GridapPETSc.with(args=split(petsc_options)) do
   ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
@@ -151,7 +152,7 @@ for (ntime,tn) in enumerate(time_step)
         
         M
       
-      while (m<= M) && (err_norm_Δa0<a_err_threshold)
+      while (m<= M) #&& (err_norm_Δa0<a_err_threshold)
 
         Δpm1 .=  pazeros(Mat_S)
         Δa_star .= pazeros(Mat_ML)
@@ -235,7 +236,8 @@ end
 println("Solution computed at time $tn")
 uh_tn = FEFunction(U(tn), vec_um)
 ph_tn = FEFunction(P(tn), vec_pm)
-save_path = "$(case)_$(tn)_.vtu"
+save_path = joinpath(save_sim_dir,"$(case)_$(tn)_.vtu")
+
   if !benchmark && (mod(ntime,100)==0 || print_on_request(log_dir)) 
 
 

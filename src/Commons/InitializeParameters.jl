@@ -58,7 +58,8 @@ function init_params(params::Dict{Symbol,Any})
     verifykey(params,:log_dir; val = "Log") #Default directort for printing on request
     verifykey(params,:newtag; val = nothing) #Newtag dictionary
     verifykey(params,:name_tags; val = nothing) #Name tags where to export forces
-
+    verifykey(params,:save_sim_dir; val = "Results_vtu") #Name tags where to export forces
+    
     if params[:restart]
         @unpack restart_file, t_endramp, t0 = params
         restart_path = joinpath(@__DIR__, "..","..","restarts", restart_file)
@@ -70,6 +71,12 @@ function init_params(params::Dict{Symbol,Any})
             initial_rescale_factor = t0/t_endramp
         end
         params = merge!(params, Dict(:restart_df => restart_df, :initial_rescale_factor=>initial_rescale_factor))
+    end
+
+    #Check
+    if !isnothing(params[:name_tags])
+        @assert haskey(params, fieldexport)
+        @assert length(params[:name_tags]) == length(params[:fieldexport])
     end
 
 end
