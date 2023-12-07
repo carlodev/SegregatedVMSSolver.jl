@@ -11,6 +11,15 @@ export extract_airfoil_features
 export compute_CL_CD
 
 
+
+function custom_cmp_file(x::String)
+    offset = findlast("_",x)[1]+1
+    offend = findlast(".",x)[1]-1
+    str, num_str = SubString(x, 1, offset-1), SubString(x, offset, offend)
+    num = parse(Float64, num_str)
+    return str, num
+end
+
 """
     get_nodes(path::String)
 
@@ -55,7 +64,9 @@ function average_field(path::String, field_name::String, nodes::DataFrame; offse
     @assert offset >0
     @assert offend > offset
     
-    vector_files = field_file_path[offset:offend]
+    idx_sort = sortperm(field_file_path, by=custom_cmp_file)
+
+    vector_files = field_file_path[idx_sort][offset:offend]
     n_time_steps = length(vector_files)
     
     df_field = DataFrame(CSV.File(vector_files[1]))
