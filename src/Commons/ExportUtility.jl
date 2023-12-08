@@ -149,7 +149,7 @@ function get_local_unique_idx(params)
     if !isnothing(export_tags)
         @unpack Γ_ = export_tags
         local_unique_idx = []
-        for (Γ) in zip(Γ_)
+        for Γ in Γ_
 
             #export nodes
             local_unique_idx_ = map(Γ.trians) do ttrian
