@@ -195,7 +195,7 @@ function export_nodes_glob(parts, trian, tagname,D)
             nodes_uniques = unique(gg)
 
             export_time_step(0.0, nodes_uniques, "$(tagname)_nodes")
-            global_unique_idx = unique(i -> g.data[i], eachindex(gg)) 
+            global_unique_idx = unique(i -> gg[i], eachindex(gg)) 
         end
     end
     return global_unique_idx
