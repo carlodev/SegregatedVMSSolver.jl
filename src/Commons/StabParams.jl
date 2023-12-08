@@ -95,9 +95,9 @@ Compute GG
 # D == 2 (d[1] + d[3])^2 + (d[2] + d[4])^2
 #D == 3 (d[1] + d[4] + d[7])^2 + (d[2] + d[5] + d[8])^2 + (d[3] + d[6] + d[9])^2
 function gg_operation(d::TensorValue)
-    D = size(t1)[1] #get dimension, 2 or 3
+    D = size(d)[1] #get dimension, 2 or 3
     Imat = collect(Int64.(I(D)))
-    sum(map(r -> t1⊙TensorValue(repeat(r,D)...), eachrow(Imat)).^2)
+    sum(map(r -> d⊙TensorValue(repeat(r,D)...), eachrow(Imat)).^2)
 end
 
 """
