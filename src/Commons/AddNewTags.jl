@@ -94,7 +94,7 @@ function add_vertical_tag!(model, x_coord::Real, tagname::String)
 
     function is_tag(x::Vector)
          x = getindex(x,1)
-         return isapprox(getindex.(x,1), x_coord, atol=a_tol) && getindex.(x,2) .< 0.2 && getindex.(x,2) .> -0.2
+         return isapprox(getindex.(x,1), x_coord, atol=a_tol) && getindex.(x,2) .< 0.15 && getindex.(x,2) .> -0.1
      end
 
      create_new_tag!(model,tagname,is_tag)
