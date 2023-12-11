@@ -85,13 +85,15 @@ function average_field(path::String, field_name::String, nodes::DataFrame; offse
         Zpoints = find_z_aligned(nodes)
         NZ = length(Zpoints[1])
 
-        zv = zeros(length(Zpoints))
-        df_field_avg =  DataFrame(p=zv)
+        # zv = zeros(length(Zpoints))
+        df_field_avg =  copy(df_field)[1:length(Zpoints),:]
 
 
         for (xyidx,zidx) in enumerate(Zpoints)
-            z_avg = sum(df_field[zidx,:p]) / NZ
-            df_field_avg[xyidx,:p] = z_avg
+            for pname in propertynames(df_field)
+                z_avg = sum(df_field[zidx,pname]) / NZ
+                df_field_avg[xyidx,pname] = z_avg
+            end
         end
 
     else
@@ -130,7 +132,7 @@ end
 
 It provides the airfoil features like pressure and friction coefficient splitted between top and bottom. The nodes and results are orderded for growing x coordinates.
 """
-function extract_airfoil_features(nodes::DataFrame, n_Γ0::DataFrame, Ph::DataFrame, Friction::DataFrame; u0::Float64, μ::Float64, rho::Float64, α::Float64, chord::Float64)
+function extract_airfoil_features(nodes::DataFrame, n_Γ0::DataFrame, Ph::DataFrame, Friction::DataFrame; u0::Float64, μ::Float64, rho::Float64, α::Float64, chord::Float64, der_slope=-1.0)
     q = 0.5 .* u0^2 * rho
     p1 = [0.0, 0.0] #leading edge
     p2 = [chord *cosd(α), -chord * sind(α)] #trailing edge
@@ -165,7 +167,7 @@ else
 
 
 
-    rev_idx = findall(is_above.(XY_Airfoil;p1,p2) .* sign.(n_Γ_airfoil.y) .<0) #reverse n_Γ sign for this
+    rev_idx = findall(is_above.(XY_Airfoil;p1,p2, der_slope=der_slope) .* sign.(n_Γ_airfoil.y) .<0) #reverse n_Γ sign for this
 
     n_Γ_airfoil.y[rev_idx] = -1 .* n_Γ_airfoil.y[rev_idx] 
 
@@ -202,8 +204,8 @@ end
 #  is_above(p; p1, p2)
 #  It recognize if a specific point coordinate `p` is on the top or bottom side. It use a threshold line which is a cuibic function passing by the trailing `p2` and leading ´p1´ edges.
 #  
-function is_above(p; p1, p2)
-    der = p2[2]/p2[1] .* -0.20 #derivative in trailing edge Manage the (-0.20) factor
+function is_above(p; p1, p2, der_slope=-1)
+    der = p2[2]/p2[1] .* -der_slope # -0.20 #derivative in trailing edge Manage the (-0.20) factor
     c = -der/8 + der #derivative in leading edge
     
     a = (2*p2[2]-p2[1]*der - c*p2[1])/(-p2[1]^3)
