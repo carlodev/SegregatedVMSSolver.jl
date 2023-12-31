@@ -101,6 +101,8 @@ matrices = initialize_matrices_and_vectors(trials,tests, t0+dt, uh0, params; met
 Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, 
 Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices
 
+
+
 vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector = initialize_vectors(matrices,uh0,ph0)
 
 if case == "TaylorGreen"
@@ -113,11 +115,16 @@ export_n_Γ(params)
 
 mkpath(save_sim_dir)
 
+uh_avg = FEFunction(U(t0), vec_um)
+uh_avg.fields.item.free_values .= 0.0
+ph_avg = FEFunction(P(t0), vec_pm)
+ph_avg.fields.item.free_values .= 0.0
+
 GridapPETSc.with(args=split(petsc_options)) do
-  ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
-  ns2 = create_PETSc_setup(Mat_S,pres_kspsetup)
-  uh_tn_updt = FEFunction(U(t0), vec_um)
-  
+ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
+ns2 = create_PETSc_setup(Mat_S,pres_kspsetup)
+uh_tn_updt = FEFunction(U(t0), vec_um)
+
 for (ntime,tn) in enumerate(time_step)
 
       m = 0
@@ -237,6 +244,7 @@ println("Solution computed at time $tn")
 uh_tn = FEFunction(U(tn), vec_um)
 ph_tn = FEFunction(P(tn), vec_pm)
 save_path = joinpath(save_sim_dir,"$(case)_$(tn)_.vtu")
+update_time_average!(uh_tn,ph_tn, uh_avg, ph_avg, tn, params)
 
   if !benchmark && (mod(ntime,100)==0 || print_on_request(log_dir)) 
 
@@ -244,13 +252,13 @@ save_path = joinpath(save_sim_dir,"$(case)_$(tn)_.vtu")
     if case == "TaylorGreen"
         writevtk(Ω, save_path, cellfields = ["uh" => uh_tn, "uh_analytic"=> u0(tn), "ph" => ph_tn, "ph_analytic"=> p0(tn)])
     else
-       @time writevtk(Ω, save_path, cellfields = ["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn])
+      @time writevtk(Ω, save_path, cellfields = ["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
+      "uh_avg" => uh_avg,"ph_avg" => ph_avg])
 
     end
   end
 
     export_fields(params, tn, uh_tn, ph_tn)
-
 
 
 

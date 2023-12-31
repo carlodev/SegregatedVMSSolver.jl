@@ -59,7 +59,8 @@ function init_params(params::Dict{Symbol,Any})
     verifykey(params,:newtag; val = nothing) #Newtag dictionary
     verifykey(params,:name_tags; val = nothing) #Name tags where to export forces
     verifykey(params,:save_sim_dir; val = "Results_vtu") #Name tags where to export forces
-    
+    verifykey(params,:time_window; val = nothing) #
+
     if params[:restart]
         @unpack restart_file, t_endramp, t0 = params
         restart_path = joinpath(@__DIR__, "..","..","restarts", restart_file)
