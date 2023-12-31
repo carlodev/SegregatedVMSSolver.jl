@@ -159,7 +159,7 @@ for (ntime,tn) in enumerate(time_step)
         
         M
       
-      while (m<= M) #&& (err_norm_Δa0<a_err_threshold)
+      while (m<= M) && (err_norm_Δa0<a_err_threshold)
 
         Δpm1 .=  pazeros(Mat_S)
         Δa_star .= pazeros(Mat_ML)
