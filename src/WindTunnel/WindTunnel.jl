@@ -1,7 +1,7 @@
 using SegregatedVMSSolver.ExportUtility
 include("BoundaryConditions.jl")
 
-function run_airfoil(params,distribute)
+function run_windtunnel(params,distribute)
     @unpack rank_partition, D, N, t0, dt, tF, ν, θ, M = params
 
     parts  = distribute(LinearIndices((prod(rank_partition),)))
