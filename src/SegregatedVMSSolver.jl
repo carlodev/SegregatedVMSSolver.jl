@@ -97,4 +97,7 @@ include(joinpath("Cylinder","Cylinder.jl"))
 
 #Airfoil
 include(joinpath("Airfoil","Airfoil.jl"))
+
+#WindTunnel
+include(joinpath("WindTunnel","WindTunnel.jl"))
 end
