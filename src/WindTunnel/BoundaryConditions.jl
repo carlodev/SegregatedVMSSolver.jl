@@ -1,4 +1,4 @@
-function bc_airfoil(params)
+function bc_windtunnel(params)
     @unpack D, u_in, t_endramp, TI = params
     
     #u_free(x,t) = VectorValue(4*umax/0.41^2*(0.205^2 - x[2]^2),0) #parabolic inlet
