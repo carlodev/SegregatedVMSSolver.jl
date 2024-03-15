@@ -92,7 +92,24 @@ function update_time_average!(uh_tn,ph_tn, uh_avg, ph_avg, tn, params)
 end
 end
 
+
+
+
 function update_avg_dofs!(f_tn, f_avg, N)
   println("updates fields")
-  f_avg.fields.item.free_values .+= f_tn.fields.item.free_values ./N
+  update_avg_dofs!(f_tn.fields,  f_avg.fields, N)
+end
+
+function update_avg_dofs!(fields_tn::MPIArray, fields_avg::MPIArray, N)
+  println("updates fields")
+  fields_avg.item.free_values .+= fields_tn.item.free_values ./N
+end
+
+
+function update_avg_dofs!(fields_tn::DebugArray, fields_avg::DebugArray, N)
+  println("updates fields")
+  for (ff_tn, ff_avg) in zip(fields_tn,fields_avg)
+    ff_avg.free_values .+= ff_tn.free_values ./N
+  end
+
 end

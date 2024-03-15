@@ -115,10 +115,14 @@ export_n_Γ(params)
 
 mkpath(save_sim_dir)
 
+
+
 uh_avg = FEFunction(U(t0), vec_um)
-uh_avg.fields.item.free_values .= 0.0
+set_zeros!(uh_avg.fields)
+# uh_avg.fields.item.free_values .= 0.0
 ph_avg = FEFunction(P(t0), vec_pm)
-ph_avg.fields.item.free_values .= 0.0
+# ph_avg.fields.item.free_values .= 0.0
+set_zeros!(ph_avg.fields)
 
 GridapPETSc.with(args=split(petsc_options)) do
 ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
@@ -257,8 +261,9 @@ update_time_average!(uh_tn,ph_tn, uh_avg, ph_avg, tn, params)
 
     end
   end
-
-    export_fields(params, tn, uh_tn, ph_tn)
+  
+  # read_nodes_to_export(params,uh_tn,tn)
+  export_fields(params, tn, uh_tn, ph_tn)
 
 
 
