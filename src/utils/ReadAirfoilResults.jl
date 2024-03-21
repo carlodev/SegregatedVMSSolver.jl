@@ -69,7 +69,7 @@ function average_field(path::String, field_name::String, nodes::DataFrame; offse
     vector_files = field_file_path[idx_sort][offset:offend]
     n_time_steps = length(vector_files)
     
-    df_field = DataFrame(CSV.File(vector_files[1]))
+    df_field = DataFrame(CSV.File(vector_files[1])) ./ n_time_steps
 
     for fread in vector_files[2:end]
         println(fread)
