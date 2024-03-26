@@ -13,6 +13,25 @@ function allocate_Mat_inv_ML(Mat_ML::SparseMatrixCSC)
   return zeros(l)
 end
 
+
+
+"""
+    set_zeros!(fields::DebugArray)
+
+Set zeros as free values for a field
+"""
+function set_zeros!(fields::DebugArray)
+  for a in fields.items
+    a.free_values .= 0.0
+  end
+end
+
+
+function set_zeros!(fields::MPIArray)
+    fields.item.free_values .= 0.0
+end
+
+
 """
   inv_lump_vel_mass!(Mat_inv_ML::PVector,Mat_ML::PSparseMatrix)
 

@@ -12,6 +12,8 @@ function main(params)
         run_function = run_cylinder
     elseif case == "Airfoil"
         run_function = run_airfoil
+    elseif case == "WindTunnel"
+        run_function = run_windtunnel
 
     else
         @error "Case $case not recognized as valid"

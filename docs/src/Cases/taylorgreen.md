@@ -1,14 +1,7 @@
 # Taylor Green Vortex
-![Taylor Green](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/tg.png)
-![Taylor Green](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/Taylor_Vortex.png)
-
-
 
 It solves the 2D Taylor Green Vortex case. It is the only case where analtical solution are available:
 
-```@docs
-analytical_solution
-```
 
 ``u_x= U_{a}-V_{s} \cos \bigg (\frac{\pi}{D}(x-U_{a} t)\bigg ) \sin \bigg (\frac{\pi}{D}(y-V_{a} t)\bigg ) e^{-\frac{2 v \pi^{2}}{D^{2}} t}``
 

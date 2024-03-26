@@ -70,3 +70,46 @@ function DataFrames.haskey(df::DataFrame,s::Symbol)
   end
 
 end
+
+function update_time_average!(uh_tn,ph_tn, uh_avg, ph_avg, tn, params)
+  @unpack time_step, time_window= params
+  if !isnothing(time_window)
+    tw0 = time_window[1]
+    twf = time_window[2]
+    if tw0<=tn<=twf
+    
+    tsc=collect(time_step)
+    first_time_step = findfirst(x->x==tw0,tsc)
+    last_time_step = findfirst(x->x==twf,tsc)
+    
+    Ntimes = last_time_step-first_time_step+1
+    println("updating time average")
+
+    update_avg_dofs!(deepcopy(uh_tn), uh_avg, Ntimes)
+    update_avg_dofs!(deepcopy(ph_tn), ph_avg, Ntimes)
+  end
+
+end
+end
+
+
+
+
+function update_avg_dofs!(f_tn, f_avg, N)
+  println("updates fields")
+  update_avg_dofs!(f_tn.fields,  f_avg.fields, N)
+end
+
+function update_avg_dofs!(fields_tn::MPIArray, fields_avg::MPIArray, N)
+  println("updates fields")
+  fields_avg.item.free_values .+= fields_tn.item.free_values ./N
+end
+
+
+function update_avg_dofs!(fields_tn::DebugArray, fields_avg::DebugArray, N)
+  println("updates fields")
+  for (ff_tn, ff_avg) in zip(fields_tn,fields_avg)
+    ff_avg.free_values .+= ff_tn.free_values ./N
+  end
+
+end

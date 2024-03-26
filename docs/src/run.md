@@ -30,11 +30,13 @@ Print Settings
 - `:printinitial` can be `true` or `false`. If `true` saves the flowfield at `t0`. It is useful when restarting from a previous solution.
 - `:benchmark`  can be `true` or `false`. If `true` it does not print the solution, and it gives the time needed for computing the iteration form the 2nd till the end. The first iteration is not taken into account for computing the time because of precompilation.
 - `:name_tags` specify the boundary names to export, eg: `:name_tags=>["airfoil","inlet"]`
-
+- `:fieldexport` specify which field to export for each boundary specified in `name_tags`. eg: `[("ph","friction")]` The supported field are
+    - `ph` pressure
+    - `friction` for friction (not taking into account the viscosity)
+    - `uh` for velocity (x,y,z components)
 
 Mesh Settings
-- `:mesh_file` is a string with the name of the `.msh` that can be read. By default it points to the folder `/models` of the package.
-
+- `:mesh_file` is a string with the name of the `.msh` that can be read.
 
 
 Partitioning Settings
@@ -96,3 +98,8 @@ The example above run in the `REPL` emulating a parallel run over 4 processors (
 
 !!! info "numeric info" 
     Creating `Log/PrintSim.txt` allows to monitor the current state of the simulation. 
+
+
+!!! info "Experimental feature" 
+    It is possible to specify some x coordinates to export just planes at that coordinate, it is useful for hardcore validation of airfoils.
+    `:newtag` => Dict(:range_coordinate=>[0.60 , 0.65, 0.70, 0.75, 0.80], :tagname => ["V60", "V65", "V70", "V75", "V80"]),

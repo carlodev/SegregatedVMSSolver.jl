@@ -81,17 +81,9 @@ It provides the VMS segregated and linearized equations
       τ₃ = Cᵢ[2] * (ν^2 * GG)
   
   
-      D = length(uu)
-      if D == 2
-        uu1 = val(uu[1])
-        uu2 = val(uu[2])
-        uu_new = VectorValue(uu1, uu2)
-      elseif D == 3
-        uu1 = val(uu[1])
-        uu2 = val(uu[2])
-        uu3 = val(uu[3])
-        uu_new = VectorValue(uu1, uu2, uu3)
-      end
+
+     
+      uu_new = VectorValue(val.(uu)...)
   
       if iszero(norm(uu_new))
         return (τ₁ .+ τ₃) .^ (-1 / 2)
