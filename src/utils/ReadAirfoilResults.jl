@@ -5,7 +5,7 @@ using DataFrames
 using Trapz
 
 using Statistics
-using FFTW, LaTeXStrings
+using FFTW
 using ScatteredInterpolation
 
 
