@@ -16,6 +16,10 @@ using FillArrays
 using CSV
 using DataFrames
 
+using Statistics
+using FFTW
+using ScatteredInterpolation
+
 using GridapDistributed: Algebra
 using Gridap:FESpaces
 using Gridap.Arrays
