@@ -63,7 +63,7 @@ The inverse of the cell-map-field. It is evaluted in the middle of the refernce 
     eval_point = Point(0.5 .* ones(D)) #(0.5,0.5) or (0.5,0.5,0.5)
 
  
-    d = lazy_map(evaluate, inv_Jt, Fill(eval_point, num_cells(trian)))
+    d = lazy_map(Gridap.Arrays.evaluate, inv_Jt, Fill(eval_point, num_cells(trian)))
     return d
   end
 
