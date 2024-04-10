@@ -19,7 +19,8 @@ function run_airfoil(params,distribute)
     print_model(params)
 
     V, U, P, Q, Y, X = creation_fe_spaces(params, u_diri_tags, u_diri_values, p_diri_tags, p_diri_values)
-    
+    println("FE created")
+
 
     degree = 4*params[:order]
     Ω = Triangulation(model)
