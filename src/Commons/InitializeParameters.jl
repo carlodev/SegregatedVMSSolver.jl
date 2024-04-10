@@ -63,9 +63,14 @@ function init_params(params::Dict{Symbol,Any})
 
     if params[:restart]
         @unpack restart_file, t_endramp, t0 = params
-        restart_path = joinpath(@__DIR__, "..","..","restarts", restart_file)
-        restart_df = DataFrame(CSV.File(restart_path))
+        # restart_path = joinpath(@__DIR__, "..","..","restarts", restart_file)
+        # restart_df = DataFrame(CSV.File(restart_path))
+        restart_df = DataFrame(CSV.File(restart_file))
         
+        println("Restart Read")
+        println(names(restart_df))
+        println(size(restart_df))
+
         initial_rescale_factor = 1.0
         
         if t_endramp>t0
@@ -74,6 +79,8 @@ function init_params(params::Dict{Symbol,Any})
         params = merge!(params, Dict(:restart_df => restart_df, :initial_rescale_factor=>initial_rescale_factor))
     end
 
+    # read_nodes_to_export(params)
+    
     #Check
     if !isnothing(params[:name_tags])
         @assert haskey(params, :fieldexport)
