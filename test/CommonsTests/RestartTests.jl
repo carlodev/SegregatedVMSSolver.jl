@@ -6,6 +6,8 @@ using GridapDistributed
 using PartitionedArrays
 
 function main(distribute)
+    restart_file = joinpath(@__DIR__, "..", "..", "restarts", "BL_DU89_2D_A1_M.csv")
+
 params = Dict(
     :N => 100,
     :D => 2, #Dimension
@@ -31,7 +33,7 @@ params = Dict(
     :Re=> 1_000,
     :c=> 1.0,
     :restart=> true,
-    :restart_file=>"BL_DU89_2D_A1_M.csv",     
+    :restart_file=> restart_file,     
 )
 
 SegregatedVMSSolver.init_params(params)
