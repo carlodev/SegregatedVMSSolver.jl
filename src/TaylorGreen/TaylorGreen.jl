@@ -3,7 +3,7 @@ include("AnalyticalSolution.jl")
 include("SpaceConditions.jl")
 
 function run_taylorgreen(params, distribute)
-  @unpack rank_partition, D, N, t0, dt, tF, ν, θ, M = params
+  @unpack rank_partition, D, N, order = params
 
   parts = distribute(LinearIndices((prod(rank_partition),)))
 
@@ -17,7 +17,7 @@ function run_taylorgreen(params, distribute)
 
   #Domain and mesh definition
   domain = (-diameter, diameter, -diameter, diameter)
-  partition = (params[:N], params[:N])
+  partition = (N,N)
   model = CartesianDiscreteModel(parts, rank_partition, domain, partition; isperiodic=(true, true))
 
   # hf_gen!(params)
@@ -28,7 +28,7 @@ function run_taylorgreen(params, distribute)
 
   println("spaces created")
 
-  degree = 4 * params[:order]
+  degree = 4 * order
   Ω = Triangulation(model)
   dΩ = Measure(Ω, degree)
   

@@ -18,7 +18,7 @@ In case of a restarting simulation it reads the file and create a `initial_resca
 """
 function init_params(params::Dict{Symbol,Any})
 
-    @unpack D,rank_partition,case,t0,dt,tF = params
+    @unpack D,rank_partition,case,t0,dt,tF,restart = params
 
     @assert length(rank_partition) == D
     
@@ -61,16 +61,12 @@ function init_params(params::Dict{Symbol,Any})
     verifykey(params,:save_sim_dir; val = "Results_vtu") #Name tags where to export forces
     verifykey(params,:time_window; val = nothing) #
 
-    if params[:restart]
+    if restart
         @unpack restart_file, t_endramp, t0 = params
         # restart_path = joinpath(@__DIR__, "..","..","restarts", restart_file)
         # restart_df = DataFrame(CSV.File(restart_path))
         restart_df = DataFrame(CSV.File(restart_file))
         
-        println("Restart Read")
-        println(names(restart_df))
-        println(size(restart_df))
-
         initial_rescale_factor = 1.0
         
         if t_endramp>t0

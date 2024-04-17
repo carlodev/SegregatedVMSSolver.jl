@@ -55,7 +55,7 @@ function restart_ph_field(params::Dict{Symbol, Any},tree)
   function ph_restart(x)
     p = [x...][1:2]
     idx, _ = nn(tree, p)
-    ph = params[:restart_df].ph[idx]
+    ph = restart_df.ph[idx]
     return ph
   end
 

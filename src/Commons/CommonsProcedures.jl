@@ -17,14 +17,15 @@ end
 It creates the finite elements spaces accordingly to the previously generated dirichelet tags
 """
 function creation_fe_spaces(params::Dict{Symbol,Any}, u_diri_tags, u_diri_values, p_diri_tags, p_diri_values)
-    reffeᵤ = ReferenceFE(lagrangian, VectorValue{params[:D],Float64}, params[:order])
-    reffeₚ = ReferenceFE(lagrangian, Float64, params[:order])
+  @unpack model, D, order = params
+    reffeᵤ = ReferenceFE(lagrangian, VectorValue{D,Float64}, order)
+    reffeₚ = ReferenceFE(lagrangian, Float64, order)
 
 
-    V = TestFESpace(params[:model], reffeᵤ, conformity=:H1, dirichlet_tags=u_diri_tags)
+    V = TestFESpace(model, reffeᵤ, conformity=:H1, dirichlet_tags=u_diri_tags)
     U = TransientTrialFESpace(V, u_diri_values)
 
-    Q = TestFESpace(params[:model], reffeₚ, conformity=:H1, dirichlet_tags=p_diri_tags)
+    Q = TestFESpace(model, reffeₚ, conformity=:H1, dirichlet_tags=p_diri_tags)
     P = TrialFESpace(Q, p_diri_values)
 
     Y = MultiFieldFESpace([V, Q])
@@ -32,6 +33,7 @@ function creation_fe_spaces(params::Dict{Symbol,Any}, u_diri_tags, u_diri_values
 
     return V, U, P, Q, Y, X
 end
+
 """
   create_initial_conditions(params::Dict{Symbol,Any})
 
@@ -161,9 +163,7 @@ for (ntime,tn) in enumerate(time_step)
         norm_Δp0 = 10
         err_norm_Δa0 = 1
         err_norm_Δp0 = 1
-        
-        M
-      
+              
       while (m<= M) && (err_norm_Δa0<a_err_threshold)
 
         Δpm1 .=  pazeros(Mat_S)

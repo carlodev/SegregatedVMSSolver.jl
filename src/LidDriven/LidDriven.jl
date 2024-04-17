@@ -3,8 +3,8 @@ include("BoundaryConditions.jl")
 
 
 function run_liddriven(params,distribute)
-    @unpack rank_partition, D, N, t0, dt, tF, ν, θ, M = params
-    
+    @unpack rank_partition, N, D, order = params
+
     parts  = distribute(LinearIndices((prod(rank_partition),)))
 
     function stretching_y_function(x)
@@ -47,7 +47,7 @@ function run_liddriven(params,distribute)
      V, U, P, Q, Y, X = creation_fe_spaces(params, u_diri_tags, u_diri_values, p_diri_tags, p_diri_values)
     println("spaces created")
 
-    degree = 4*params[:order]
+    degree = 4*order
     Ω = Triangulation(model)
     dΩ = Measure(Ω, degree)
 

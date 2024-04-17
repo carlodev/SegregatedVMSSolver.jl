@@ -54,8 +54,8 @@ function G_params(Ω::GridapDistributed.DistributedTriangulation, params)
 The inverse of the cell-map-field. It is evaluted in the middle of the refernce domain.
 """
   function compute_d(trian::Gridap.Geometry.BodyFittedTriangulation, params) #trian == Ω
-    D = params[:D]
-  
+    @unpack D = params
+ 
     ξₖ = get_cell_map(trian)
     Jt = lazy_map(Broadcasting(∇), ξₖ)
     inv_Jt = lazy_map(Operation(inv), Jt)
@@ -109,9 +109,6 @@ Compute gg
     @unpack D = params
 
     d = compute_d(trian, params) #trian == Ω
-
-    
-  
     gg = lazy_map(Broadcasting(gg_operation), d)
     return gg
   end

@@ -1,9 +1,9 @@
 #It is a unique case, with pressure that is time dependent and no boundary conditions on the velocity, it is periodic in all dimensions
 function CreateTGSpaces(model, params, pa)
-    
+    @unpack D,order = params
     model = add_centre_tag!(model, Point(0.0, 0.0)) #(0.0, 0.0) is the centre coordinate
-    reffeᵤ = ReferenceFE(lagrangian, VectorValue{params[:D], Float64}, params[:order])
-    reffeₚ = ReferenceFE(lagrangian, Float64, params[:order])
+    reffeᵤ = ReferenceFE(lagrangian, VectorValue{D, Float64}, order)
+    reffeₚ = ReferenceFE(lagrangian, Float64, order)
 
 
     V = TestFESpace(model, reffeᵤ, conformity=:H1)

@@ -1,13 +1,11 @@
 include("BoundaryConditions.jl")
 
 function run_cylinder(params,distribute)
-    @unpack rank_partition, D, N, t0, dt, tF, ν, θ, M = params
+    @unpack rank_partition, mesh_file, order = params
 
     parts  = distribute(LinearIndices((prod(rank_partition),)))
 
-    mesh_file_path = params[:mesh_file]
-    
-    model = GmshDiscreteModel(parts, mesh_file_path)
+    model = GmshDiscreteModel(parts, mesh_file)
 
    
 
@@ -19,7 +17,7 @@ function run_cylinder(params,distribute)
     V, U, P, Q, Y, X = creation_fe_spaces(params, u_diri_tags, u_diri_values, p_diri_tags, p_diri_values)
     
 
-    degree = 4*params[:order]
+    degree = 4*order
     Ω = Triangulation(model)
     dΩ = Measure(Ω, degree)
 

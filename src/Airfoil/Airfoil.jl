@@ -2,13 +2,11 @@ using SegregatedVMSSolver.ExportUtility
 include("BoundaryConditions.jl")
 
 function run_airfoil(params,distribute)
-    @unpack rank_partition, D, N, t0, dt, tF, ν, θ, M = params
+    @unpack rank_partition, mesh_file, order = params
 
     parts  = distribute(LinearIndices((prod(rank_partition),)))
-
-    mesh_file_path =  params[:mesh_file]
     
-    model = GmshDiscreteModel(parts, mesh_file_path)
+    model = GmshDiscreteModel(parts, mesh_file)
     println("model read completed")
     add_new_tag!(model, params)
     
@@ -22,7 +20,7 @@ function run_airfoil(params,distribute)
     println("FE created")
 
 
-    degree = 4*params[:order]
+    degree = 4*order
     Ω = Triangulation(model)
     dΩ = Measure(Ω, degree)
 
