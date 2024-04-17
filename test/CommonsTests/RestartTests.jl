@@ -4,6 +4,7 @@ using SegregatedVMSSolver
 using Gridap
 using GridapDistributed
 using PartitionedArrays
+using NearestNeighbors
 
 function main(distribute)
     restart_file = joinpath(@__DIR__, "..", "..", "restarts", "BL_DU89_2D_A1_M.csv")
