@@ -550,7 +550,6 @@ function compute_scatter_interp(res_path, velocity::Vector{Float64} ,zp::Float64
         pp = [p[1];p[2]]
         interpolated = ScatteredInterpolation.evaluate(itp, pp)
         velocity_dense[i] = interpolated[1]
-        println(i)
     end
     
     return  xgrid,ygrid,velocity_dense
