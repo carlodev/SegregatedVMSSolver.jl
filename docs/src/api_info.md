@@ -62,9 +62,7 @@ matrices_and_vectors
 
 ## Restart
 ```@docs
-find_idx
-uh_restart
-ph_restart
+create_search_tree
 restart_uh_field
 restart_ph_field
 ```

@@ -36,11 +36,17 @@ params = Dict(
     :restart_file=> restart_file,     
 )
 
-SegregatedVMSSolver.init_params(params)
-idx_v = SegregatedVMSSolver.find_idx(VectorValue(0.0,0.0), params)
 
-@test typeof(idx_v) == Int64
-@test(typeof(SegregatedVMSSolver.uh_r(VectorValue(0.0,0.0), params, idx_v))<:VectorValue)
+SegregatedVMSSolver.init_params(params)
+tree = create_search_tree(params)
+uh_0 = restart_uh_field(params,tree)
+ph_0 = restart_ph_field(params,tree)
+eval_point = Point(0.5,0.5)
+
+@test typeof(tree)<:BruteTree
+@test typeof(uh_0(eval_point))<:VectorValue
+@test typeof(ph_0(eval_point))<:Float64
+
 end
 
 end #end module
