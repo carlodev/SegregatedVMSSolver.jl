@@ -52,8 +52,9 @@ function create_initial_conditions(params::Dict{Symbol,Any})
           end
         else
 
-          uh_0 = restart_uh_field(params)
-          ph_0 = restart_ph_field(params)
+          tree = create_search_tree(params)
+          uh_0 = restart_uh_field(params,tree)
+          ph_0 = restart_ph_field(params,tree)
           uh0 = interpolate_everywhere(uh_0, U(t0))
           ph0 = interpolate_everywhere(ph_0, P(t0))
 

@@ -6,6 +6,7 @@ using GridapDistributed
 using GridapGmsh
 using GridapPETSc
 using LinearAlgebra
+using NearestNeighbors
 
 using PartitionedArrays
 using MPI
@@ -74,9 +75,7 @@ export initialize_vectors
 export matrices_and_vectors 
 include(joinpath("Commons","MatrixCreation.jl"))
 
-export find_idx
-export uh_restart
-export ph_restart
+export create_search_tree
 export restart_uh_field
 export restart_ph_field
 include(joinpath("Commons","Restart.jl"))
