@@ -312,8 +312,8 @@ end
 function XYPlane(df::DataFrame, zp::Float64)
     zidx = findall(x-> x == zp, df.z)
     tsort = zidx[sortperm(df[zidx,:])]
-    tsort_filter = tsort[df[tsort,:].x .>0.5]
-    XYPlane(zp,tsort_filter)
+    # tsort_filter = tsort[df[tsort,:].x .>0.5]
+    XYPlane(zp,tsort)
 end
 
 
