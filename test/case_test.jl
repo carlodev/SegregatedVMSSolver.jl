@@ -18,7 +18,7 @@ function run_case_test(case::String, backend; meshfile=" ", t_endramp=1.0, Reyno
          :case => case,
          :θ => 0.5,
          :u_in=> 1.0,
-        
+         :M=>5,
          :backend => backend,  #with_debug or with_mpi()
          :rank_partition=>(2,2),
          :ν => 0.001,
@@ -41,4 +41,4 @@ function run_case_test(case::String, backend; meshfile=" ", t_endramp=1.0, Reyno
    end
 
 
-#mpiexecjl --project=. -n 4 julia case_test.jl
+#mpiexecjl --project=../. -n 4 julia case_test.jl
