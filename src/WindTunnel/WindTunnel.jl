@@ -8,7 +8,6 @@ function run_windtunnel(params,distribute)
    
     model = GmshDiscreteModel(parts, mesh_file)
     println("model read completed")
-    add_new_tag!(model, params)
     
 
 
