@@ -60,9 +60,23 @@ export update_ũ_vector!
 export update_ũ
 include(joinpath("Commons","LinearUtilities.jl"))
 
+export StabilizationMethod
+export StabilizationFormulation
+export StabilizationParameters
+export StabilizedProblem
+export ScalarStabilization
+export TensorStabilization
+export ScalarFormulation
+export TensorFormulation
+export VMS
+export SUPG
+export compute_stab_coeff
+export momentum_stabilization
+export continuity_stabilization
+include(joinpath("Commons","EquationOperations.jl"))
+
 export cconv
-export segregated_equations_SUPG!
-export segregated_equations_VMS!
+export segregated_equations
 include(joinpath("Commons","StabilizedEquations.jl"))
 
 export petsc_options_default

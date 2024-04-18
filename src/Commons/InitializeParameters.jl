@@ -36,8 +36,9 @@ function init_params(params::Dict{Symbol,Any})
     merge!(params,Dict(:time_step=>time_step))
 
 
-    
-  
+    prob = StabilizedProblem(params[:method])
+    merge!(params,Dict(:prob=>prob))
+
 
     verifykey(params,:printmodel)
     verifykey(params,:printinitial)

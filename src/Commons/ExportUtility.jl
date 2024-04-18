@@ -377,3 +377,92 @@ end
 
 
 
+function find_points_procs(uh, params::Dict{Symbol,Any})
+@unpack parts, extract_points = params
+
+println("in find_points_procs")
+
+# points_procs = zeros(length(extract_points))
+
+for (i,P) in enumerate(extract_points)
+
+    map(parts,local_views(uh)) do part, uh
+        if part == 2
+            println("parts = $part")
+            println("i=$i, P=$P")
+            println(typeof(uh))
+            val = uh(P)
+            println(val)
+        end
+
+    end
+end
+
+# points_procs_g = gather(points_procs)
+# map(points_procs_g,parts) do g,part
+#     if part ==1 #On Main procs
+#         println(g.data)
+#     end
+# end
+
+# merge!(params, Dict(:points_procs => points_procs))
+
+end
+
+
+
+
+
+###################################################
+#Exporting Velocities in vertical planes
+###################################################
+"""
+    read_nodes_to_export(params::Dict{Symbol,Any})
+
+From the vertical_planes_nodes_file.csv in params extracts the vertical nodes Vector{VectorValue}
+"""
+# function read_nodes_to_export(params::Dict{Symbol,Any})
+#     if haskey(params,:vertical_planes_nodes_file)
+#         @unpack vertical_planes_nodes_file=params 
+#         data_frame = DataFrame(CSV.File(vertical_planes_nodes_file))
+#         vnodes = Point[]
+
+#     for (i, row) in enumerate( eachrow( data_frame ) ) 
+#         push!(vnodes,Point(row.x,row.y,row.z))
+#     end
+
+#         merge!(params,Dict(:vertical_planes_nodes=>vnodes))
+#     end
+
+# end
+
+# function read_nodes_to_export(params::Dict{Symbol,Any},uh,tn)
+#     if haskey(params,:vertical_planes_nodes_file)
+#         @unpack vertical_planes_nodes,parts=params 
+#         println(typeof(vertical_planes_nodes[1]))        
+ 
+
+        
+#         map(uh.fields,parts) do uhf,part
+#             uhf(vertical_planes_nodes)
+#             println("here 1")
+#             uhvals_p = map(vn->uhf(vn),vertical_planes_nodes)
+#             println("here 2")
+
+#             println(typeof(uhvals_p))
+
+#             uhvals_df = conv_to_df(uhvals_p)
+            
+#             println(typeof(uhvals_df))
+    
+#             # if parts == 1 ## use the node 1 to print the results
+#                 CSV.write(joinpath("Results","VelocitiesVertical-$tn-$part.csv"), uhvals_df) 
+    
+#             # end
+
+#         end
+
+    
+#     end
+
+# end
