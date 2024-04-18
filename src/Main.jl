@@ -1,24 +1,8 @@
-function main(params)
-    init_params(params)
-    @unpack case, backend, rank_partition = params
+function main(simcase::SimulationCase)
+    #check(simcase)
+
+    backend = get_field(simcase,:backend)
     
-
-
-    if case == "TaylorGreen"
-        run_function = run_taylorgreen
-    elseif case == "LidDriven"
-        run_function = run_liddriven
-    elseif case == "Cylinder"
-        run_function = run_cylinder
-    elseif case == "Airfoil"
-        run_function = run_airfoil
-    elseif case == "WindTunnel"
-        run_function = run_windtunnel
-
-    else
-        @error "Case $case not recognized as valid"
-    end
-
     backend() do distribute
         if backend == with_mpi
             comm = MPI.COMM_WORLD
@@ -29,9 +13,8 @@ function main(params)
             end
            
         end
-        println(params)
 
-        run_function(params,distribute)
+        run_function(simcase,distribute)
     end
 
 return true

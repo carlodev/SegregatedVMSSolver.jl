@@ -28,6 +28,17 @@ using Gridap.CellData
 
 
 include("Main.jl")
+include(joinpath("ParametersDef","ParametersDef.jl"))
+
+export create_model
+include(joinpath("Commons","ModelCreation.jl"))
+
+export create_boundary_conditions
+include(joinpath("Commons","BoundaryConditions.jl"))
+
+export creation_fe_spaces
+include(joinpath("Commons","SpaceConditions.jl"))
+
 
 export init_params
 export verifykey
@@ -47,37 +58,14 @@ export add_new_tag!
 export add_centre_tag!
 include(joinpath("Commons","AddNewTags.jl"))
 
-export h_param
-export G_params
-export compute_d
-export compute_G
-export compute_GG
-export compute_gg
-include(joinpath("Commons","StabParams.jl"))
 
 export create_ũ_vector
 export update_ũ_vector!
 export update_ũ
 include(joinpath("Commons","LinearUtilities.jl"))
 
-export StabilizationMethod
-export StabilizationFormulation
-export StabilizationParameters
-export StabilizedProblem
-export ScalarStabilization
-export TensorStabilization
-export ScalarFormulation
-export TensorFormulation
-export VMS
-export SUPG
-export compute_stab_coeff
-export momentum_stabilization
-export continuity_stabilization
-include(joinpath("Commons","EquationOperations.jl"))
+include(joinpath("Equations","Equations.jl"))
 
-export cconv
-export segregated_equations
-include(joinpath("Commons","StabilizedEquations.jl"))
 
 export petsc_options_default
 export petsc_options

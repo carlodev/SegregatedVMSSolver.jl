@@ -9,6 +9,7 @@ function verifykey(params::Dict{Symbol,Any},keyname; val = false)
     end
 end
 
+
 """
     init_params(params::Dict{Symbol,Any})
 
@@ -36,8 +37,7 @@ function init_params(params::Dict{Symbol,Any})
     merge!(params,Dict(:time_step=>time_step))
 
 
-    prob = StabilizedProblem(params[:method])
-    merge!(params,Dict(:prob=>prob))
+ 
 
 
     verifykey(params,:printmodel)
@@ -61,14 +61,15 @@ function init_params(params::Dict{Symbol,Any})
     verifykey(params,:name_tags; val = nothing) #Name tags where to export forces
     verifykey(params,:save_sim_dir; val = "Results_vtu") #Name tags where to export forces
     verifykey(params,:time_window; val = nothing) #
-    
+
+    verifykey(params,:sprob; val = StabilizedProblem())
+        
+
     @unpack restart = params
     if restart
         @unpack restart_file, t_endramp, t0 = params
-        # restart_path = joinpath(@__DIR__, "..","..","restarts", restart_file)
-        # restart_df = DataFrame(CSV.File(restart_path))
         restart_df = DataFrame(CSV.File(restart_file))
-        
+ 
         initial_rescale_factor = 1.0
         
         if t_endramp>t0

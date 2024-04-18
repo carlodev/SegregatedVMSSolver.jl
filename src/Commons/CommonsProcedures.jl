@@ -1,38 +1,15 @@
 """
-  print_model(params::Dict{Symbol, Any})
+  print_model(model,simcase::SimulationCase)
 
 It prints the model mesh
 """
-function print_model(params::Dict{Symbol, Any})
-  @unpack printmodel, model, case = params
+function print_model(model,simcase::SimulationCase)
+  printmodel = get_field(simcase, :printmodel)
   if printmodel
-      writevtk(model,case)
+      writevtk(model,"$(typeof(simcase))")
   end
 end
 
-
-"""
-  creation_fe_spaces(params::Dict{Symbol,Any}, u_diri_tags, u_diri_values, p_diri_tags, p_diri_values)
-
-It creates the finite elements spaces accordingly to the previously generated dirichelet tags
-"""
-function creation_fe_spaces(params::Dict{Symbol,Any}, u_diri_tags, u_diri_values, p_diri_tags, p_diri_values)
-  @unpack model, D, order = params
-    reffeᵤ = ReferenceFE(lagrangian, VectorValue{D,Float64}, order)
-    reffeₚ = ReferenceFE(lagrangian, Float64, order)
-
-
-    V = TestFESpace(model, reffeᵤ, conformity=:H1, dirichlet_tags=u_diri_tags)
-    U = TransientTrialFESpace(V, u_diri_values)
-
-    Q = TestFESpace(model, reffeₚ, conformity=:H1, dirichlet_tags=p_diri_tags)
-    P = TrialFESpace(Q, p_diri_values)
-
-    Y = MultiFieldFESpace([V, Q])
-    X = TransientMultiFieldFESpace([U, P])
-
-    return V, U, P, Q, Y, X
-end
 
 """
   create_initial_conditions(params::Dict{Symbol,Any})
@@ -92,14 +69,14 @@ function solve_case(params::Dict{Symbol,Any})
 
 create_export_tags!(params)
 
-@unpack M, petsc_options, time_step, θ, dt,t0, case, benchmark, method, trials, tests, 
+@unpack M, petsc_options, time_step, θ, dt,t0, case, benchmark, trials, tests, 
 Ω, matrix_freq_update, a_err_threshold, log_dir, save_sim_dir = params
 @unpack U,P,u0 = params
 
 
 uh0, ph0 = create_initial_conditions(params)
 
-matrices = initialize_matrices_and_vectors(trials,tests, t0+dt, uh0, params; method=method)
+matrices = initialize_matrices_and_vectors(trials,tests, t0+dt, uh0, params)
 
 Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, 
 Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices
@@ -141,7 +118,7 @@ for (ntime,tn) in enumerate(time_step)
     
         @time begin
          Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
-          Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices_and_vectors(trials, tests, tn+dt, uh_tn_updt, params; method=method)
+          Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices_and_vectors(trials, tests, tn+dt, uh_tn_updt, params)
         end
 
         println("update numerical set up")

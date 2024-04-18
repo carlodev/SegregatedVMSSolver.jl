@@ -92,24 +92,19 @@ end
 
 
 
-function initialize_matrices_and_vectors(trials,tests, t::Real, u_adv, params; method=:SUPG)
-  return matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=method)
+function initialize_matrices_and_vectors(trials,tests, t::Real, u_adv, params)
+  return matrices_and_vectors(trials, tests, t::Real, u_adv, params)
 end
 
 
 """
-  matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=:VMS)
+  matrices_and_vectors(trials, tests, t::Real, u_adv, params)
 
 It updates matrices and vectors
 """
-function matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=:VMS)
+function matrices_and_vectors(trials, tests, t::Real, u_adv, params)
 
-  if method==:VMS
-    Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs = segregated_equations_VMS!(u_adv, params)
-
-  elseif method ==:SUPG
-    Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs = segregated_equations_SUPG!(u_adv, params)
-  end
+  Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs =  segregated_equations(u_adv,params)
 
     U,P = trials
     V,Q = tests

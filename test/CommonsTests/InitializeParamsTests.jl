@@ -23,7 +23,8 @@ params= Dict(:case=>case, :D=>D, :rank_partition=>rank_partition,
 SegregatedVMSSolver.init_params(params)
 
 
-@unpack printmodel, printinitial, matrix_freq_update,a_err_threshold,benchmark,M,t_endramp,mesh_file,restart,restart_file,ν = params
+@unpack printmodel, printinitial, matrix_freq_update,a_err_threshold,
+        benchmark,M,t_endramp,mesh_file,restart,restart_file,ν,sprob = params
 @test printmodel == false
 @test printinitial == false
 @test matrix_freq_update == 20
@@ -35,6 +36,10 @@ SegregatedVMSSolver.init_params(params)
 @test restart == false
 @test restart_file == " "
 @test ν == c*ρ*u_in/Re
+@test sprob.method == VMS()
+@test typeof(sprob.coeff_method) <: TensorFormulation
+@test sprob.skew == false
+
 end
 
 end

@@ -4,6 +4,8 @@ using SegregatedVMSSolver
 using Gridap
 using GridapDistributed
 using PartitionedArrays
+using GridapGmsh
+
 
 function run_case_test(case::String, backend; meshfile=" ", t_endramp=1.0, Reynolds=1000)
       mesh_file = joinpath(@__DIR__, "..", "models", meshfile)
@@ -23,8 +25,7 @@ function run_case_test(case::String, backend; meshfile=" ", t_endramp=1.0, Reyno
          :rank_partition=>(2,2),
          :ν => 0.001,
          :petsc_options => petsc_options_default(),
-         :method=>:VMS,
-         :Cᵢ => [4, 36],
+         :method=>VMS(),
     
          :t_endramp=>t_endramp,
          :mesh_file => mesh_file,

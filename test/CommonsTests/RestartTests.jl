@@ -9,6 +9,8 @@ using NearestNeighbors
 function main(distribute)
     restart_file = joinpath(@__DIR__, "..", "..", "restarts", "BL_DU89_2D_A1_M.csv")
 
+    
+
 params = Dict(
     :N => 100,
     :D => 2, #Dimension
@@ -24,8 +26,8 @@ params = Dict(
     :rank_partition=>(2,2),
     :ν => 0.001,
     :petsc_options => petsc_options_default(),
-    :method=>:VMS,
-    :Cᵢ => [4, 36],
+    :sprob=>StabilizedProblem(),
+
     :benchmark=>false,
     :t_endramp=> 5.0,
     :mesh_file => "DU89_2D_A1_M.msh",

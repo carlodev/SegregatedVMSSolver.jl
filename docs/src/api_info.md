@@ -43,8 +43,7 @@ update_ũ
 ## Stabilized Equations
 ```@docs
 cconv
-segregated_equations_SUPG!
-segregated_equations_VMS!
+
 ```
 
 ## SolversOptions

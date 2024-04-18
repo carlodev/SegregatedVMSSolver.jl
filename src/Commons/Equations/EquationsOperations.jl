@@ -3,25 +3,12 @@ abstract type StabilizationMethod end
 abstract type StabilizationFormulation end
 abstract type StabilizationParameters end
 
-"""
-  cconv(uadv, ∇u) 
-
-Wrapper for the convective term
-  ``u(\\nabla u)``  
-"""
-conv(u, ∇u) = (∇u') ⋅ u
-
-
-val(x) = x
-val(x::Gridap.Fields.ForwardDiff.Dual) = x.value
-
 
 struct StabilizedProblem{T<:StabilizationMethod,S<:StabilizationFormulation}
     method::T
     coeff_method::S
     skew::Bool
 end
-
 
 
 struct ScalarStabilization <: StabilizationParameters
@@ -45,49 +32,64 @@ end
 
 
 struct VMS <: StabilizationMethod
+    order::Int64
 end
 
 struct SUPG <: StabilizationMethod
+    order::Int64
 end
 
-
+function StabilizedProblem()
+    StabilizedProblem(VMS(1))
+end
 
 function StabilizedProblem(method::VMS)
-    StabilizedProblem(method, TensorFormulation(1,[4,36]), false)
+    StabilizedProblem(method, TensorFormulation(), false)
 end
 
 function StabilizedProblem(method::VMS, vv::Vector{Int64})
-    StabilizedProblem(method, TensorFormulation(1,vv), false)
+    StabilizedProblem(method, TensorFormulation(vv), false)
 end
 
 function StabilizedProblem(method::SUPG)
-    StabilizedProblem(method, ScalarFormulation(2), true)
+    StabilizedProblem(method, ScalarFormulation(), true)
 end
 
 
+#Default constructurs
+function TensorFormulation()
+    TensorFormulation(2,[4,36])
+end
 
+function TensorFormulation(vv::Vector{Int64})
+    TensorFormulation(2,vv)
+end
+
+function ScalarFormulation()
+    ScalarFormulation(1)
+end
 
 
 function compute_stab_coeff(coeff_method::ScalarFormulation,params::Dict{Symbol,Any})
     @unpack Ω, D = params
-    h = h_param(Ω, D,coeff_method)
+    h = h_param(Ω, D)
     return ScalarStabilization(h)
 end
 
 function compute_stab_coeff(coeff_method::TensorFormulation,params::Dict{Symbol,Any})
     @unpack Ω = params
-    G, GG, gg = G_params(Ω, params,coeff_method)
+    G, GG, gg = G_params(Ω, params)
     return TensorStabilization(G, GG, gg)
 end
 
 
 function compute_stab_coeff(params::Dict{Symbol,Any})
-    @unpack prob = params
-    return compute_stab_coeff(prob.coeff_method, params)
+    @unpack sprob = params
+    return compute_stab_coeff(sprob.coeff_method, params)
 end
 
-function compute_stab_coeff(prob::StabilizedProblem,params::Dict{Symbol,Any})
-    return compute_stab_coeff(prob.coeff_method, params)
+function compute_stab_coeff(sprob::StabilizedProblem,params::Dict{Symbol,Any})
+    return compute_stab_coeff(sprob.coeff_method, params)
 end
 
 
@@ -99,8 +101,8 @@ Bazilevs, Y., Calo, V. M., Cottrell, J. A., Hughes, T. J. R., Reali, A., & Scova
 """
 function momentum_stabilization(uu, stab_coeff::TensorStabilization, params::Dict{Symbol,Any} )
     @unpack G,GG,gg=stab_coeff
-    @unpack prob,ν,dt = params
-    @unpack Ci = prob.coeff_method
+    @unpack sprob,ν,dt = params
+    @unpack Ci = sprob.coeff_method
 
     function τm(uu, G, GG)
         τ₁ = Ci[1] * (2 / dt)^2 #Here, you can increse the 2 if CFL high
@@ -132,7 +134,7 @@ Stabilization parameter continuity
 Bazilevs, Y., Calo, V. M., Cottrell, J. A., Hughes, T. J. R., Reali, A., & Scovazzi, G. (2007). Variational multiscale residual-based turbulence modeling for large eddy simulation of incompressible flows. Computer Methods in Applied Mechanics and Engineering, 197(1–4), 173–201. https://doi.org/10.1016/j.cma.2007.07.016
 """
 function continuity_stabilization(uu, stab_coeff::TensorStabilization, params::Dict{Symbol,Any} )
-     @unpack   gg = params
+     @unpack   gg = stab_coeff
     return 1 / (momentum_stabilization(uu,stab_coeff,params) ⋅ gg)
 
 
@@ -146,8 +148,8 @@ Janssens, B. (2014). Numerical modeling and experimental investigation of ﬁne 
 """
 function momentum_stabilization(uu, stab_coeff::ScalarStabilization, params::Dict{Symbol,Any} )
     @unpack h=stab_coeff
-    @unpack prob,ν,dt = params
-    @unpack r = prob.coeff_method
+    @unpack sprob,ν,dt = params
+    @unpack r = sprob.coeff_method
 
     function τsu(u, h)
         τ₂ = h^2 / (4 * ν)
@@ -173,6 +175,5 @@ Stabilization parameters continuity equation
 Janssens, B. (2014). Numerical modeling and experimental investigation of ﬁne particle coagulation and dispersion in dilute ﬂows.
 """
 function continuity_stabilization(uu, stab_coeff::ScalarStabilization, params::Dict{Symbol,Any} )
-    @unpack   gg = params
     return (uu ⋅ uu) * momentum_stabilization(uu, stab_coeff, params)
 end
