@@ -1,14 +1,4 @@
-"""
-  print_model(model,simcase::SimulationCase)
-
-It prints the model mesh
-"""
-function print_model(model,simcase::SimulationCase)
-  printmodel = get_field(simcase, :printmodel)
-  if printmodel
-      writevtk(model,"$(typeof(simcase))")
-  end
-end
+using SegregatedVMSSolver.ParametersDef
 
 
 """

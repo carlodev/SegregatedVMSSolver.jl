@@ -1,54 +1,54 @@
 abstract type SimulationCase end
-abstract type MeshFileCase <:SimulationCase end
-abstract type CartesianCase <:SimulationCase end
-
 
 struct SimulationParameters
     timep::TimeParameters
     physicalp::PhysicalParameters
     solverp::SolverParameters
     exportp::ExportParameters
-    clusterp::ClusterParameters
     restartp::RestartParameters
 end
 
 function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters, 
-                            solverp::SolverParameters,exportp::ExportParameters, clusterp::ClusterParameters)
+                            solverp::SolverParameters,exportp::ExportParameters)
     restartp=RestartParameters()
-    SimulationParameters(timep,physicalp,solverp,exportp,clusterp,restartp)
+    SimulationParameters(timep,physicalp,solverp,exportp,restartp)
 end
 
-struct Airfoil <: MeshFileCase 
-    meshfile::String
+
+for case in (:Airfoil,:WindTunnel,:Cylinder,:LidDriven)
+    @eval begin
+        struct $case <: SimulationCase
+            meshp::MeshParameters
+            simulationp::SimulationParameters
+            sprob::StabilizedProblem
+        end
+    end
+end
+  
+struct TaylorGreen <: SimulationCase
+    analyticalsol
+    meshp::MeshParameters
     simulationp::SimulationParameters
     sprob::StabilizedProblem
 end
 
-struct WindTunnel <: MeshFileCase 
-    meshfile::String
-    simulationp::SimulationParameters
-    sprob::StabilizedProblem
-end
-
-struct Cylinder <: MeshFileCase 
-    meshfile::String
-    simulationp::SimulationParameters
-    sprob::StabilizedProblem
-end
-
-struct TaylorGreen <: CartesianCase
-    simulationp::SimulationParameters
-    sprob::StabilizedProblem
-end
-
-struct LidDriven <: CartesianCase 
-    simulationp::SimulationParameters
-    sprob::StabilizedProblem
+function TaylorGreen(meshp::MeshParameters, simulationp::SimulationParameters, sprob::StabilizedProblem)
+    diameter = 0.5 #0.5 [m] vortex dimension
+    Vs = 1 #1[m/s]swirling speed
+    Ua = 0.3 #0.3 [m/s]convective velocity in x
+    Va = 0.2 #0.2 [m/s]convective velocity in y
+    ν = 0.001 #0.001 m2/s 
+  
+  
+    velocity, pressure, ωa = analytical_solution(diameter, Vs, Ua, Va, ν)
+    analyticalsol = Dict(:velocity=>velocity, :pressure=>pressure)
+    TaylorGreen(analyticalsol, meshp, simulationp, sprob)
 end
 
 VelocityBoundaryCase = Union{Airfoil,WindTunnel,Cylinder, LidDriven}
 
-MyStructurePrint = Union{SimulationCase,StabilizedProblem,SimulationParameters,UserParameters,StabilizationMethod,StabilizationFormulation}
+
+MyStructurePrint = Union{SimulationCase,StabilizedProblem,SimulationParameters,UserParameters,MeshInfo,StabilizationMethod,StabilizationFormulation}
 
 function printstructure(s::MyStructurePrint)
     fnames = fieldnames(typeof(s))
@@ -66,7 +66,6 @@ function printstructure(s::MyStructurePrint)
 end
 
 Base.show(io::IO,s::MyStructurePrint) = printstructure(s)
-
 
 
 function get_field(s::MyStructurePrint,f::Symbol)
@@ -100,7 +99,6 @@ function search_field(s::MyStructurePrint,f::Symbol, flag::Bool, a)
 
         i = i+1
     end 
-
 
     return flag, a
 end

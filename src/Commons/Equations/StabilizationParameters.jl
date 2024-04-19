@@ -19,26 +19,26 @@ function h_param(Ω::GridapDistributed.DistributedTriangulation, D::Int64)
 end
 
 """
-  G_params(Ω::Triangulation, params)
+  G_params(Ω::Triangulation, D)
 
 Compute the tensor G and the values GG and gg according to the VMS formulation proposed by [Bazilevs2007](@cite) 
 """
-function G_params(Ω::Triangulation, params)
-  G = compute_G(Ω,params)
-  GG = compute_GG(Ω,params)
-  gg = compute_gg(Ω,params)
+function G_params(Ω::Triangulation, D::Int64)
+  G = compute_G(Ω,D)
+  GG = compute_GG(Ω,D)
+  gg = compute_gg(Ω,D)
   return G, GG, gg
 end
 
-function G_params(Ω::GridapDistributed.DistributedTriangulation, params)
+function G_params(Ω::GridapDistributed.DistributedTriangulation, D::Int64)
     G = map(Ω.trians) do trian
-      compute_G(trian,params)
+      compute_G(trian,D)
     end
     GG = map(Ω.trians) do trian
-      compute_GG(trian,params)
+      compute_GG(trian,D)
     end
     gg = map(Ω.trians) do trian
-      compute_gg(trian,params)
+      compute_gg(trian,D)
     end
 
     G = CellData.CellField(G, Ω)
@@ -48,13 +48,12 @@ function G_params(Ω::GridapDistributed.DistributedTriangulation, params)
   end
 
 """
-  compute_d(trian::Gridap.Geometry.BodyFittedTriangulation, params) #trian == Ω
+  compute_d(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64) #trian == Ω
 
 The inverse of the cell-map-field. It is evaluted in the middle of the refernce domain.
 """
-  function compute_d(trian::Gridap.Geometry.BodyFittedTriangulation, params) #trian == Ω
-    @unpack D = params
- 
+  function compute_d(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64) #trian == Ω
+
     ξₖ = get_cell_map(trian)
     Jt = lazy_map(Broadcasting(∇), ξₖ)
     inv_Jt = lazy_map(Operation(inv), Jt)
@@ -67,12 +66,12 @@ The inverse of the cell-map-field. It is evaluted in the middle of the refernce 
   end
 
 """
-  compute_G(trian::Gridap.Geometry.BodyFittedTriangulation, params)
+  compute_G(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64)
 
 Compute G (AbstractArray of TensorValues)
 """
-  function compute_G(trian::Gridap.Geometry.BodyFittedTriangulation, params) #trian == Ω
-    d = compute_d(trian, params) #trian == Ω
+  function compute_G(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64) #trian == Ω
+    d = compute_d(trian, D) #trian == Ω
     dtrans = lazy_map(Broadcasting(transpose), d)
     G = lazy_map(Broadcasting(⋅), d, dtrans)
     return G
@@ -83,8 +82,8 @@ Compute G (AbstractArray of TensorValues)
 
 Compute GG 
 """
-  function compute_GG(trian::Gridap.Geometry.BodyFittedTriangulation, params) #trian == Ω
-    G = compute_G(trian, params) #trian == Ω
+  function compute_GG(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64) #trian == Ω
+    G = compute_G(trian, D) #trian == Ω
     GG = lazy_map(Broadcasting(⊙), G, G)
     return GG
   end
@@ -100,14 +99,12 @@ function gg_operation(d::TensorValue)
 end
 
 """
-  compute_GG(trian::Gridap.Geometry.BodyFittedTriangulation, params)
+  compute_GG(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64)
 
 Compute gg 
 """ 
-  function compute_gg(trian::Gridap.Geometry.BodyFittedTriangulation, params) #trian == Ω
-    @unpack D = params
-
-    d = compute_d(trian, params) #trian == Ω
+  function compute_gg(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64) #trian == Ω
+    d = compute_d(trian, D) #trian == Ω
     gg = lazy_map(Broadcasting(gg_operation), d)
     return gg
   end

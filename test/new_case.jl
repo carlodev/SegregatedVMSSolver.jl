@@ -2,6 +2,9 @@
 using PartitionedArrays
 using Gridap
 using GridapGmsh
+using Revise
+using SegregatedVMSSolver
+
 
 ### test
 t0 =0.0
@@ -16,57 +19,23 @@ mesh_file = joinpath(@__DIR__, "..", "models", "DU89_2D_A1_M.msh")
 
 sprob = StabilizedProblem()
 timep = TimeParameters(t0,dt,tF)
-physicalp = PhysicalParameters(Re=Re,D=D)
-solverp = SolverParameters()
+physicalp = PhysicalParameters(Re=Re)
+solverp = SolverParameters(petsc_options=" ")
 exportp = ExportParameters()
-clusterp= ClusterParameters(rank_partition,backend)
-simparams = SimulationParameters(timep,physicalp,solverp,exportp,clusterp)
-
-airfoil_case = Airfoil(mesh_file,simparams,sprob)
-
-printstructure(airfoil_case)
-
-new_main(airfoil_case)
+meshp= MeshParameters(rank_partition,D,mesh_file)
 
 
+simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
-function run_function(simcase,distribute)
-    params = Dict{Symbol,Any}()
-    rank_partition,order = get_field(simcase,[:rank_partition,:order])
 
-    parts  = distribute(LinearIndices((prod(rank_partition),)))
+mcase = Airfoil(meshp,simparams,sprob)
 
-    model = create_model(parts, simcase)
-    @info "model read completed"
 
-    boundary_conditions = create_boundary_conditions(simcase) 
-    @info "boundary conditions created"
+meshp= MeshParameters(rank_partition,D;N=10,L=0.5)
+mcase =TaylorGreen(meshp,simparams,sprob)
 
-    V, U, P, Q, Y, X = creation_fe_spaces(simcase, model, boundary_conditions)
-    @info "FE Spaces Created"
 
-    trials = [U, P]
-    tests = [V, Q]
-    
-    degree = 4*order
-    Ω = Triangulation(model)
-    dΩ = Measure(Ω, degree)
 
-    
-    new_dict = Dict(:parts=>parts,
-    :U => U,
-    :P => P,
-    :X => X,
-    :Y => Y,
-    :Ω => Ω,
-    :dΩ => dΩ,
-    :degree => degree,
-    :trials => trials, 
-    :tests => tests)
-    merge!(params, new_dict)
-
-  
-    # solve_case(params,simcase)
-end
-
+using SegregatedVMSSolver
+SegregatedVMSSolver.main(mcase,with_debug)
 

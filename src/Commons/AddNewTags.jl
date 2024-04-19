@@ -1,3 +1,16 @@
+module AddNewTags
+using Gridap
+using GridapDistributed
+using Gridap.Arrays
+using Gridap.CellData
+
+
+export add_new_tag!
+export add_centre_tag!
+export add_SEM_tag!
+
+
+
 """
     create_new_tag!(model::GridapDistributed.DistributedDiscreteModel, tagname::String, is_tag::Function)
 
@@ -88,38 +101,6 @@ function add_new_tag!(model, range_coordinate::Tuple, tagname::String)
 
 end
 
-# function add_vertical_tag!(model, x_coord::Real, tagname::String)
-    
-#     a_tol = 1/400
-
-#     function is_tag(x::Vector)
-#          x = getindex(x,1)
-#          return isapprox(getindex.(x,1), x_coord, atol=a_tol) && getindex.(x,2) .< 0.15 && getindex.(x,2) .> -0.1
-#      end
-
-#      create_new_tag!(model,tagname,is_tag)
-#   end
-
-
-
-# function add_new_tag!(model, params)
-# @unpack newtag = params
-#     if !isnothing(newtag)
-#         @unpack range_coordinate, tagname = newtag
-#         comm = MPI.COMM_WORLD
-
-#         for (xr,tg) in zip(range_coordinate,tagname)
-#         # add_new_tag!(model, range_coordinate, tagname)
-#         println("Xc = $xr, Tag = $tg")
-#             add_vertical_tag!(model, xr, tg)
-#             MPI.Barrier(comm)
-#         end
-        
-#     end
-# end
-
-
-
 """
     add_centre_tag!(model, tag_coordinate::Point)
 
@@ -174,3 +155,8 @@ function add_SEM_tag!(model; c=1.0, a_tol = 1e-1)
     return model
 end
 
+
+
+
+
+end #end module

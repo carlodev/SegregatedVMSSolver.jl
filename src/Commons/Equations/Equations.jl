@@ -2,26 +2,17 @@ module Equations
 using Gridap
 using GridapDistributed
 using Parameters
+using FillArrays
+using LinearAlgebra
+using Gridap.CellData
 
+using SegregatedVMSSolver.ParametersDef
 
-export StabilizationMethod
-export StabilizationFormulation
-export StabilizationParameters
-export StabilizedProblem
-export ScalarStabilization
-export TensorStabilization
-export ScalarFormulation
-export TensorFormulation
-export VMS
-export SUPG
 export segregated_equations
 
-# export compute_stab_coeff
-# export momentum_stabilization
-# export continuity_stabilization
 
-include("EquationsOperations.jl")
 include("StabilizationParameters.jl")
+include("StabilizationOperations.jl")
 include("StabilizedEquations.jl")
 
 

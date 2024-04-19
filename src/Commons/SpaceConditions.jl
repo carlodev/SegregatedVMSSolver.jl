@@ -1,5 +1,13 @@
+module SpaceConditions
+using Gridap
+using GridapDistributed
 
-function creation_fe_spaces(simcase::TaylorGreen, model,boundary_conditions)
+using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.BoundaryConditions
+ 
+export creation_fe_spaces
+
+function creation_fe_spaces(simcase::TaylorGreen, model, boundary_conditions)
 
     u_diri_tags,u_diri_values,p_diri_tags,p_diri_values = boundary_conditions
 
@@ -43,3 +51,5 @@ function creation_fe_spaces(simcase::VelocityBoundaryCase, model, boundary_condi
     return V, U, P, Q, Y, X
 
 end
+
+end #end module

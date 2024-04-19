@@ -11,17 +11,20 @@ val(x) = x
 val(x::Gridap.Fields.ForwardDiff.Dual) = x.value
 
 
-function segregated_equations(u_adv,params)
-    @unpack ν,dΩ, dt, θ, sprob = params
-    @unpack skew = sprob
+function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::SimulationCase)
+  skew, ν,dt, θ = get_field(simcase,[:skew,:ν,:dt,:θ])
+  
+  sprob = simcase.sprob
+  @unpack dΩ = params
+  @unpack skew = sprob
     
     skewcoeff = skew * 0.5 # ==0 if skew == false
     vms_activation = is_VMS(sprob.method)
     
 
-    stab_coeff = compute_stab_coeff(sprob,params)
-    Tm = momentum_stabilization(u_adv, stab_coeff, params)
-    Tc = continuity_stabilization(u_adv, stab_coeff, params)
+    stab_coeff = compute_stab_coeff(simcase,params)
+    Tm = momentum_stabilization(u_adv, stab_coeff, simcase)
+    Tc = continuity_stabilization(u_adv, stab_coeff, simcase)
   
     ### VMS extra equations
     Auu_vms1(u, v) =  ∫(vms_activation .* u_adv ⋅ (∇(v))'*Tm⊙ (cconv ∘ (u_adv, ∇(u))) )dΩ + 

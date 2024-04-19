@@ -1,19 +1,39 @@
-function create_model(parts, simcase::MeshFileCase)
-    model = GmshDiscreteModel(parts, get_field(simcase,:meshfile))
+module ModelCreation
+
+using Gridap
+using GridapGmsh
+using PartitionedArrays
+using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.AddNewTags
+
+export create_model
+
+
+function create_model(parts, simcase::VelocityBoundaryCase)
+    mesh = simcase.meshp
+    model = create_model(parts, mesh.meshinfo, mesh.D, mesh.rank_partition)
     print_model(model,simcase)
     return model
 end
 
 
-function create_model(simcase::CartesianCase)
-    D,N = get_field(simcase,[:D,:N])
-    L = 0.5 #same length in all the 3 dimensions
+
+function create_model(parts, meshinfo::GmshMeshParams, D, rank_partition)
+    model = GmshDiscreteModel(parts, meshinfo.filename)
+    return model
+end
+
+
+function create_model(meshinfo::CartesianMeshParams, D::Int64)
+    N = meshinfo.N
+    L = meshinfo.L
+    @assert length(L) == D
     if D == 2
-        domain = (-L, L, -L, L)
-        partition = (N,N)
+        domain = (-L[1], L[1], -L[2], L[2])
+        partition = (N[1],N[2])
     elseif D == 3
-        domain = (-L, L, -L, L, -L, L)
-        partition = (N,N,N)
+        domain = (-L[1], L[1], -L[2], L[2], -L[3], L[3])
+        partition = (N[1],N[2],N[3])
     end
 
     return domain,partition
@@ -21,8 +41,9 @@ function create_model(simcase::CartesianCase)
 end
 
 
-function create_model(parts, simcase::LidDriven)
-    domain,partition,rank_partition = create_model(simcase)
+function create_model(parts, meshinfo::CartesianMeshParams, D::Int64, rank_partition)
+
+    domain,partition = create_model(meshinfo,D)
 
     function stretching_y_function(x)
         gamma1 = 2.5
@@ -40,19 +61,49 @@ function create_model(parts, simcase::LidDriven)
         end
         Point(m)
     end
+
     model =CartesianDiscreteModel(parts,rank_partition, domain, partition, map=stretching)
+    labels = get_face_labeling(model)
+
+    if D == 2
+        add_tag_from_tags!(labels, "diri1", [5,])
+        add_tag_from_tags!(labels, "diri0", [1, 2, 4, 3, 6, 7, 8])
+        add_tag_from_tags!(labels, "p", [4,])
+    elseif D == 3
+        add_tag_from_tags!(model, "diri1", [3,4,7,8,10,12,19,20,24])
+        add_tag_from_tags!(model, "diri0", [1, 2,5,6,9,11,13,14,15,16,17,18,21,22,23,25,26])
+        add_tag_from_tags!(model, "p", [1,])
+    end
 
     return model 
 end
 
 
-
-
 function create_model(parts, simcase::TaylorGreen)
-    domain,partition,rank_partition = create_model(simcase)
+    mesh = simcase.meshp
+    rank_partition = mesh.rank_partition
+
+    domain,partition = create_model(mesh.meshinfo, mesh.D)
 
     model =CartesianDiscreteModel(parts,rank_partition, domain, partition;isperiodic=(true, true) )
     model = add_centre_tag!(model, Point(0.0, 0.0)) #(0.0, 0.0) is the centre coordinate
-
+    
+    print_model(model,simcase)
     return model 
+end
+
+
+"""
+  print_model(model,simcase::SimulationCase)
+
+It prints the model mesh
+"""
+function print_model(model,simcase::SimulationCase)
+  printmodel = get_field(simcase, :printmodel)
+  if printmodel
+      writevtk(model,"$(typeof(simcase))")
+  end
+end
+
+
 end

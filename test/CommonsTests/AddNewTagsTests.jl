@@ -6,6 +6,9 @@ using Gridap
 using GridapDistributed
 using PartitionedArrays
 
+using SegregatedVMSSolver.AddNewTags
+
+
 function test_label(a::DebugArray)
     return   !isempty(findall(x->x=="centre", a.items[1].tag_to_name))
 
@@ -24,7 +27,7 @@ mesh_partition =  (D==2) ?  (11,11) : (11,11,11)
 model = CartesianDiscreteModel(parts,rank_partition,domain,mesh_partition)
 tag_coordinate = (D==2) ? VectorValue(0.5,0.5) : VectorValue(0.5,0.5,0.5)
 
-SegregatedVMSSolver.add_centre_tag!(model, tag_coordinate)
+add_centre_tag!(model, tag_coordinate)
 labels = get_face_labeling(model)
 
 @testset "New Tag" begin 

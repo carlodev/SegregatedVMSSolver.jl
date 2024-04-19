@@ -1,0 +1,75 @@
+module EquationsTests
+
+using Test
+using SegregatedVMSSolver
+using Gridap
+using GridapDistributed
+using PartitionedArrays
+
+using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.ModelCreation
+using SegregatedVMSSolver.BoundaryConditions
+using SegregatedVMSSolver.SpaceConditions
+
+
+include(joinpath("..","case_test.jl")) 
+
+
+function test_equations(rank_partition, distribute, D)
+    parts  = distribute(LinearIndices((prod(rank_partition),)))
+    
+    params = Dict{Symbol,Any}()
+
+    TestCase,mesh_file = first(iterate_test_cases(D))
+    simcase = create_simulation_test(TestCase, D; meshfile = mesh_file)
+    order = get_field(simcase,:order)
+
+        model = create_model(parts, simcase)
+    
+        boundary_conditions = create_boundary_conditions(simcase) 
+    
+        V, U, P, Q, Y, X = creation_fe_spaces(simcase, model, boundary_conditions)
+       
+
+        trials = [U, P]
+        tests = [V, Q]
+        
+        degree = 4*order
+        Ω = Triangulation(model)
+        dΩ = Measure(Ω, degree)
+    
+        
+        new_dict = Dict(:parts=>parts,
+        :U => U,
+        :P => P,
+        :X => X,
+        :Y => Y,
+        :Ω => Ω,
+        :dΩ => dΩ,
+        :degree => degree,
+        :trials => trials, 
+        :tests => tests)
+        merge!(params, new_dict)
+        
+        u_adv = interpolate_everywhere(VectorValue(zeros(D)...), U(0.0))
+
+
+        Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs =segregated_equations(u_adv,params,simcase)
+        return true
+
+end
+
+
+
+function main(distribute)
+        D = 2
+        rank_partition = (2, 2)
+
+        @test test_equations(rank_partition, distribute, D)
+end
+
+
+
+
+
+end

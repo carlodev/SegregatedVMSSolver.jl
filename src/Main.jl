@@ -1,8 +1,12 @@
-function main(simcase::SimulationCase)
+
+using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.ModelCreation
+using SegregatedVMSSolver.BoundaryConditions
+using SegregatedVMSSolver.SpaceConditions
+
+function main(simcase::SimulationCase,backend::Function)
     #check(simcase)
 
-    backend = get_field(simcase,:backend)
-    
     backend() do distribute
         if backend == with_mpi
             comm = MPI.COMM_WORLD
@@ -19,4 +23,44 @@ function main(simcase::SimulationCase)
 
 return true
 
+end
+
+
+function run_function(simcase,distribute)
+    params = Dict{Symbol,Any}()
+    rank_partition,order = get_field(simcase,[:rank_partition,:order])
+
+    parts  = distribute(LinearIndices((prod(rank_partition),)))
+
+    model = create_model(parts, simcase)
+    @info "model read completed"
+
+    boundary_conditions = create_boundary_conditions(simcase) 
+    @info "boundary conditions created"
+
+    V, U, P, Q, Y, X = creation_fe_spaces(simcase, model, boundary_conditions)
+    @info "FE Spaces Created"
+
+    trials = [U, P]
+    tests = [V, Q]
+    
+    degree = 4*order
+    Ω = Triangulation(model)
+    dΩ = Measure(Ω, degree)
+
+    
+    new_dict = Dict(:parts=>parts,
+    :U => U,
+    :P => P,
+    :X => X,
+    :Y => Y,
+    :Ω => Ω,
+    :dΩ => dΩ,
+    :degree => degree,
+    :trials => trials, 
+    :tests => tests)
+    merge!(params, new_dict)
+    
+
+    # solve_case(params,simcase)
 end

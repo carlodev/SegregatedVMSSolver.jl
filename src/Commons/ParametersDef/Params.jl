@@ -1,4 +1,5 @@
 abstract type UserParameters end
+abstract type MeshInfo <: UserParameters end
 
 struct TimeParameters <: UserParameters
     t0::Float64
@@ -23,25 +24,15 @@ end
 
 struct PhysicalParameters <: UserParameters
     Re::Int64
-    D::Int64
     ν::Float64
     u_in::Float64
     c::Float64
 end
 
-function PhysicalParameters(;Re::Int64,D::Int64, c=1.0, u_in=1.0)
+function PhysicalParameters(;Re::Int64,c=1.0, u_in=1.0)
     ν = Re / (c*u_in)
-    PhysicalParameters(Re,D,ν,u_in,c)
+    PhysicalParameters(Re,ν,u_in,c)
 end
-
-
-function PhysicalParameters(Re::Int64,D::Int64)
-    c = 1.0
-    u_in = 1.0
-    ν = Re / (c*u_in)
-    PhysicalParameters(Re,D,ν,u_in,c)
-end
-
 
 struct SolverParameters <: UserParameters
     θ::Float64
@@ -55,10 +46,43 @@ function SolverParameters(;θ=0.5, petsc_options=petsc_options_default(),matrix_
     SolverParameters(θ, petsc_options,matrix_freq_update,a_err_threshold, M )
 end
 
-struct ClusterParameters <: UserParameters
-    rank_partition::Union{Tuple, Int64}
-    backend::Function
+struct MeshParameters{T<:MeshInfo} <: UserParameters
+    rank_partition::Tuple
+    D::Int64
+    meshinfo::T
 end
+
+
+struct CartesianMeshParams <:MeshInfo
+    N::Vector{Int64}
+    L::Vector{Float64}
+end
+
+struct GmshMeshParams <:MeshInfo
+   filename::String
+end
+
+function MeshParameters(rank_partition::Tuple, D::Int64; N::Int64,L::Float64)
+    @assert length(rank_partition) == D
+
+    Nt = N .* ones(Int64, D)
+    Lt = L .* ones(Float64,D)
+
+    meshinfo = CartesianMeshParams(Nt,Lt)
+    MeshParameters(rank_partition, D, meshinfo)
+end
+
+function MeshParameters(rank_partition::Int64, D::Int64, meshinfo::GmshMeshParams)
+    rank_partition_t = (rank_partition,ones(D-1))
+    MeshParameters(rank_partition_t, D, meshinfo)
+end
+
+
+function MeshParameters(rank_partition::Union{Int64,Tuple}, D::Int64, filename::String)
+    meshinfo = GmshMeshParams(filename)
+    MeshParameters(rank_partition, D, meshinfo)
+end
+
 
 struct ExportParameters <: UserParameters
     printmodel::Bool
@@ -95,3 +119,5 @@ end
 function RestartParameters(rfile::String)
     RestartParameters(true, rfile)
 end
+
+
