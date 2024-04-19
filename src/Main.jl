@@ -49,7 +49,7 @@ function run_function(simcase,distribute)
     dΩ = Measure(Ω, degree)
 
     
-    new_dict = Dict(:parts=>parts,
+    new_dict = Dict(:parts=>parts, :model=>model,
     :U => U,
     :P => P,
     :X => X,

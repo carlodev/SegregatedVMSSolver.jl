@@ -38,10 +38,9 @@ include(joinpath("Commons","BoundaryConditions.jl"))
 include(joinpath("Commons","SpaceConditions.jl"))
 include(joinpath("Commons","Equations","Equations.jl"))
 
+include(joinpath("Commons","Restart.jl"))
+include(joinpath("Commons","InitialConditions.jl"))
 
-# export init_params
-# export verifykey
-# include(joinpath("Commons","InitializeParameters.jl"))
 
 # include(joinpath("Commons","ExportUtility.jl"))
 
@@ -57,8 +56,6 @@ include(joinpath("Commons","CommonsProcedures.jl"))
 # export update_ũ
 # include(joinpath("Commons","LinearUtilities.jl"))
 
-# include(joinpath("Equations","Equations.jl"))
-
 
 
 # export allocate_Mat_inv_ML
@@ -66,12 +63,6 @@ include(joinpath("Commons","CommonsProcedures.jl"))
 # export initialize_vectors
 # export matrices_and_vectors 
 # include(joinpath("Commons","MatrixCreation.jl"))
-
-# export create_search_tree
-# export restart_uh_field
-# export restart_ph_field
-# include(joinpath("Commons","Restart.jl"))
-
 
 include("Main.jl")
 

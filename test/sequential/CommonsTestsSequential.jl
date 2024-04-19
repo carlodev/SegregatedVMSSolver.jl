@@ -32,7 +32,7 @@ function test_common_debug()
   # LinearUtilitiesTests.main(distribute)
   # StabilizedEquationsTests.main(distribute)
   # MatrixCreationTests.main(distribute)
-  # RestartTests.main(distribute)
+
   end
 end
 
