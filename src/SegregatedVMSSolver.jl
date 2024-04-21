@@ -23,13 +23,17 @@ using ScatteredInterpolation
 
 using GridapDistributed: Algebra
 using Gridap:FESpaces
+
 # using Gridap.Arrays
 # using Gridap.CellData
 
 
 
-include(joinpath("Commons","SolversOptions.jl"))
+include(joinpath("Commons","SolverOptions.jl"))
+include(joinpath("Commons","Interfaces.jl"))
+
 include(joinpath("Commons","ParametersDef","ParametersDef.jl"))
+include(joinpath("Commons","VectorsOperations.jl"))
 
 include(joinpath("Commons","AddNewTags.jl"))
 
@@ -39,30 +43,13 @@ include(joinpath("Commons","SpaceConditions.jl"))
 include(joinpath("Commons","Equations","Equations.jl"))
 
 include(joinpath("Commons","Restart.jl"))
+include(joinpath("Commons","ExportUtility.jl"))
+
 include(joinpath("Commons","InitialConditions.jl"))
+include(joinpath("Commons","MatrixCreation.jl"))
 
 
-# include(joinpath("Commons","ExportUtility.jl"))
-
-# export creation_fe_spaces
-# export create_initial_conditions
-# export create_PETSc_setup
-# export solve_case
-include(joinpath("Commons","CommonsProcedures.jl"))
-
-
-# export create_ũ_vector
-# export update_ũ_vector!
-# export update_ũ
-# include(joinpath("Commons","LinearUtilities.jl"))
-
-
-
-# export allocate_Mat_inv_ML
-# export inv_lump_vel_mass!
-# export initialize_vectors
-# export matrices_and_vectors 
-# include(joinpath("Commons","MatrixCreation.jl"))
+include(joinpath("Commons","SolveProblem.jl"))
 
 include("Main.jl")
 

@@ -3,8 +3,9 @@ using PartitionedArrays
 using Gridap
 using GridapGmsh
 using Revise
+using Parameters
 using SegregatedVMSSolver
-
+using SegregatedVMSSolver.ParametersDef
 
 ### test
 t0 =0.0
@@ -22,20 +23,27 @@ timep = TimeParameters(t0,dt,tF)
 physicalp = PhysicalParameters(Re=Re)
 solverp = SolverParameters(petsc_options=" ")
 exportp = ExportParameters()
+
 meshp= MeshParameters(rank_partition,D,mesh_file)
 
+meshp= MeshParameters(rank_partition,D; N=100,L=0.5)
 
 simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 
-mcase = Airfoil(meshp,simparams,sprob)
+mcase = LidDriven(meshp,simparams,sprob)
+
+using SegregatedVMSSolver
+
+SegregatedVMSSolver.main(mcase,with_debug)
+
+
+
 
 
 meshp= MeshParameters(rank_partition,D;N=10,L=0.5)
 mcase =TaylorGreen(meshp,simparams,sprob)
 
-
-
-using SegregatedVMSSolver
+using SegregatedVMSSolver.ParametersDef
 SegregatedVMSSolver.main(mcase,with_debug)
 

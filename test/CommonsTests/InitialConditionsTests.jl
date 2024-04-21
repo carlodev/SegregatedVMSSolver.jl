@@ -1,12 +1,10 @@
-module RestartTests
+module InitialConditionsTests
 
 using Test
 using SegregatedVMSSolver
 using Gridap
 using GridapDistributed
 using PartitionedArrays
-using CSV
-using DataFrames
 
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.ModelCreation
@@ -19,31 +17,14 @@ using SegregatedVMSSolver.InitialConditions
 include(joinpath("..","case_test.jl")) 
 
 
-function test_restart(rank_partition, distribute, D)
+function test_initialconditions(rank_partition, distribute, D)
     parts  = distribute(LinearIndices((prod(rank_partition),)))
     
     params = Dict{Symbol,Any}()
 
+    TestCase,mesh_file = first(iterate_test_cases(D))
 
-    t0 =0.0
-    dt = 0.1
-    tF = 1.0
-    Re = 1000
-    airfoil_mesh_file = joinpath(@__DIR__, "..","..", "models", "DU89_2D_A1_M.msh")
-    airfoil_restart_file = joinpath(@__DIR__, "..", "..","restarts", "BL_DU89_2D_A1_M.csv")
-
-    sprob = StabilizedProblem()
-    timep = TimeParameters(t0,dt,tF)
-    physicalp = PhysicalParameters(Re=Re)
-    solverp = SolverParameters()
-    exportp = ExportParameters(printmodel=false)
-    restartp = RestartParameters(airfoil_restart_file)
-    meshp= MeshParameters(rank_partition,D,airfoil_mesh_file)
-
-    
-    simparams = SimulationParameters(timep,physicalp,solverp,exportp,restartp)
-
-    simcase = Airfoil(meshp,simparams,sprob)
+    simcase = create_simulation_test(TestCase, D; meshfile = mesh_file)
     order = get_field(simcase,:order)
 
         model = create_model(parts, simcase)
@@ -73,13 +54,7 @@ function test_restart(rank_partition, distribute, D)
         :tests => tests)
         merge!(params, new_dict)
         
-        restartfile,D = get_field(simcase,[:restartfile,:D])
-        restart_df = DataFrame(CSV.File(restartfile))
-
-        tree = create_search_tree(restart_df)
-        restart_uh_field(D,tree,restart_df)
-        restart_ph_field(tree,restart_df)
-
+        uh0,ph0 = create_initial_conditions(simcase,params)
 
         return true
 
@@ -90,7 +65,8 @@ end
 function main(distribute)
         D = 2
         rank_partition = (2, 2)
-        @test test_restart(rank_partition, distribute, D)
+
+        @test test_initialconditions(rank_partition, distribute, D)
 end
 
 

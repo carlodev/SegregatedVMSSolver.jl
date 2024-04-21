@@ -1,3 +1,20 @@
+module MatrixCreation
+using Gridap
+using GridapDistributed
+using SparseArrays
+using PartitionedArrays
+using LinearAlgebra
+
+using Gridap.Arrays
+
+using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.Equations
+using SegregatedVMSSolver.VectorsOperations
+
+export initialize_vectors
+export initialize_matrices_and_vectors
+export matrices_and_vectors
+
 """
   allocate_Mat_inv_ML(Mat_ML::PSparseMatrix) 
 
@@ -14,22 +31,6 @@ function allocate_Mat_inv_ML(Mat_ML::SparseMatrixCSC)
 end
 
 
-
-"""
-    set_zeros!(fields::DebugArray)
-
-Set zeros as free values for a field
-"""
-function set_zeros!(fields::DebugArray)
-  for a in fields.items
-    a.free_values .= 0.0
-  end
-end
-
-
-function set_zeros!(fields::MPIArray)
-    fields.item.free_values .= 0.0
-end
 
 
 """
@@ -92,19 +93,19 @@ end
 
 
 
-function initialize_matrices_and_vectors(trials,tests, t::Real, u_adv, params)
-  return matrices_and_vectors(trials, tests, t::Real, u_adv, params)
+function initialize_matrices_and_vectors(trials,tests, t::Real, u_adv, params,simcase)
+  return matrices_and_vectors(trials, tests, t::Real, u_adv, params,simcase)
 end
 
 
 """
-  matrices_and_vectors(trials, tests, t::Real, u_adv, params)
+  matrices_and_vectors(trials, tests, t::Real, u_adv, params,simcase)
 
 It updates matrices and vectors
 """
-function matrices_and_vectors(trials, tests, t::Real, u_adv, params)
+function matrices_and_vectors(trials, tests, t::Real, u_adv, params,simcase)
 
-  Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs =  segregated_equations(u_adv,params)
+  Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs =  segregated_equations(u_adv,params,simcase)
 
     U,P = trials
     V,Q = tests
@@ -142,5 +143,8 @@ function matrices_and_vectors(trials, tests, t::Real, u_adv, params)
     Vec_Ap = Vec_Apu + Vec_App
     Vec_Au = Vec_Auu + Vec_Aup
     return  Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap
+
+end
+
 
 end

@@ -74,5 +74,16 @@ function restart_ph_field(tree,restart_df::DataFrame)
 
 end
 
+function DataFrames.haskey(df::DataFrame,s::Symbol)
+  
+  if sum(DataFrames.propertynames(df) .== s)>0
+        return true
+  else
+        return false
+  end
+
+end
+
+
 end
 

@@ -3,6 +3,8 @@ using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.ModelCreation
 using SegregatedVMSSolver.BoundaryConditions
 using SegregatedVMSSolver.SpaceConditions
+using SegregatedVMSSolver.SolveProblem
+
 
 function main(simcase::SimulationCase,backend::Function)
     #check(simcase)
@@ -26,7 +28,7 @@ return true
 end
 
 
-function run_function(simcase,distribute)
+function run_function(simcase::SimulationCase,distribute)
     params = Dict{Symbol,Any}()
     rank_partition,order = get_field(simcase,[:rank_partition,:order])
 
@@ -61,6 +63,10 @@ function run_function(simcase,distribute)
     :tests => tests)
     merge!(params, new_dict)
     
+    solve_case(params,simcase)
 
-    # solve_case(params,simcase)
+
 end
+
+
+

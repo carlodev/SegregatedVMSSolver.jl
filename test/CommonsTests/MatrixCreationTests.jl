@@ -7,6 +7,7 @@ using PartitionedArrays, SparseArrays
 using Gridap, GridapDistributed
 using Gridap:FESpaces
 
+using SegregatedVMSSolver.MatrixCreation
 
 
 function test_matrix(rank_partition,distribute,D)
@@ -33,8 +34,8 @@ Au(u, v) = ∫(ν * ∇(v) ⊙ ∇(u) )dΩ
 MAu = get_matrix(AffineFEOperator(Au,rhs,U,V))
 @test typeof(MAu) <: PSparseMatrix
 
-Mat_inv = allocate_Mat_inv_ML(MAu)
-SegregatedVMSSolver.inv_lump_vel_mass!(Mat_inv, MAu)
+Mat_inv = SegregatedVMSSolver.MatrixCreation.allocate_Mat_inv_ML(MAu)
+SegregatedVMSSolver.MatrixCreation.inv_lump_vel_mass!(Mat_inv, MAu)
 
 @test typeof(Mat_inv)<:PVector
 

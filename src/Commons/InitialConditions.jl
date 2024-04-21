@@ -1,22 +1,24 @@
 module InitialConditions
 using Parameters
 using Gridap
+using GridapDistributed
+using PartitionedArrays
 using CSV
 using DataFrames
 
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.Restart
+using SegregatedVMSSolver.ExportUtility
 
 export create_initial_conditions
 
 
-create_search_tree
 """
   create_initial_conditions(simcase::SimulationCase)
 
 It creates the initial conditions for velocity and pressure. If `restart` is `true` then the velocity and the pressure field are interpoled on the specified DataFrame.  
 """
-function create_initial_conditions(simcase::VelocityBoundary,params::Dict{Symbol,Any})
+function create_initial_conditions(simcase::VelocityBoundaryCase,params::Dict{Symbol,Any})
     @unpack U,P = params
 
     restart,D,t0 =  get_field(simcase,[:restart,:D,:t0])
@@ -35,6 +37,7 @@ function create_initial_conditions(simcase::VelocityBoundary,params::Dict{Symbol
         ph0 = interpolate_everywhere(ph_0, P(t0))
     end
 
+    print_initial_conditions((uh0,ph0,uh0,uh0,ph0), simcase,params)
 
     return uh0,ph0
 end
@@ -47,7 +50,20 @@ function create_initial_conditions(simcase::TaylorGreen,params::Dict{Symbol,Any}
 
     uh0 = interpolate_everywhere(analyticalsol.velocity, U(t0))
     ph0 = interpolate_everywhere(analyticalsol.pressure, P(t0))
+    print_initial_conditions((uh0,ph0), simcase,params)
     return uh0,ph0
+end
+
+function print_initial_conditions(fields, simcase::SimulationCase,params::Dict{Symbol,Any})
+    if simcase.simulationp.exportp.printinitial
+      save_sim_dir = simcase.simulationp.exportp.save_sim_dir
+      case = typeof(simcase)
+      @unpack Ω = params
+
+      save_path = joinpath(save_sim_dir,"InitialCondition_$(case)_.vtu")
+      
+      writesolution(simcase, Ω, save_path,0.0, fields)
+    end
 end
 
 

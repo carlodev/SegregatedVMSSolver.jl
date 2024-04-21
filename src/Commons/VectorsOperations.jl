@@ -1,3 +1,21 @@
+module VectorsOperations
+
+using Gridap
+using GridapDistributed
+using PartitionedArrays
+using SparseArrays
+using Parameters
+using SegregatedVMSSolver
+using SegregatedVMSSolver.ParametersDef
+
+export create_ũ_vector
+export update_ũ_vector!
+export update_ũ
+export pazeros
+export set_zeros!
+export update_time_average!
+
+
 
 """
   create_ũ_vector(zfv1::AbstractVector)
@@ -50,40 +68,48 @@ function  pazeros(a::PVector)
   PartitionedArrays.pzeros(a.index_partition)
 end
 
+"""
+    set_zeros!(fields::DebugArray)
 
-function Base.println(d::Dict)
-  for k in keys(d)
-    if k !== :restart_df
-    kval = d[k]
-    println("$k = $kval")
-    end
+Set zeros as free values for a field
+"""
+function set_zeros!(fields::DebugArray)
+  for a in fields.items
+    a.free_values .= 0.0
   end
 end
 
 
-function DataFrames.haskey(df::DataFrame,s::Symbol)
-  
-  if sum(DataFrames.propertynames(df) .== s)>0
-        return true
-  else
-        return false
-  end
-
+function set_zeros!(fields::MPIArray)
+    fields.item.free_values .= 0.0
 end
 
-function update_time_average!(uh_tn,ph_tn, uh_avg, ph_avg, tn, params)
-  @unpack time_step, time_window= params
-  if !isnothing(time_window)
-    tw0 = time_window[1]
-    twf = time_window[2]
+
+# function Base.println(d::Dict)
+#   for k in keys(d)
+#     if k !== :restart_df
+#     kval = d[k]
+#     println("$k = $kval")
+#     end
+#   end
+# end
+
+
+
+
+function update_time_average!(uh_tn,ph_tn, uh_avg, ph_avg, tn::Float64, time_step::Vector{Float64}, timep::TimeParameters)
+
+  if timep.time_average
+
+    tw0 = timep.time_window[1]
+    twf = timep.time_window[2]
     if tw0<=tn<=twf
     
-    tsc=collect(time_step)
-    first_time_step = findfirst(x->x==tw0,tsc)
-    last_time_step = findfirst(x->x==twf,tsc)
+    first_time_step = findfirst(x->x==tw0,time_step)
+    last_time_step = findfirst(x->x==twf,time_step)
     
     Ntimes = last_time_step-first_time_step+1
-    println("updating time average")
+    @info "updating time average"
 
     update_avg_dofs!(deepcopy(uh_tn), uh_avg, Ntimes)
     update_avg_dofs!(deepcopy(ph_tn), ph_avg, Ntimes)
@@ -96,20 +122,20 @@ end
 
 
 function update_avg_dofs!(f_tn, f_avg, N)
-  println("updates fields")
   update_avg_dofs!(f_tn.fields,  f_avg.fields, N)
 end
 
 function update_avg_dofs!(fields_tn::MPIArray, fields_avg::MPIArray, N)
-  println("updates fields")
   fields_avg.item.free_values .+= fields_tn.item.free_values ./N
 end
 
 
 function update_avg_dofs!(fields_tn::DebugArray, fields_avg::DebugArray, N)
-  println("updates fields")
   for (ff_tn, ff_avg) in zip(fields_tn,fields_avg)
     ff_avg.free_values .+= ff_tn.free_values ./N
   end
 
 end
+
+
+end #end module
