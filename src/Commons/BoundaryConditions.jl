@@ -14,7 +14,7 @@ include("AnalyticalSolution.jl")
 export create_boundary_conditions
 
 function boundary_velocities(simcase::VelocityBoundaryCase)
-    D, u_in, t_endramp = get_field(simcase,[:D, :u_in, :t_endramp])
+    @sunpack D, u_in, t_endramp = simcase
    
 
     """ No ramp

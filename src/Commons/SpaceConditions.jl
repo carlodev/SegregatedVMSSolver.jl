@@ -11,7 +11,7 @@ function creation_fe_spaces(simcase::TaylorGreen, model, boundary_conditions)
 
     u_diri_tags,u_diri_values,p_diri_tags,p_diri_values = boundary_conditions
 
-    D,order = get_field(simcase,[:D,:order])
+    @sunpack D,order = simcase
     reffeᵤ = ReferenceFE(lagrangian, VectorValue{D, Float64}, order)
     reffeₚ = ReferenceFE(lagrangian, Float64, order)
 
@@ -33,7 +33,7 @@ end
 function creation_fe_spaces(simcase::VelocityBoundaryCase, model, boundary_conditions)
 
     u_diri_tags,u_diri_values,p_diri_tags,p_diri_values = boundary_conditions
-    D,order = get_field(simcase,[:D,:order])
+    @sunpack D,order = simcase
 
     reffeᵤ = ReferenceFE(lagrangian, VectorValue{D,Float64}, order)
     reffeₚ = ReferenceFE(lagrangian, Float64, order)

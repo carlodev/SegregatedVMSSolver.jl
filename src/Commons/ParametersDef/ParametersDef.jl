@@ -12,15 +12,16 @@ export Cylinder
 export TaylorGreen
 export LidDriven
 export VelocityBoundaryCase
+
 export printstructure
-export get_field
+export sunpack
+
+export UserParameters
 
 export TimeParameters
 export PhysicalParameters
 export SolverParameters
-export MeshParameters
-export CartesianMeshParams
-export GmshMeshParams
+export MeshInfo
 export ExportParameters
 export RestartParameters
 

@@ -10,7 +10,7 @@ end
 
 function compute_stab_coeff(simcase::SimulationCase,params::Dict{Symbol,Any})
     @unpack Ω = params
-    D,coeff_method = get_field(simcase,[:D,:coeff_method])
+    @sunpack D,coeff_method =simcase
     compute_stab_coeff(coeff_method,Ω,D)
 end
 
@@ -27,7 +27,7 @@ function momentum_stabilization(uu, stab_coeff::TensorStabilization,simcase::Sim
     @unpack sprob = simcase
     @unpack Ci = sprob.coeff_method
     
-    ν,dt = get_field(simcase,  [:ν,:dt])
+    @sunpack ν,dt = simcase
 
     function τm(uu, G, GG)
         τ₁ = Ci[1] * (2 / dt)^2 #Here, you can increse the 2 if CFL high
@@ -76,7 +76,7 @@ function momentum_stabilization(uu, stab_coeff::ScalarStabilization,simcase::Sim
     @unpack sprob = simcase
     @unpack r = sprob.coeff_method
 
-    ν,dt = get_field(simcase,  [:ν,:dt])
+    @sunpack ν,dt = simcase
 
     function τsu(u, h)
         τ₂ = h^2 / (4 * ν)

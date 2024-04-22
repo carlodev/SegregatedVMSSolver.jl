@@ -1,55 +1,40 @@
 abstract type UserParameters end
 abstract type MeshInfo <: UserParameters end
 
-struct TimeParameters <: UserParameters
-    t0::Float64
+@with_kw struct TimeParameters <: UserParameters
+    t0::Float64 = 0.0
     dt::Float64
     tF::Float64
-    t_endramp::Float64
-    time_average::Bool
-    time_window::Tuple{Float64,Float64}
-end
-
-
-function TimeParameters(t0::Float64,dt::Float64,tF::Float64,time_window::Tuple{Float64,Float64})
-    @assert tF>t0
-    TimeParameters(t0,dt,tF,t0,true,time_window)
-end
-
-function TimeParameters(t0::Float64,dt::Float64,tF::Float64,t_endramp::Float64)
-    @assert tF>t0
-    time_window = (t0,t0)
-    TimeParameters(t0,dt,tF,t_endramp,false,time_window)
+    t_endramp::Float64 = t0
+    time_window::Tuple{Float64,Float64} = (t0,t0)
+    time_average::Bool = (time_window[1]==time_window[2]) ? false : true
+    @assert t0<tF "t0 = $t0, tF = $tF, condition t0<tF not satisfied"
+    @assert time_window[1] >= t0 && time_window[2] <= tF "time_window exceeds time limits: t0 = $t0, tF = $tF, time_window=$(time_window)"
+    @assert t0<=t_endramp<tF "$(t_endramp) not valid"
 end
 
 function TimeParameters(t0::Float64,dt::Float64,tF::Float64)
-    TimeParameters(t0,dt,tF,t0)
+    TimeParameters(t0=t0,dt=dt,tF=tF)
 end
 
 
-struct PhysicalParameters <: UserParameters
+@with_kw struct PhysicalParameters <: UserParameters
     Re::Int64
-    ν::Float64
-    u_in::Float64
-    c::Float64
+    u_in::Float64=1.0
+    c::Float64=1.0
+    ν::Float64=(c*u_in)/Re
+    # @info "Viscosity set ν = $ν"
 end
 
-function PhysicalParameters(;Re::Int64,c=1.0, u_in=1.0)
-    ν = (c*u_in)/Re
-    PhysicalParameters(Re,ν,u_in,c)
+
+@with_kw struct SolverParameters <: UserParameters
+    θ::Float64=0.5
+    petsc_options::String=petsc_options_default()
+    matrix_freq_update::Int64=20
+    a_err_threshold::Int64=200
+    M::Int64=20
 end
 
-struct SolverParameters <: UserParameters
-    θ::Float64
-    petsc_options::String
-    matrix_freq_update::Int64
-    a_err_threshold::Int64
-    M::Int64
-end
-
-function SolverParameters(;θ=0.5, petsc_options=petsc_options_default(),matrix_freq_update=20,a_err_threshold=200, M=20 )
-    SolverParameters(θ, petsc_options,matrix_freq_update,a_err_threshold, M )
-end
 
 struct MeshParameters{T<:MeshInfo} <: UserParameters
     rank_partition::Tuple
@@ -89,40 +74,25 @@ function MeshParameters(rank_partition::Union{Int64,Tuple}, D::Int64, filename::
 end
 
 
-struct ExportParameters <: UserParameters
-    printmodel::Bool
-    printinitial::Bool
-    benchmark::Bool
-    log_dir::String
-    save_sim_dir::String
-    export_field::Bool
-    name_tags::Vector{String}
-    fieldexport::Vector{Vector{String}}
-end
-
-function ExportParameters(;printmodel=true,printinitial=true, benchmark=false,
-                            log_dir="Log",  save_sim_dir="Results_vtu",name_tags=[""],fieldexport=[[""]])
-    export_field = true
-    if isempty(name_tags[1])
-        export_field = false
-
-    end
-
-    return ExportParameters(printmodel,printinitial,benchmark,log_dir,save_sim_dir,export_field,name_tags,fieldexport)
+@with_kw struct ExportParameters <: UserParameters
+    printmodel::Bool=true
+    printinitial::Bool=true
+    benchmark::Bool=false
+    log_dir::String="Log"
+    save_sim_dir::String="Results_vtu"
+    name_tags::Vector{String}=[""]
+    fieldexport::Vector{Vector{String}}=[[""]]
+    export_field::Bool = (isempty(name_tags[1])) ? false : true
+    @assert length(name_tags) == length(fieldexport)
 end
 
 
-struct RestartParameters <: UserParameters
-    restart::Bool
-    restartfile::String
+@with_kw struct RestartParameters <: UserParameters
+    restartfile::String = ""
+    restart::Bool= (isempty(restartfile)) ? false : true
 end
 
-function RestartParameters()
-    RestartParameters(false, " ")
-end
 
-function RestartParameters(rfile::String)
-    RestartParameters(true, rfile)
-end
+
 
 

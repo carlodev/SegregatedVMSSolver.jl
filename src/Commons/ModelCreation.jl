@@ -99,7 +99,7 @@ end
 It prints the model mesh
 """
 function print_model(model,simcase::SimulationCase)
-  printmodel = get_field(simcase, :printmodel)
+  @sunpack printmodel = simcase
   if printmodel
       writevtk(model,"$(typeof(simcase))")
   end

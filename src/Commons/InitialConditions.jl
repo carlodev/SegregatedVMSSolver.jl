@@ -21,14 +21,14 @@ It creates the initial conditions for velocity and pressure. If `restart` is `tr
 function create_initial_conditions(simcase::VelocityBoundaryCase,params::Dict{Symbol,Any})
     @unpack U,P = params
 
-    restart,D,t0 =  get_field(simcase,[:restart,:D,:t0])
+    @sunapck restart,D,t0 = simcase
 
     uh0v = VectorValue(zeros(D)...)
     uh0 = interpolate_everywhere(uh0v, U(t0))
     ph0 = interpolate_everywhere(0.0, P(t0))
 
     if restart
-        restartfile = get_field(simcase,:restartfile)
+        @sunpack restartfile =simcase
         restart_df = DataFrame(CSV.File(restartfile))
         tree = create_search_tree(params,restart_df)
         uh_0 = restart_uh_field(D,tree,restart_df)
@@ -47,7 +47,7 @@ end
 function create_initial_conditions(simcase::TaylorGreen,params::Dict{Symbol,Any})
     @unpack U,P = params
     @unpack analyticalsol = simcase
-    t0 =  get_field(simcase,:t0)
+    @sunapck t0 =  simcase
 
     uh0 = interpolate(analyticalsol[:velocity](t0), U(t0))
     ph0 = interpolate(analyticalsol[:pressure](t0), P(t0))

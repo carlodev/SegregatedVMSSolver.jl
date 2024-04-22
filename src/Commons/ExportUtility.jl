@@ -247,7 +247,7 @@ end
 
 
 function export_fields(params,simcase,tt,uh0,ph0)
-    export_field, fieldexport = get_field(simcase.simulationp.exportp, [:export_field, :fieldexport])
+    @sunpack export_field, fieldexport = simcase.simulationp.exportp
     if export_field
         export_fields(params::Dict{Symbol,Any}, fieldexport, tt::Float64, uh0, ph0)
     end
@@ -321,8 +321,8 @@ function rotation(n::VectorValue{3,Float64})
 end
 
 function initialize_export_nodes(params::Dict{Symbol,Any}, simcase::SimulationCase)
-    export_field, name_tags = get_field(simcase.simulationp.exportp, [:export_field, :name_tags])
-    D = get_field(simcase, :D)
+    @sunpack export_field, name_tags = simcase.simulationp.exportp
+    @sunpack D = simcase
     if export_field
         create_export_tags!(params, name_tags)
         get_local_unique_idx(params)

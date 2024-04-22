@@ -30,7 +30,7 @@ end
 
 function run_function(simcase::SimulationCase,distribute)
     params = Dict{Symbol,Any}()
-    rank_partition,order = get_field(simcase,[:rank_partition,:order])
+    @sunpack rank_partition,order = simcase
 
     parts  = distribute(LinearIndices((prod(rank_partition),)))
 

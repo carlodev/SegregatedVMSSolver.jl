@@ -22,7 +22,7 @@ function test_equations(rank_partition, distribute, D)
 
     TestCase,mesh_file = first(iterate_test_cases(D))
     simcase = create_simulation_test(TestCase, D; meshfile = mesh_file)
-    order = get_field(simcase,:order)
+    @sunpack order = simcase
 
         model = create_model(parts, simcase)
     

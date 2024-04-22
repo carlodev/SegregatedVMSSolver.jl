@@ -21,9 +21,10 @@ rank_partition = (2,2)
 # mesh_file = joinpath(@__DIR__, "..", "models", "DU89_2D_A1_M.msh")
 
 sprob = StabilizedProblem(VMS(1))
-timep = TimeParameters(t0,dt,tF,t_endramp)
+timep = TimeParameters(t0=t0,dt=dt,tF=tF)
+
 physicalp = PhysicalParameters(Re=Re)
-solverp = SolverParameters(petsc_options=" ")
+solverp = SolverParameters(petsc_options="")
 exportp = ExportParameters(printinitial=false)
 
 meshp= MeshParameters(rank_partition,D; N=50,L=0.5)

@@ -22,7 +22,7 @@ function initialize_solve(simcase::SimulationCase,params::Dict{Symbol,Any})
   @unpack trials,tests = params
   U,P = trials
 
-  t0,dt,save_sim_dir = get_field(simcase,[:t0,:dt,:save_sim_dir])
+  @sunpack t0,dt,save_sim_dir = simcase
 
   uh0, ph0 = create_initial_conditions(simcase,params)
   @info "Initial Conditions Created"
@@ -54,9 +54,8 @@ function solve_case(params::Dict{Symbol,Any},simcase::SimulationCase)
   @unpack trials,tests = params
   U,P = trials
 
-t0,dt,tF =  get_field(simcase.simulationp.timep,[:t0,:dt,:tF])
-petsc_options,matrix_freq_update,M,a_err_threshold,θ =  get_field(simcase.simulationp.solverp,[:petsc_options,:matrix_freq_update,:M,:a_err_threshold,:θ])
-
+@sunpack t0,dt,tF =  simcase.simulationp.timep
+@sunpack petsc_options,matrix_freq_update,M,a_err_threshold,θ = simcase.simulationp.solverp
 time_step = collect(t0+dt:dt:tF)
 
 init_values = initialize_solve(simcase,params)

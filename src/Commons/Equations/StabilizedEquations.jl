@@ -12,7 +12,7 @@ val(x::Gridap.Fields.ForwardDiff.Dual) = x.value
 
 
 function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::SimulationCase)
-  skew, ν,dt, θ = get_field(simcase,[:skew,:ν,:dt,:θ])
+  @sunapck skew, ν,dt, θ = simcase
   
   sprob = simcase.sprob
   @unpack dΩ = params

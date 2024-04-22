@@ -48,7 +48,9 @@ end
 VelocityBoundaryCase = Union{Airfoil,WindTunnel,Cylinder, LidDriven}
 
 
-MyStructurePrint = Union{SimulationCase,StabilizedProblem,SimulationParameters,UserParameters,MeshInfo,StabilizationMethod,StabilizationFormulation}
+MyStructurePrint = Union{SimulationCase,StabilizedProblem,SimulationParameters,
+                        UserParameters,MeshInfo, StabilizationMethod,StabilizationFormulation}
+
 
 function printstructure(s::MyStructurePrint)
     fnames = fieldnames(typeof(s))
@@ -68,33 +70,40 @@ end
 Base.show(io::IO,s::MyStructurePrint) = printstructure(s)
 
 
-function get_field(s::MyStructurePrint,f::Symbol)
-    flag, val = search_field(s::MyStructurePrint,f::Symbol, false, nothing)
-    if flag==false
-        @error "field $f not found in $s"
-    else
-        return val
+macro sunpack(args)
+    args.head!=:(=) && error("Expression needs to be of form `a, b = c`")
+    items, suitecase = args.args
+    
+    items = isa(items, Symbol) ? [items] : items.args
+    kd = Vector{Expr}(undef, length(items))
+    for (i,key) in enumerate(items)
+        kd[i] = quote
+            flag, val = search_field($suitecase, Val{$(Expr(:quote, key))}(), false, nothing)
+            $key = val
+        end
+    
     end
+    kdblock = Expr(:block, kd...)
+    esc(kdblock)
 end
 
-function get_field(s::MyStructurePrint,fv::Vector{Symbol})
-    return map(f->get_field(s,f),fv)
-end
 
-function search_field(s::MyStructurePrint,f::Symbol, flag::Bool, a)
+
+function search_field(s::MyStructurePrint, ::Val{f}, flag::Bool, a) where {f}
     fnames = fieldnames(typeof(s))
-
+    println(typeof(s))
     i = 1 
     while i<= length(fnames) && !flag
         fn = fnames[i]
 
         fnfield = getfield(s,fn)
         fnfield_type = typeof(fnfield) <: MyStructurePrint
+
         if f == fn
             flag= true
             a = fnfield
         elseif fnfield_type
-            flag, a = search_field(fnfield,f, flag, a)
+            flag, a = search_mfield(fnfield, Val{f}(), flag, a)
         end
 
         i = i+1
