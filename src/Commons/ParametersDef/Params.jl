@@ -16,11 +16,16 @@ function TimeParameters(t0::Float64,dt::Float64,tF::Float64,time_window::Tuple{F
     TimeParameters(t0,dt,tF,t0,true,time_window)
 end
 
-function TimeParameters(t0::Float64,dt::Float64,tF::Float64)
+function TimeParameters(t0::Float64,dt::Float64,tF::Float64,t_endramp::Float64)
     @assert tF>t0
     time_window = (t0,t0)
-    TimeParameters(t0,dt,tF,t0,false,time_window)
+    TimeParameters(t0,dt,tF,t_endramp,false,time_window)
 end
+
+function TimeParameters(t0::Float64,dt::Float64,tF::Float64)
+    TimeParameters(t0,dt,tF,t0)
+end
+
 
 struct PhysicalParameters <: UserParameters
     Re::Int64
@@ -30,7 +35,7 @@ struct PhysicalParameters <: UserParameters
 end
 
 function PhysicalParameters(;Re::Int64,c=1.0, u_in=1.0)
-    ν = Re / (c*u_in)
+    ν = (c*u_in)/Re
     PhysicalParameters(Re,ν,u_in,c)
 end
 

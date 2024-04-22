@@ -56,7 +56,7 @@ petsc_options
 allocate_Mat_inv_ML
 inv_lump_vel_mass!
 initialize_vectors
-matrices_and_vectors 
+compute_matrices 
 ```
 
 ## Restart

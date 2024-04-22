@@ -1,3 +1,6 @@
+
+using Gridap
+
 """
   analytical_solution(diameter::Int64, Vs::Float64, Ua::Float64, Va::Float64, ν::Float64) 
 

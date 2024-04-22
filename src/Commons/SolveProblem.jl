@@ -27,7 +27,7 @@ function initialize_solve(simcase::SimulationCase,params::Dict{Symbol,Any})
   uh0, ph0 = create_initial_conditions(simcase,params)
   @info "Initial Conditions Created"
 
-  matrices = initialize_matrices_and_vectors(trials,tests, t0+dt, uh0, params,simcase)
+  matrices = initialize_matrices(trials,tests, t0+dt, uh0, params,simcase)
   vectors = initialize_vectors(matrices,uh0,ph0)
 
   initialize_export_nodes(params, simcase)
@@ -66,6 +66,7 @@ matrices, vectors, (uh_avg,ph_avg) =  init_values
 
 GridapPETSc.with(args=split(petsc_options)) do
 
+
 Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
   Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices
 
@@ -85,7 +86,11 @@ for (ntime,tn) in enumerate(time_step)
     
         @time begin
          Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
-          Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices_and_vectors(trials, tests, tn+dt, uh_tn_updt, params)
+          Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = compute_matrices(trials, tests, tn+dt, uh_tn_updt, params,simcase)
+         
+          matrices = ( Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
+          Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap)
+
         end
 
         println("update numerical set up")
@@ -109,7 +114,6 @@ for (ntime,tn) in enumerate(time_step)
         err_norm_Δa0 = 1
         err_norm_Δp0 = 1
 
-
         
       while (m<= M) && (err_norm_Δa0<a_err_threshold)
 
@@ -117,13 +121,17 @@ for (ntime,tn) in enumerate(time_step)
         Δa_star .= pazeros(Mat_ML)
 
         vectors = (vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector)
-        println(norm(Δa_star))
-        solve_velocity!(ns1,matrices,vectors,θ,dt)
-        println(norm(Δa_star))
+        println("norm um = $(norm(vec_um))")
+        println("norm pm = $(norm(vec_pm))")
+        println("norm da = $(norm(Δa))")
+        println("norm am = $(norm(vec_am))")
 
-        solve_pressure!(ns2,matrices,vectors,θ,dt)
+        solve_velocity!(ns1,matrices,vectors,dt,θ)
+
+        solve_pressure!(ns2,matrices,vectors,dt,θ)
       
         Δpm1 = GridapDistributed.change_ghost(Δpm1, Mat_Aup)
+        println("norm pm1 = $(norm(Δpm1))")
 
         Δa .= Δa_star - θ .* Mat_inv_ML .* (Mat_Aup * Δpm1)
 
@@ -136,11 +144,9 @@ for (ntime,tn) in enumerate(time_step)
           vec_am .= Δa
           norm_Δa0 = norm(Δa)
           norm_Δp0 = norm(Δpm1)
-
         else
           vec_sum_pm .+= Δpm1
           vec_am .+= Δa
-
         end
         
         err_norm_Δa0 = norm_Δa0/norm(Δa)
@@ -204,8 +210,6 @@ end
 function solve_pressure!(ns2, matrices, vectors, dt::Float64, θ::Float64)
   Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices
   vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector = vectors
-        println("norm da star in pres")
-        println(norm(Δa_star))
 
   vec_um = GridapDistributed.change_ghost(vec_um, Mat_Apu)
   vec_pm = GridapDistributed.change_ghost(vec_pm, Mat_App)

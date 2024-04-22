@@ -393,9 +393,9 @@ function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime:
   
   
   function writesolution(simcase::TaylorGreen, Ω, save_path,tn::Float64, fields::Tuple)
-    u0 = simcase.analyticalsol.velocity
-    p0 = simcase.analyticalsol.pressure
-    uh,ph,_,_ ,_= fields
+    u0 = simcase.analyticalsol[:velocity]
+    p0 = simcase.analyticalsol[:pressure]
+    uh,ph= fields
     writevtk(Ω, save_path, cellfields = ["uh" => uh, "uh_analytic"=> u0(tn), "ph" => ph, "ph_analytic"=> p0(tn)])
   end
   

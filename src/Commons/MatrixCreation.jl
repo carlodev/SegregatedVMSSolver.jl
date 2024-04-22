@@ -12,8 +12,8 @@ using SegregatedVMSSolver.Equations
 using SegregatedVMSSolver.VectorsOperations
 
 export initialize_vectors
-export initialize_matrices_and_vectors
-export matrices_and_vectors
+export initialize_matrices
+export compute_matrices
 
 """
   allocate_Mat_inv_ML(Mat_ML::PSparseMatrix) 
@@ -93,17 +93,17 @@ end
 
 
 
-function initialize_matrices_and_vectors(trials,tests, t::Real, u_adv, params,simcase)
-  return matrices_and_vectors(trials, tests, t::Real, u_adv, params,simcase)
+function initialize_matrices(trials,tests, t::Real, u_adv, params,simcase)
+  return compute_matrices(trials, tests, t::Real, u_adv, params,simcase)
 end
 
 
 """
-  matrices_and_vectors(trials, tests, t::Real, u_adv, params,simcase)
+  compute_matrices(trials, tests, t::Real, u_adv, params,simcase)
 
 It updates matrices and vectors
 """
-function matrices_and_vectors(trials, tests, t::Real, u_adv, params,simcase)
+function compute_matrices(trials, tests, t::Real, u_adv, params,simcase)
 
   Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs =  segregated_equations(u_adv,params,simcase)
 
