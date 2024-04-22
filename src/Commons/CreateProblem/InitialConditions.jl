@@ -1,18 +1,3 @@
-module InitialConditions
-using Parameters
-using Gridap
-using GridapDistributed
-using PartitionedArrays
-using CSV
-using DataFrames
-
-using SegregatedVMSSolver.ParametersDef
-using SegregatedVMSSolver.Restart
-using SegregatedVMSSolver.ExportUtility
-
-export create_initial_conditions
-
-
 """
   create_initial_conditions(simcase::SimulationCase)
 
@@ -66,7 +51,3 @@ function print_initial_conditions(fields, simcase::SimulationCase,params::Dict{S
       writesolution(simcase, Ω, save_path,0.0, fields)
     end
 end
-
-
-
-end #end module

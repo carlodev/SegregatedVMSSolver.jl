@@ -1,10 +1,8 @@
 
 using SegregatedVMSSolver.ParametersDef
-using SegregatedVMSSolver.ModelCreation
-using SegregatedVMSSolver.BoundaryConditions
-using SegregatedVMSSolver.SpaceConditions
+using SegregatedVMSSolver.CreateProblem
 using SegregatedVMSSolver.SolveProblem
-
+using PartitionedArrays, Gridap, GridapDistributed
 
 function main(simcase::SimulationCase,backend::Function)
     #check(simcase)
@@ -20,7 +18,7 @@ function main(simcase::SimulationCase,backend::Function)
            
         end
 
-        run_function(simcase,distribute)
+        run_case(simcase,distribute)
     end
 
 return true
@@ -28,7 +26,7 @@ return true
 end
 
 
-function run_function(simcase::SimulationCase,distribute)
+function run_case(simcase::SimulationCase,distribute)
     params = Dict{Symbol,Any}()
     @sunpack rank_partition,order = simcase
 

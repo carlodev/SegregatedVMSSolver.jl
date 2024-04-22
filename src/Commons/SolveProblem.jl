@@ -8,7 +8,7 @@ using Parameters
 
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
-using SegregatedVMSSolver.InitialConditions
+using SegregatedVMSSolver.CreateProblem
 using SegregatedVMSSolver.MatrixCreation
 using SegregatedVMSSolver.VectorsOperations
 using SegregatedVMSSolver.ExportUtility

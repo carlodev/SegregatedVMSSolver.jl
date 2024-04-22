@@ -4,7 +4,12 @@ using GridapDistributed
 using Parameters
 using FillArrays
 using LinearAlgebra
+using PartitionedArrays
+
 using Gridap.CellData
+using Gridap.Arrays
+using Gridap.CellData
+using GridapDistributed: Algebra
 
 using SegregatedVMSSolver.ParametersDef
 

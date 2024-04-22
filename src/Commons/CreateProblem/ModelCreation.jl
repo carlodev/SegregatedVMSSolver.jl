@@ -1,14 +1,3 @@
-module ModelCreation
-
-using Gridap
-using GridapGmsh
-using PartitionedArrays
-using SegregatedVMSSolver.ParametersDef
-using SegregatedVMSSolver.AddNewTags
-
-export create_model
-
-
 function create_model(parts, simcase::VelocityBoundaryCase)
     mesh = simcase.meshp
     model = create_model(parts, mesh.meshinfo, mesh.D, mesh.rank_partition)
@@ -105,5 +94,3 @@ function print_model(model,simcase::SimulationCase)
   end
 end
 
-
-end

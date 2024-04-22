@@ -7,6 +7,7 @@ using Parameters
 using SegregatedVMSSolver
 using SegregatedVMSSolver.ParametersDef
 
+
 ### test
 t0 =0.0
 dt = 0.1
@@ -20,7 +21,7 @@ rank_partition = (2,2)
 
 # mesh_file = joinpath(@__DIR__, "..", "models", "DU89_2D_A1_M.msh")
 
-sprob = StabilizedProblem(VMS(1))
+sprob = StabilizedProblem(SUPG())
 timep = TimeParameters(t0=t0,dt=dt,tF=tF)
 
 physicalp = PhysicalParameters(Re=Re)
@@ -37,7 +38,6 @@ mcase = LidDriven(meshp,simparams,sprob)
 using SegregatedVMSSolver
 
 SegregatedVMSSolver.main(mcase,with_debug)
-
 
 
 

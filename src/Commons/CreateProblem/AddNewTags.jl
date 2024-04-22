@@ -1,16 +1,3 @@
-module AddNewTags
-using Gridap
-using GridapDistributed
-using Gridap.Arrays
-using Gridap.CellData
-
-
-export add_new_tag!
-export add_centre_tag!
-export add_SEM_tag!
-
-
-
 """
     create_new_tag!(model::GridapDistributed.DistributedDiscreteModel, tagname::String, is_tag::Function)
 
@@ -154,9 +141,3 @@ function add_SEM_tag!(model; c=1.0, a_tol = 1e-1)
 
     return model
 end
-
-
-
-
-
-end #end module

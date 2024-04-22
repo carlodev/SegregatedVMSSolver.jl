@@ -1,18 +1,3 @@
-module BoundaryConditions
-using Parameters
-
-using Gridap
-using Gridap.Arrays
-using Gridap.CellData
-
-using SegregatedVMSSolver.ParametersDef
-using SegregatedVMSSolver.AddNewTags
-
-
-include("AnalyticalSolution.jl")
-
-export create_boundary_conditions
-
 function boundary_velocities(simcase::VelocityBoundaryCase)
     @sunpack D, u_in, t_endramp = simcase
    
@@ -96,5 +81,3 @@ function create_boundary_conditions(simcase::TaylorGreen)
   p_diri_values=pressure
   return u_diri_tags,u_diri_values,p_diri_tags,p_diri_values
 end
-
-end #end module

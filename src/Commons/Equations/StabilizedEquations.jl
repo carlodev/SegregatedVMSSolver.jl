@@ -6,11 +6,6 @@ Wrapper for the convective term
 """
 cconv(u, ∇u) = (∇u') ⋅ u
 
-
-val(x) = x
-val(x::Gridap.Fields.ForwardDiff.Dual) = x.value
-
-
 function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::SimulationCase)
   @sunpack skew, ν,dt, θ = simcase
   

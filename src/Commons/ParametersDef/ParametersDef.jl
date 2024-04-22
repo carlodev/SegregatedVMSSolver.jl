@@ -40,7 +40,7 @@ export TensorFormulation
 export VMS
 export SUPG
 
-include("../AnalyticalSolution.jl")
+include("AnalyticalSolution.jl")
 
 include("Params.jl")
 include("StabilizationStruct.jl")

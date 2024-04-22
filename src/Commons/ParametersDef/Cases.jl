@@ -73,7 +73,6 @@ Base.show(io::IO,s::MyStructurePrint) = printstructure(s)
 
 function search_field(s::MyStructurePrint, ::Val{f}, flag::Bool, a) where {f}
     fnames = fieldnames(typeof(s))
-    println(typeof(s))
     i = 1 
     while i<= length(fnames) && !flag
         fn = fnames[i]

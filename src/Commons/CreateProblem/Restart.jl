@@ -1,15 +1,3 @@
-module Restart
-
-using DataFrames
-using Gridap
-using SegregatedVMSSolver.ParametersDef
-using NearestNeighbors
-
-
-export create_search_tree
-export restart_uh_field
-export restart_ph_field
-
 #For periodic case look for ghost nodes, that's the isempty function; The y direction is not periodic for the channel; look for genralization?
 
 """
@@ -83,7 +71,3 @@ function DataFrames.haskey(df::DataFrame,s::Symbol)
   end
 
 end
-
-
-end
-
