@@ -44,7 +44,7 @@ function test_restart(rank_partition, distribute, D)
     simparams = SimulationParameters(timep,physicalp,solverp,exportp,restartp)
 
     simcase = Airfoil(meshp,simparams,sprob)
-    @sunapck order = simcase
+    @sunpack order = simcase
 
         model = create_model(parts, simcase)
     
@@ -73,7 +73,7 @@ function test_restart(rank_partition, distribute, D)
         :tests => tests)
         merge!(params, new_dict)
         
-        @sunapck restartfile,D = simcase
+        @sunpack restartfile,D = simcase
         restart_df = DataFrame(CSV.File(restartfile))
 
         tree = create_search_tree(restart_df)

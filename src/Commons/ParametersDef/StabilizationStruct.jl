@@ -4,10 +4,10 @@ abstract type StabilizationFormulation end
 abstract type StabilizationParameters end
 
 
-struct StabilizedProblem{T<:StabilizationMethod,S<:StabilizationFormulation}
-    method::T
-    coeff_method::S
-    skew::Bool
+@with_kw struct StabilizedProblem{T<:StabilizationMethod,S<:StabilizationFormulation}
+    method::T = VMS()
+    coeff_method::S=TensorFormulation()
+    skew::Bool=false
 end
 
 
@@ -21,50 +21,29 @@ struct TensorStabilization <: StabilizationParameters
     gg
 end
 
-struct ScalarFormulation <: StabilizationFormulation
-    r::Int64
+@with_kw struct ScalarFormulation <: StabilizationFormulation
+    r::Int64 = 1
 end
 
-struct TensorFormulation <: StabilizationFormulation
-    r::Int64
-    Ci::Vector{Int64}
+@with_kw struct TensorFormulation <: StabilizationFormulation
+    r::Int64 = 2 
+    Ci::Vector{Int64} = [4,36]
 end
 
 
-struct VMS <: StabilizationMethod
-    order::Int64
+@with_kw struct VMS <: StabilizationMethod
+    order::Int64 = 1
 end
 
-struct SUPG <: StabilizationMethod
-    order::Int64
-end
-
-function StabilizedProblem()
-    StabilizedProblem(VMS(1))
+@with_kw struct SUPG <: StabilizationMethod
+    order::Int64 = 1
 end
 
 function StabilizedProblem(method::VMS)
     StabilizedProblem(method, TensorFormulation(), false)
 end
 
-function StabilizedProblem(method::VMS, vv::Vector{Int64})
-    StabilizedProblem(method, TensorFormulation(vv), false)
-end
-
 function StabilizedProblem(method::SUPG)
     StabilizedProblem(method, ScalarFormulation(), true)
 end
 
-
-#Default constructurs
-function TensorFormulation()
-    TensorFormulation(2,[4,36])
-end
-
-function TensorFormulation(vv::Vector{Int64})
-    TensorFormulation(2,vv)
-end
-
-function ScalarFormulation()
-    ScalarFormulation(1)
-end

@@ -1,10 +1,8 @@
+
 using SegregatedVMSSolver
 using Parameters
-
 using SegregatedVMSSolver.ParametersDef
-import SegregatedVMSSolver.ParametersDef
 
-sprob = StabilizedProblem(VMS(1))
 
 timep = TimeParameters(0.0,0.5,1.0)
 physicalp = PhysicalParameters(Re=1000)
@@ -16,4 +14,4 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 mcase = LidDriven(meshp,simparams,sprob)
 
 
-
+@sunpack D,rank_partition,order,L,θ,log_dir,order,method= mcase

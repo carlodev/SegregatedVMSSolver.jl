@@ -21,7 +21,7 @@ It creates the initial conditions for velocity and pressure. If `restart` is `tr
 function create_initial_conditions(simcase::VelocityBoundaryCase,params::Dict{Symbol,Any})
     @unpack U,P = params
 
-    @sunapck restart,D,t0 = simcase
+    @sunpack restart,D,t0 = simcase
 
     uh0v = VectorValue(zeros(D)...)
     uh0 = interpolate_everywhere(uh0v, U(t0))
@@ -47,7 +47,7 @@ end
 function create_initial_conditions(simcase::TaylorGreen,params::Dict{Symbol,Any})
     @unpack U,P = params
     @unpack analyticalsol = simcase
-    @sunapck t0 =  simcase
+    @sunpack t0 =  simcase
 
     uh0 = interpolate(analyticalsol[:velocity](t0), U(t0))
     ph0 = interpolate(analyticalsol[:pressure](t0), P(t0))

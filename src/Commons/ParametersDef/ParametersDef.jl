@@ -14,7 +14,8 @@ export LidDriven
 export VelocityBoundaryCase
 
 export printstructure
-export sunpack
+export search_field
+export @sunpack
 
 export UserParameters
 
@@ -22,6 +23,8 @@ export TimeParameters
 export PhysicalParameters
 export SolverParameters
 export MeshInfo
+export GmshMeshParams
+export CartesianMeshParams
 export ExportParameters
 export RestartParameters
 

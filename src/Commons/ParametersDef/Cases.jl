@@ -70,24 +70,6 @@ end
 Base.show(io::IO,s::MyStructurePrint) = printstructure(s)
 
 
-macro sunpack(args)
-    args.head!=:(=) && error("Expression needs to be of form `a, b = c`")
-    items, suitecase = args.args
-    
-    items = isa(items, Symbol) ? [items] : items.args
-    kd = Vector{Expr}(undef, length(items))
-    for (i,key) in enumerate(items)
-        kd[i] = quote
-            flag, val = search_field($suitecase, Val{$(Expr(:quote, key))}(), false, nothing)
-            $key = val
-        end
-    
-    end
-    kdblock = Expr(:block, kd...)
-    esc(kdblock)
-end
-
-
 
 function search_field(s::MyStructurePrint, ::Val{f}, flag::Bool, a) where {f}
     fnames = fieldnames(typeof(s))
@@ -103,7 +85,7 @@ function search_field(s::MyStructurePrint, ::Val{f}, flag::Bool, a) where {f}
             flag= true
             a = fnfield
         elseif fnfield_type
-            flag, a = search_mfield(fnfield, Val{f}(), flag, a)
+            flag, a = search_field(fnfield, Val{f}(), flag, a)
         end
 
         i = i+1
@@ -113,3 +95,19 @@ function search_field(s::MyStructurePrint, ::Val{f}, flag::Bool, a) where {f}
 end
 
 
+macro sunpack(args)
+    args.head!=:(=) && error("Expression needs to be of form `a, b = c`")
+    items, suitecase = args.args
+    items = isa(items, Symbol) ? [items] : items.args
+    kd = Vector{Expr}(undef, length(items))
+    
+    for (i,key) in enumerate(items)
+        kd[i] = quote
+            flag, val = search_field($suitecase, Val{$(Expr(:quote, key))}(), false, nothing)
+            $key = val
+        end
+    
+    end
+    kdblock = Expr(:block, kd...)
+    esc(kdblock)
+end
