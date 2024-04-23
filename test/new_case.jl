@@ -6,7 +6,7 @@ using Revise
 using Parameters
 using SegregatedVMSSolver
 using SegregatedVMSSolver.ParametersDef
-
+using MPI
 
 ### test
 t0 =0.0
@@ -16,7 +16,7 @@ t_endramp = 1.0
 
 Re = 1000
 D = 2
-backend = with_debug
+backend = with_mpi
 rank_partition = (2,2)
 
 # mesh_file = joinpath(@__DIR__, "..", "models", "DU89_2D_A1_M.msh")
@@ -37,26 +37,27 @@ mcase = LidDriven(meshp,simparams,sprob)
 
 using SegregatedVMSSolver
 
-SegregatedVMSSolver.main(mcase,with_debug)
+SegregatedVMSSolver.main(mcase,backend)
+
+
+#mpiexecjl --project=. -n 4 julia test/new_case.jl
 
 
 
 
 
 
+# timep = TimeParameters(0.0,0.01,2.5)
+# solverp = SolverParameters(petsc_options=" ", matrix_freq_update=1)
 
+# physicalp = PhysicalParameters(Re=Re)
 
-timep = TimeParameters(0.0,0.01,2.5)
-solverp = SolverParameters(petsc_options=" ", matrix_freq_update=1)
+# exportp = ExportParameters()
+# meshp= MeshParameters(rank_partition,D;N=50,L=0.5)
+# simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
-physicalp = PhysicalParameters(Re=Re)
+# mcase =TaylorGreen(meshp,simparams,sprob)
+# using SegregatedVMSSolver
 
-exportp = ExportParameters()
-meshp= MeshParameters(rank_partition,D;N=50,L=0.5)
-simparams = SimulationParameters(timep,physicalp,solverp,exportp)
-
-mcase =TaylorGreen(meshp,simparams,sprob)
-using SegregatedVMSSolver
-
-SegregatedVMSSolver.main(mcase,with_debug)
+# SegregatedVMSSolver.main(mcase,with_debug)
 

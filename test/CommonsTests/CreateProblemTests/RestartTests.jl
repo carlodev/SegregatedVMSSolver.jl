@@ -7,16 +7,14 @@ using GridapDistributed
 using PartitionedArrays
 using CSV
 using DataFrames
+using NearestNeighbors
 
+using SegregatedVMSSolver.CreateProblem
 using SegregatedVMSSolver.ParametersDef
-using SegregatedVMSSolver.ModelCreation
-using SegregatedVMSSolver.BoundaryConditions
-using SegregatedVMSSolver.SpaceConditions
-using SegregatedVMSSolver.Restart
-using SegregatedVMSSolver.InitialConditions
 
 
-include(joinpath("..","case_test.jl")) 
+
+include(joinpath("..","..","case_test.jl")) 
 
 
 function test_restart(rank_partition, distribute, D)
@@ -29,8 +27,8 @@ function test_restart(rank_partition, distribute, D)
     dt = 0.1
     tF = 1.0
     Re = 1000
-    airfoil_mesh_file = joinpath(@__DIR__, "..","..", "models", "DU89_2D_A1_M.msh")
-    airfoil_restart_file = joinpath(@__DIR__, "..", "..","restarts", "BL_DU89_2D_A1_M.csv")
+    airfoil_mesh_file = joinpath(@__DIR__, "..","..","..", "models", "DU89_2D_A1_M.msh")
+    airfoil_restart_file = joinpath(@__DIR__, "..", "..","..","restarts", "BL_DU89_2D_A1_M.csv")
 
     sprob = StabilizedProblem()
     timep = TimeParameters(t0,dt,tF)
@@ -76,9 +74,14 @@ function test_restart(rank_partition, distribute, D)
         @sunpack restartfile,D = simcase
         restart_df = DataFrame(CSV.File(restartfile))
 
-        tree = create_search_tree(restart_df)
-        restart_uh_field(D,tree,restart_df)
-        restart_ph_field(tree,restart_df)
+        tree = SegregatedVMSSolver.CreateProblem.create_search_tree(restart_df)
+        @test typeof(tree)<:BruteTree
+
+        uh = SegregatedVMSSolver.CreateProblem.restart_uh_field(D,tree,restart_df)
+        @test typeof(uh)<:Function
+
+        ph = SegregatedVMSSolver.CreateProblem.restart_ph_field(tree,restart_df)
+        @test typeof(ph)<:Function
 
 
         return true

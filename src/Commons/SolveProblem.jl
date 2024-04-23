@@ -46,7 +46,7 @@ end
 
 
 """
-  solve_case(params::Dict{Symbol,Any})
+    solve_case(params::Dict{Symbol,Any})
 
 It solves iteratively the velocity and pressure system.
 """
@@ -120,17 +120,12 @@ for (ntime,tn) in enumerate(time_step)
         Δa_star .= pazeros(Mat_ML)
 
         vectors = (vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector)
-        println("norm um = $(norm(vec_um))")
-        println("norm pm = $(norm(vec_pm))")
-        println("norm da = $(norm(Δa))")
-        println("norm am = $(norm(vec_am))")
 
         solve_velocity!(ns1,matrices,vectors,dt,θ)
 
         solve_pressure!(ns2,matrices,vectors,dt,θ)
       
         Δpm1 = GridapDistributed.change_ghost(Δpm1, Mat_Aup)
-        println("norm pm1 = $(norm(Δpm1))")
 
         Δa .= Δa_star - θ .* Mat_inv_ML .* (Mat_Aup * Δpm1)
 

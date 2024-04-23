@@ -1,5 +1,5 @@
 """
-  h_param(Ω::Triangulation, D::Int64)
+    h_param(Ω::Triangulation, D::Int64)
 
 For a given triangulation `Ω` it computes the cell size
 ``Area^{1/2}, D=2``
@@ -19,7 +19,7 @@ function h_param(Ω::GridapDistributed.DistributedTriangulation, D::Int64)
 end
 
 """
-  G_params(Ω::Triangulation, D)
+    G_params(Ω::Triangulation, D)
 
 Compute the tensor G and the values GG and gg according to the VMS formulation proposed by [Bazilevs2007](@cite) 
 """
@@ -48,7 +48,7 @@ function G_params(Ω::GridapDistributed.DistributedTriangulation, D::Int64)
   end
 
 """
-  compute_d(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64) #trian == Ω
+    compute_d(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64) #trian == Ω
 
 The inverse of the cell-map-field. It is evaluted in the middle of the refernce domain.
 """
@@ -66,7 +66,7 @@ The inverse of the cell-map-field. It is evaluted in the middle of the refernce 
   end
 
 """
-  compute_G(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64)
+    compute_G(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64)
 
 Compute G (AbstractArray of TensorValues)
 """
@@ -78,7 +78,7 @@ Compute G (AbstractArray of TensorValues)
   end
 
 """
-  compute_GG(trian::Gridap.Geometry.BodyFittedTriangulation, params)
+    compute_GG(trian::Gridap.Geometry.BodyFittedTriangulation, params)
 
 Compute GG 
 """
@@ -99,7 +99,7 @@ function gg_operation(d::TensorValue)
 end
 
 """
-  compute_GG(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64)
+    compute_GG(trian::Gridap.Geometry.BodyFittedTriangulation, D::Int64)
 
 Compute gg 
 """ 

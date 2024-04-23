@@ -18,7 +18,7 @@ export update_time_average!
 
 
 """
-  create_ũ_vector(zfv1::AbstractVector)
+    create_ũ_vector(zfv1::AbstractVector)
 
 It allocates the vector to keep in memory the velocity field up to previous 4 time steps
 """
@@ -28,7 +28,7 @@ end
 
 
 """
-  update_ũ_vector!(ũ_vec::Vector, uh_new::AbstractVector)
+    update_ũ_vector!(ũ_vec::Vector, uh_new::AbstractVector)
 
 It updates the vector which stores the values of velocity at previous time steps.
 """

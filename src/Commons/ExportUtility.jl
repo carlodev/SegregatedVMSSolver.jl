@@ -246,7 +246,7 @@ function export_n_Γ(params::Dict{Symbol,Any})
 end
 
 
-function export_fields(params,simcase,tt,uh0,ph0)
+function export_fields(params, simcase, tt, uh0, ph0)
     @sunpack export_field, fieldexport = simcase.simulationp.exportp
     if export_field
         export_fields(params::Dict{Symbol,Any}, fieldexport, tt::Float64, uh0, ph0)
@@ -264,26 +264,26 @@ function export_fields(params::Dict{Symbol,Any}, fieldexport::Vector, tt::Float6
     @unpack parts, export_tags = params
     @unpack name_tags, Γ_, n_Γ_, local_unique_idx_, global_unique_idx_ = export_tags
 
-        for (name_tag, Γ, n_Γ, local_unique_idx, global_unique_idx, fieldexp) in zip(name_tags, Γ_, n_Γ_, local_unique_idx_, global_unique_idx_, fieldexport)
-            n_Γ = -n_Γ #pointing from the body to the outside
-            t_Γ = rotation ∘ n_Γ #extract tangent
+    for (name_tag, Γ, n_Γ, local_unique_idx, global_unique_idx, fieldexp) in zip(name_tags, Γ_, n_Γ_, local_unique_idx_, global_unique_idx_, fieldexport)
+        n_Γ = -n_Γ #pointing from the body to the outside
+        t_Γ = rotation ∘ n_Γ #extract tangent
 
-            friction = (transpose(∇(uh0)) ⋅ n_Γ) ⋅ t_Γ
+        friction = (transpose(∇(uh0)) ⋅ n_Γ) ⋅ t_Γ
 
-            cellfields = create_cellfield(name_tag, uh0, ph0, friction, fieldexp)
-            fdat = GridapDistributed._prepare_fdata(Γ.trians, cellfields)
+        cellfields = create_cellfield(name_tag, uh0, ph0, friction, fieldexp)
+        fdat = GridapDistributed._prepare_fdata(Γ.trians, cellfields)
 
-            for field in keys(cellfields)
-                fieldh = map(Γ.trians, fdat, local_unique_idx) do ttrian, cf, unique_idx
-                    visgrid = get_visgrid(ttrian)
-                    pdata = Gridap.Visualization._prepare_pdata(ttrian, cf, visgrid.cell_to_refpoints)
-                    field_h = pdata[field][unique_idx]
-                    return field_h
-                end #end map
-                extract_global_unique(fieldh, parts, global_unique_idx, tt, field)
-            end #end for field in keys(cellfields)
+        for field in keys(cellfields)
+            fieldh = map(Γ.trians, fdat, local_unique_idx) do ttrian, cf, unique_idx
+                visgrid = get_visgrid(ttrian)
+                pdata = Gridap.Visualization._prepare_pdata(ttrian, cf, visgrid.cell_to_refpoints)
+                field_h = pdata[field][unique_idx]
+                return field_h
+            end #end map
+            extract_global_unique(fieldh, parts, global_unique_idx, tt, field)
+        end #end for field in keys(cellfields)
 
-        end #for () in zip ()
+    end #for () in zip ()
 end
 
 
@@ -380,31 +380,59 @@ end
 function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime::Int64, tn::Float64, fields::Tuple)
     benchmark = simcase.simulationp.exportp.benchmark
     log_dir = simcase.simulationp.exportp.log_dir
-  
-    if !benchmark && (mod(ntime,100)==0 || print_on_request(log_dir)) 
-      save_sim_dir = simcase.simulationp.exportp.save_sim_dir
-      case = typeof(simcase)
-      save_path = joinpath(save_sim_dir,"$(case)_$(tn)_.vtu")
-      @unpack Ω = params
-      writesolution(simcase, Ω, save_path,tn, fields)
-    end
-  
-  end
-  
-  
-  function writesolution(simcase::TaylorGreen, Ω, save_path,tn::Float64, fields::Tuple)
-    u0 = simcase.analyticalsol[:velocity]
-    p0 = simcase.analyticalsol[:pressure]
-    uh,ph= fields
-    writevtk(Ω, save_path, cellfields = ["uh" => uh, "uh_analytic"=> u0(tn), "ph" => ph, "ph_analytic"=> p0(tn)])
-  end
-  
-  
-  function writesolution(simcase::VelocityBoundaryCase, Ω, save_path,tn, fields::Tuple)
-    uh_tn,ph_tn,uh_tn_updt,uh_avg,ph_avg  = fields
-    @time writevtk(Ω, save_path, cellfields = ["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
-    "uh_avg" => uh_avg,"ph_avg" => ph_avg])
-  end
 
-  
+    if !benchmark
+        if (mod(ntime, 100) == 0 || print_on_request(log_dir))
+            save_sim_dir = simcase.simulationp.exportp.save_sim_dir
+            case = typeof(simcase)
+            save_path = joinpath(save_sim_dir, "$(case)_$(tn)_.vtu")
+            @unpack Ω = params
+            writesolution(simcase, Ω, save_path, tn, fields)
+        end
+        compute_error(params, simcase, tn, fields)
+    end
+
+end
+
+
+function writesolution(simcase::TaylorGreen, Ω, save_path, tn::Float64, fields::Tuple)
+    u_analytic = simcase.analyticalsol[:velocity]
+    p_analytic = simcase.analyticalsol[:pressure]
+    uh, ph = fields
+    writevtk(Ω, save_path, cellfields=["uh" => uh, "uh_analytic" => u_analytic(tn), "ph" => ph, "ph_analytic" => p_analytic(tn)])
+end
+
+
+function writesolution(simcase::VelocityBoundaryCase, Ω, save_path, tn, fields::Tuple)
+    uh_tn, ph_tn, uh_tn_updt, uh_avg, ph_avg = fields
+    @time writevtk(Ω, save_path, cellfields=["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
+        "uh_avg" => uh_avg, "ph_avg" => ph_avg])
+end
+
+
+"""
+    compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen, tn::Float64, fields::Tuple)
+
+It computes the velocity and pressure L2 error for the Taylor-Green case 
+"""
+function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen, tn::Float64, fields::Tuple)
+    u_analytic = simcase.analyticalsol[:velocity](tn)
+    p_analytic = simcase.analyticalsol[:pressure](tn)
+    uh, ph = fields
+    @unpack dΩ = params
+    #error velocity and pressure
+    eu = u_analytic - uh
+    ep = p_analytic - ph
+
+    #L2 norm error velocity and pressure
+    l2eu = sqrt(sum(∫(eu ⋅ eu) * dΩ))
+    l2ep = sqrt(sum(∫(ep * ep) * dΩ))
+    println("L2 velocity error = $l2eu")
+    println("L2 prssure error = $l2ep")
+end
+
+function compute_error(params::Dict{Symbol,Any}, simcase::VelocityBoundaryCase, tn::Float64, fields::Tuple)
+
+end
+
 end # end module

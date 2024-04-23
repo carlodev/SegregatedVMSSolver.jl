@@ -6,15 +6,13 @@ using Gridap
 using GridapDistributed
 using PartitionedArrays
 
+using SegregatedVMSSolver.CreateProblem
 using SegregatedVMSSolver.ParametersDef
-using SegregatedVMSSolver.ModelCreation
-using SegregatedVMSSolver.BoundaryConditions
-using SegregatedVMSSolver.SpaceConditions
-using SegregatedVMSSolver.Restart
-using SegregatedVMSSolver.InitialConditions
 
 
-include(joinpath("..","case_test.jl")) 
+
+include(joinpath("..","..","case_test.jl")) 
+
 
 
 function test_initialconditions(rank_partition, distribute, D)

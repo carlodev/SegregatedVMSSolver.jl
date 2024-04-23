@@ -6,6 +6,8 @@ using Gridap
 using GridapDistributed
 using PartitionedArrays
 
+using SegregatedVMSSolver.Equations
+
 
 
 function test_stab(rank_partition, distribute, D)

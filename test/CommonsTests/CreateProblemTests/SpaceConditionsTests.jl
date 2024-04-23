@@ -7,13 +7,13 @@ using GridapDistributed
 using PartitionedArrays
 
 using SegregatedVMSSolver
-using SegregatedVMSSolver.ModelCreation
-using SegregatedVMSSolver.BoundaryConditions
-using SegregatedVMSSolver.SpaceConditions
+using SegregatedVMSSolver.CreateProblem
+using SegregatedVMSSolver.ParametersDef
 
 
 
-include(joinpath("..","case_test.jl")) 
+include(joinpath("..","..","case_test.jl")) 
+
 
 
 function test_spaceconditions(rank_partition, distribute, D)

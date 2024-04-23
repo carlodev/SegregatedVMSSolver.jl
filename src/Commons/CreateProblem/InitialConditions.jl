@@ -1,5 +1,5 @@
 """
-  create_initial_conditions(simcase::SimulationCase)
+    create_initial_conditions(simcase::SimulationCase)
 
 It creates the initial conditions for velocity and pressure. If `restart` is `true` then the velocity and the pressure field are interpoled on the specified DataFrame.  
 """

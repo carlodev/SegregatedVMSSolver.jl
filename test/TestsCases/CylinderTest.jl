@@ -1,19 +1,11 @@
-# Cylinder
-
-![Cyx](../assets/Cyx.png)
-
-The Cylinder case can be used to see how meshes created in  [`gmsh`](https://gmsh.info/) are manged and to obtain the vortex shedding phenomena.
-The user has to create a proper mesh in [`gmsh`](https://gmsh.info/) setting the following physical boundaries:
-- `inlet` for the inlet
-- `outlet` for the outlet
-- `cylinder` for the cylinder walls
-- `limits` for the top and bottom boundaries
-
-```julia
 using PartitionedArrays
 using SegregatedVMSSolver
+using Test
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
+
+
+function cylinder_test(backend)
 
 t0 =0.0
 dt = 0.1
@@ -39,5 +31,6 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 mcase = Cylinder(meshp,simparams,sprob)
 
-SegregatedVMSSolver.main(mcase,backend)
-```
+@test SegregatedVMSSolver.main(mcase,backend)
+
+end

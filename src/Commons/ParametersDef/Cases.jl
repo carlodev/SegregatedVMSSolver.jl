@@ -94,6 +94,8 @@ function search_field(s::MyStructurePrint, ::Val{f}, flag::Bool, a) where {f}
 end
 
 
+
+### Macro inspired from @unpack from UnPack.jl package
 macro sunpack(args)
     args.head!=:(=) && error("Expression needs to be of form `a, b = c`")
     items, suitecase = args.args

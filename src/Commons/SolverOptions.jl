@@ -34,7 +34,7 @@ function petsc_options_default()
 end
 
 """
-  petsc_options(; vel_ksp="gmres", vel_pc="gamg", pres_ksp = "cg", pres_pc = "gamg")
+    petsc_options(; vel_ksp="gmres", vel_pc="gamg", pres_ksp = "cg", pres_pc = "gamg")
 It provides the command-line for `GridapPETSc` to solve the segregated linear systems
 """
 function petsc_options(; vel_ksp="gmres", vel_pc="gamg", pres_ksp = "cg", pres_pc = "gamg")
@@ -49,7 +49,7 @@ function petsc_options_airfoil()
 end
 
 """
-  create_PETSc_setup(M::AbstractMatrix,ksp_setup::Function)
+    create_PETSc_setup(M::AbstractMatrix,ksp_setup::Function)
 
 Wrapper for creating PETSc symbolic and numeric setup for `GridapPETSc`  
 """

@@ -1,15 +1,5 @@
-# Lid Driven Cavity Flow
 
-![Ldx](../assets/Ldx.png)
-
-The Lid Driven Cavity flow is another standard case. It is a box of 1x1 dimension with the top side that can slide. The user can set different Reynolds.
-
-
-```julia
-using PartitionedArrays
-using SegregatedVMSSolver
-using SegregatedVMSSolver.ParametersDef
-using SegregatedVMSSolver.SolverOptions
+function liddriven_test(backend)
 
 t0 =0.0
 dt = 0.1
@@ -35,6 +25,6 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 mcase = LidDriven(meshp,simparams,sprob)
 
-SegregatedVMSSolver.main(mcase,with_debug)
+@test SegregatedVMSSolver.main(mcase,backend)
 
-```
+end

@@ -20,10 +20,9 @@ include(joinpath("Commons","SolveProblem.jl"))
 include("Main.jl")
 
 
-# include(joinpath("utils","ReadAirfoilResults.jl"))
+include(joinpath("utils","ReadAirfoilResults.jl"))
+include(joinpath("utils","WallDistance.jl"))
 
-
-# include(joinpath("utils","WallDistance.jl"))
 
 include("Exports.jl")
 

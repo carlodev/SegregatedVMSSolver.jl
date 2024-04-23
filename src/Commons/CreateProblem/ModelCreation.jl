@@ -83,7 +83,7 @@ end
 
 
 """
-  print_model(model,simcase::SimulationCase)
+    print_model(model,simcase::SimulationCase)
 
 It prints the model mesh
 """

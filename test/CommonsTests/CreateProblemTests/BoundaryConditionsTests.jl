@@ -7,10 +7,13 @@ using GridapDistributed
 using PartitionedArrays
 
 using SegregatedVMSSolver
-using SegregatedVMSSolver.BoundaryConditions
+using SegregatedVMSSolver.CreateProblem
+using SegregatedVMSSolver.ParametersDef
 
 
-include(joinpath("..","case_test.jl")) 
+
+include(joinpath("..","..","case_test.jl")) 
+
 
 
 function test_boundaryconditions(distribute, D)

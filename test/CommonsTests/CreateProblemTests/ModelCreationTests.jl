@@ -8,10 +8,13 @@ using GridapDistributed
 using PartitionedArrays
 
 using SegregatedVMSSolver
-using SegregatedVMSSolver.ModelCreation
+using SegregatedVMSSolver.CreateProblem
+using SegregatedVMSSolver.ParametersDef
 
 
-include(joinpath("..","case_test.jl")) 
+
+include(joinpath("..","..","case_test.jl")) 
+
 
 
 function test_modelcreation(rank_partition, distribute, D)

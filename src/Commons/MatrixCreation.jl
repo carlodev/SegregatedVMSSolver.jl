@@ -16,7 +16,7 @@ export initialize_matrices
 export compute_matrices
 
 """
-  allocate_Mat_inv_ML(Mat_ML::PSparseMatrix) 
+    allocate_Mat_inv_ML(Mat_ML::PSparseMatrix) 
 
 It allocates a zero vector where to store the inverse of the lumped matrix
 """
@@ -34,7 +34,7 @@ end
 
 
 """
-  inv_lump_vel_mass!(Mat_inv_ML::PVector,Mat_ML::PSparseMatrix)
+    inv_lump_vel_mass!(Mat_inv_ML::PVector,Mat_ML::PSparseMatrix)
 
 It computes the lumped matrix, takes the inverse of the diagonal elements.
 """
@@ -68,7 +68,7 @@ function inv_lump_vel_mass!(Mat_inv_ML::Vector, Mat_ML::SparseMatrixCSC)
 end
 
 """
-  initialize_vectors(matrices::Tuple,uh0,ph0)
+    initialize_vectors(matrices::Tuple,uh0,ph0)
 
 It initializes vectors where velocity, pressure, acceleration and all the increments will be stored.
 """
@@ -99,7 +99,7 @@ end
 
 
 """
-  compute_matrices(trials, tests, t::Real, u_adv, params,simcase)
+    compute_matrices(trials, tests, t::Real, u_adv, params,simcase)
 
 It updates matrices and vectors
 """

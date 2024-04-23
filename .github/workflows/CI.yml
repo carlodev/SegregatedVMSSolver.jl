@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - case-based
     tags: ['*']
   pull_request:
 concurrency:

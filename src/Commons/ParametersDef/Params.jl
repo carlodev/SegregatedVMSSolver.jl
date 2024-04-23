@@ -18,6 +18,7 @@ function TimeParameters(t0::Float64,dt::Float64,tF::Float64)
 end
 
 
+
 @with_kw struct PhysicalParameters <: UserParameters
     Re::Int64
     u_in::Float64=1.0
@@ -26,6 +27,9 @@ end
     # @info "Viscosity set ν = $ν"
 end
 
+function PhysicalParameters(Re::Int64)
+    PhysicalParameters(Re=Re)
+end
 
 @with_kw struct SolverParameters <: UserParameters
     θ::Float64=0.5
@@ -92,7 +96,9 @@ end
     restart::Bool= (isempty(restartfile)) ? false : true
 end
 
-
+function RestartParameters(restartfile::String)
+    RestartParameters(restartfile=restartfile, restart=true)
+end
 
 
 

@@ -3,7 +3,6 @@ module ReadAirfoilResults
 using CSV
 using DataFrames
 using Trapz
-
 using Statistics
 using FFTW
 using ScatteredInterpolation

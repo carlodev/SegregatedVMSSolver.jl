@@ -7,9 +7,9 @@ using GridapDistributed
 using PartitionedArrays
 
 using SegregatedVMSSolver.ParametersDef
-using SegregatedVMSSolver.ModelCreation
-using SegregatedVMSSolver.BoundaryConditions
-using SegregatedVMSSolver.SpaceConditions
+using SegregatedVMSSolver.CreateProblem
+using SegregatedVMSSolver.Equations
+
 
 
 include(joinpath("..","case_test.jl")) 

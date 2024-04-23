@@ -2,6 +2,7 @@ module CreateProblem
 
 using Gridap
 using GridapDistributed
+using GridapGmsh
 using Gridap.Arrays
 using Gridap.CellData
 

@@ -1,6 +1,7 @@
 module ParametersDef
 
 using Parameters
+using Gridap
 
 using SegregatedVMSSolver.SolverOptions
 
