@@ -1,9 +1,6 @@
-push!(LOAD_PATH,joinpath("..","src"))
+# push!(LOAD_PATH,joinpath("..","src"))
 
-using Documenter, DocumenterCitations, Pkg
-
-Pkg.activate(joinpath("..","."))
-using SegregatedVMSSolver
+using Documenter, DocumenterCitations, SegregatedVMSSolver
 
 
 bib = CitationBibliography(joinpath(@__DIR__, "src", "docs.bib"); style=:numeric)
