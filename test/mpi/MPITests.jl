@@ -7,11 +7,13 @@ using PartitionedArrays
 #project directory
 pdir = joinpath(@__DIR__,"..","..",".")
 
+mpidir = @__DIR__
+
 procs = 4
 function run_mpi_driver(procs,file)
     mpiexec() do cmd
       
-         run(`$cmd -n $procs $(Base.julia_cmd()) --project=$pdir $file`)
+         run(`$cmd -n $procs $(Base.julia_cmd()) --project=$pdir $(joinpath(mpidir,file))`)
       
       @test true
     
@@ -19,15 +21,8 @@ function run_mpi_driver(procs,file)
 end
 
 
-@testset "Commons MPI" begin
-  include(joinpath("..", "CommonsTests", "CommonsTests.jl"))
-  run_mpi_driver(procs, CommonsTests.tests_common(with_mpi))
-end
+run_mpi_driver(procs, "mpi_test.jl")
 
-@testset "Cases Tests MPI" begin
-  include(joinpath("..", "TestsCases", "TestsCases.jl"))
-  run_mpi_driver(procs, TestsCases.tests_cases(with_mpi))
-end
 
 
 

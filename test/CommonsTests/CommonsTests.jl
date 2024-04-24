@@ -22,6 +22,7 @@ function test_solve(backend)
 end
 
 function tests_common(backend)
+  backend() do distribute
   if backend == with_mpi
     comm = MPI.COMM_WORLD
     ranks = MPI.Comm_rank(comm)
@@ -31,6 +32,7 @@ function tests_common(backend)
       redirect_stdout(devnull)
     end
   end
+end
 
   CreateProblemTests.test_create_problem(backend)
   test_solve(backend)

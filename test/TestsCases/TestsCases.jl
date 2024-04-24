@@ -13,6 +13,7 @@ include("LidDrivenTest.jl")
 include("TaylorGreenTest.jl")
 
 function tests_cases(backend)
+  backend() do distribute
     if backend == with_mpi
         comm = MPI.COMM_WORLD
         ranks = MPI.Comm_rank(comm)
@@ -22,6 +23,7 @@ function tests_cases(backend)
           redirect_stdout(devnull)
         end
       end
+    end
 
     @testset "Cases Tests $(typeof(backend))" begin
         airfoil_test(with_debug)
