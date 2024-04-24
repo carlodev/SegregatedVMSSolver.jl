@@ -13,8 +13,8 @@ sprob = StabilizedProblem()
 
 The user is creating a `StabilizedProblem` using the default options.
 It is possible to specify:
--   method: `VMS()` or `SUPG` where also the order of elements can be specified
--   coeff_method: `TensorFormulation()`, `ScalarFormulation`. Stabilization coefficients `r` and `Ci` can be provided.
+-   method: `VMS()` or `SUPG()` where also the order of elements can be specified
+-   coeff_method: `TensorFormulation()`, `ScalarFormulation()`. Stabilization coefficients `r` and `Ci` can be provided.
 -   skew: enable a skew-symmetric formulation
 
 ```julia
