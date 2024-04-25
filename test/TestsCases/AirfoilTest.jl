@@ -21,7 +21,7 @@ timep = TimeParameters(t0,dt,tF)
 
 physicalp = PhysicalParameters(Re=Re)
 solverp = SolverParameters(M=2)
-exportp = ExportParameters(printinitial=false,printmodel=false,name_tags=["airfoil"], fieldexport=[["uh"]])
+exportp = ExportParameters(printinitial=false,printmodel=false,name_tags=["airfoil"], fieldexport=[["uh","ph","friction"]])
 
 
 meshp= MeshParameters(rank_partition,D,airfoil_mesh_file)
@@ -33,3 +33,7 @@ mcase = Airfoil(meshp,simparams,sprob)
 
 @test SegregatedVMSSolver.main(mcase,backend)
 end
+
+airfoil_test(with_mpi)
+
+#mpiexecjl -n 4 julia --project=. test/TestsCases/AirfoilTest.jl
