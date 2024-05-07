@@ -15,7 +15,7 @@ function create_initial_conditions(simcase::VelocityBoundaryCase,params::Dict{Sy
     if restart
         @sunpack restartfile =simcase
         restart_df = DataFrame(CSV.File(restartfile))
-        tree = create_search_tree(params,restart_df)
+        tree = create_search_tree(restart_df)
         uh_0 = restart_uh_field(D,tree,restart_df)
         ph_0 = restart_ph_field(tree,restart_df)
         uh0 = interpolate(uh_0, U(t0))
