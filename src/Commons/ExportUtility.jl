@@ -12,6 +12,7 @@ export writesolution
 export initialize_export_nodes
 export export_fields
 
+using SegregatedVMSSolver
 using SegregatedVMSSolver.ParametersDef
 
 function unwrap_vector(a)
@@ -88,27 +89,12 @@ function conv_to_df(vv::Vector{Float64})
 end
 
 # """
-#     export_time_step(t::Float64, vv::Vector, fname::String, part::Int64)
-
-# Save .csv file, one for each processor
-# """
-function export_time_step(t::Float64, vv::Vector, fname::String, part::Int64)
-    df = conv_to_df(vv)
-
-    dir = joinpath("Results", "$(fname)_$t")
-    mkpath(dir)
-    filename = joinpath(dir, "$(fname)_$(part)_$t.csv")
-    CSV.write(filename, df)
-end
-
-# """
 #     export_time_step(t::Float64, vv::Vector, fname::String)
 
 # Save .csv file global nodes
 # """
 function export_time_step(t::Float64, vv::Vector, fname::String)
     df = conv_to_df(vv)
-    mkpath("Results")
     filename = joinpath("Results", "$(fname)_$t.csv")
     CSV.write(filename, df)
 end
@@ -324,6 +310,9 @@ function initialize_export_nodes(params::Dict{Symbol,Any}, simcase::SimulationCa
     @sunpack export_field, name_tags = simcase.simulationp.exportp
     @sunpack D = simcase
     if export_field
+        mkpath("Results")
+        @info "Folder Results created"
+        
         create_export_tags!(params, name_tags)
         get_local_unique_idx(params)
         export_nodes_glob(params, D)
