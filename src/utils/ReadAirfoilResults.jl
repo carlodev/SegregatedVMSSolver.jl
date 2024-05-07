@@ -278,7 +278,7 @@ function extract_Cp(nodes::GeometryNodes, Ph::DataFrame; u0::Float64=1.0, rho::F
     q = 0.5 .* u0^2 * rho
     cp_top = Ph[nodes.metadata.idx_top, :] ./ q
     cp_bottom = Ph[nodes.metadata.idx_bottom, :] ./ q
-    return cp_top, cp_bottom
+    return cp_top.p, cp_bottom.p
 end
 
 """
@@ -288,9 +288,9 @@ For a given set of nodes and Ph dataframe, it provides the friction coefficient 
 """
 function extract_Cf(nodes::GeometryNodes, Friction::DataFrame, μ::Float64; u0::Float64=1.0, rho::Float64=1.0)
     q = 0.5 .* u0^2 * rho
-    friction_top = .-Friction[nodes.metadata.idx_top, :] ./ q .* μ
-    friction_bottom = Friction[nodes.metadata.idx_bottom, :] ./ q .* μ
-    return friction_top, friction_bottom
+    friction_top = .- Float64.(Friction[nodes.metadata.idx_top, :]) ./ q .* μ
+    friction_bottom = Float64.(Friction[nodes.metadata.idx_bottom, :]) ./ q .* μ
+    return friction_top.p, friction_bottom.p
 end
 
 
