@@ -9,6 +9,7 @@ function cylinder_test(backend)
 
 t0 =0.0
 dt = 0.1
+t_endramp = 0.3
 tF = 0.5
 
 Re = 100
@@ -18,7 +19,7 @@ cylinder_mesh_file = joinpath(@__DIR__,"..", "..", "models", "Cylinder_2D.msh")
 
 
 sprob = StabilizedProblem(SUPG(1))
-timep = TimeParameters(t0,dt,tF)
+timep = TimeParameters(t0=t0,dt=dt,tF=tF,t_endramp=t_endramp)
 
 physicalp = PhysicalParameters(Re=Re)
 solverp = SolverParameters()

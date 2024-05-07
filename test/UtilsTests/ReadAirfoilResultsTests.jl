@@ -7,7 +7,7 @@ using SegregatedVMSSolver.ReadAirfoilResults
 
 using DataFrames
 
-res_path = "Results/"
+res_path = joinpath(@__DIR__, "Results")
 Re = 500_000
 u0 = 1.0
 c = 1.0

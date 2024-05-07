@@ -14,6 +14,8 @@ Re = 10
 D = 2
 rank_partition = (2,2)
 airfoil_mesh_file = joinpath(@__DIR__,"..", "..", "models", "DU89_2D_A1_M.msh")
+airfoil_restart_file = joinpath(@__DIR__,"..", "..", "restarts", "BL_DU89_2D_A1_M.csv")
+
 
 
 sprob = StabilizedProblem(VMS(1))
@@ -25,7 +27,9 @@ exportp = ExportParameters(printinitial=false,printmodel=false,name_tags=["airfo
 
 
 meshp= MeshParameters(rank_partition,D,airfoil_mesh_file)
-simparams = SimulationParameters(timep,physicalp,solverp,exportp)
+restartp = RestartParameters(airfoil_restart_file)
+
+simparams = SimulationParameters(timep,physicalp,solverp,exportp,restartp)
 
 
 mcase = Airfoil(meshp,simparams,sprob)
