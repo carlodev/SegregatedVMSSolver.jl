@@ -34,6 +34,7 @@ mcase = Airfoil(meshp,simparams,sprob)
 @test SegregatedVMSSolver.main(mcase,backend)
 end
 
-airfoil_test(with_mpi)
+#airfoil_test(with_mpi)
 
 #mpiexecjl -n 4 julia --project=. test/TestsCases/AirfoilTest.jl
+

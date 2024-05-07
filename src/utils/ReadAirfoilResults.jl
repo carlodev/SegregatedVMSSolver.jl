@@ -20,8 +20,10 @@ export extract_Cp
 export extract_Cf
 export compute_CL_CD
 
-export compute_average
-export compute_average_2D
+export read_fluctuations
+export compute_time_average
+export compute_time_span_average
+export compute_PSD
 export compute_plane_tke
 export compute_scatter_interp
 
@@ -537,7 +539,7 @@ end
 
 ##### Time Average
 
-function compute_average(res_path::String; tagname="topairfoil", offset=1, offend=-1)
+function compute_time_average(res_path::String; tagname="topairfoil", offset=1, offend=-1)
 
     filenames, idx_sort_reduct = get_idx_sort_reduct(res_path, tagname, offset, offend)
     Ntime = length(idx_sort_reduct)
@@ -559,7 +561,7 @@ function compute_average(res_path::String; tagname="topairfoil", offset=1, offen
 end
 
 
-function compute_average_2D(Vel_avg3D::Matrix; tagname="topairfoil")
+function compute_time_span_average(Vel_avg3D::Matrix; tagname="topairfoil")
     tnodes = get_nodes(res_path; tagname=tagname)
 
     unique_z = unique(tnodes.z)
