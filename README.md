@@ -2,8 +2,8 @@
 
 **Documentation**
 
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://carlodev.github.io/SegregatedVMSSolver.jl/)
-[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://carlodev.github.io/SegregatedVMSSolver.jl/)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://carlodev.github.io/SegregatedVMSSolver.jl/stable/)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/)
 [![Build Status](https://github.com/carlodev/SegregatedVMSSolver.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/carlodev/SegregatedVMSSolver.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![codecov](https://codecov.io/gh/carlodev/SegregatedVMSSolver.jl/graph/badge.svg?token=GSJB5o6A0m)](https://codecov.io/gh/carlodev/SegregatedVMSSolver.jl)
 
