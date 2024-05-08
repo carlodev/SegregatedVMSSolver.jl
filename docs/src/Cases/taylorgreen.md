@@ -1,14 +1,8 @@
 # Taylor Green Vortex
-![Taylor Green](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/tg.png)
-![Taylor Green](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/Taylor_Vortex.png)
-
-
+![TGx](../assets/TGx.png)
 
 It solves the 2D Taylor Green Vortex case. It is the only case where analtical solution are available:
 
-```@docs
-analytical_solution
-```
 
 ``u_x= U_{a}-V_{s} \cos \bigg (\frac{\pi}{D}(x-U_{a} t)\bigg ) \sin \bigg (\frac{\pi}{D}(y-V_{a} t)\bigg ) e^{-\frac{2 v \pi^{2}}{D^{2}} t}``
 
@@ -25,3 +19,39 @@ The parameters set by the user are overwritten by the following standard values:
 - ``Va = 0.3\;m/s`` translational  velocity in $y$ direction
 - ``D = 0.5\;m`` vortex dimensions
 - ``\nu = 0.001\; m^2/s``
+
+```julia
+using PartitionedArrays
+using SegregatedVMSSolver
+using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.SolverOptions
+
+
+t0 =0.0
+dt = 0.1
+tF = 0.5
+
+Re = 1000
+D = 2
+rank_partition = (2,2)
+
+
+sprob = StabilizedProblem(VMS(1))
+timep = TimeParameters(t0=t0,dt=dt,tF=tF)
+
+physicalp = PhysicalParameters(Re=Re)
+solverp = SolverParameters()
+exportp = ExportParameters(printinitial=false,printmodel=false)
+```
+
+We create a mesh of 32x32 elements
+
+```julia
+meshp= MeshParameters(rank_partition,D;N=32,L=0.5)
+simparams = SimulationParameters(timep,physicalp,solverp,exportp)
+
+
+mcase = TaylorGreen(meshp,simparams,sprob)
+
+SegregatedVMSSolver.main(mcase,with_debug)
+```

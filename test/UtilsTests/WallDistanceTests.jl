@@ -12,7 +12,7 @@ Re = 500e3
 chord = 1.0
 walltag = ["airfoil","wake"]
 
-df_start = get_initial_conditions(mesh_file, D, u_in, Re, chord, walltag)
+df_start = get_initial_conditions(mesh_file, u_in, Re, walltag; D=D, chord=chord)
 @test typeof(df_start) <: DataFrame
 
 rm("Inital_Condition.vtu"; force=true, recursive=true)
