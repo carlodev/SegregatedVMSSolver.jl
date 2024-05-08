@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - case-based
+      - master
     tags: ['*']
 jobs:
   SequentialTests:
