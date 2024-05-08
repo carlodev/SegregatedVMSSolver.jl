@@ -1,44 +1,49 @@
 
 using Test
 using SegregatedVMSSolver
-using Gridap
-using GridapDistributed
-using PartitionedArrays
 
-function run_case_test(case::String, backend; meshfile=" ", t_endramp=1.0, Reynolds=1000)
-      mesh_file = joinpath(@__DIR__, "..", "models", meshfile)
-   
-   params = Dict(
-         :N => 32,
-         :D => 2, #Dimension
-         :order => 1, 
-         :t0 => 0.0,
-         :dt => 0.25,
-         :tF => 1.0,
-         :case => case,
-         :θ => 0.5,
-         :u_in=> 1.0,
+
+
+function create_simulation_test(case, D; meshfile="", rank_partition=(2,2))
+      t0 =0.0
+      dt = 0.1
+      tF = 1.0
+      Re = 1000
+     
+      sprob = StabilizedProblem()
+      timep = TimeParameters(t0,dt,tF)
+      physicalp = PhysicalParameters(Re=Re)
+      solverp = SolverParameters()
+      exportp = ExportParameters(printmodel=false)
+
+      if isempty(meshfile)
+            meshp = MeshParameters(rank_partition,D; N = 10, L=0.5)
+      else
+            meshp= MeshParameters(rank_partition,D,meshfile)
+      end    
+      
+      simparams = SimulationParameters(timep,physicalp,solverp,exportp)
         
-         :backend => backend,  #with_debug or with_mpi()
-         :rank_partition=>(2,2),
-         :ν => 0.001,
-         :petsc_options => petsc_options_default(),
-         :method=>:VMS,
-         :Cᵢ => [4, 36],
-    
-         :t_endramp=>t_endramp,
-         :mesh_file => mesh_file,
-         :Re=> Reynolds,
-         
-         :c=> 1.0,
- 
-   )
-   
-   
-   
-   @test SegregatedVMSSolver.main(params) == true
-   
-   end
+      new_case = case(meshp,simparams,sprob)
+      return new_case
 
+end
 
-#mpiexecjl --project=. -n 4 julia case_test.jl
+function iterate_test_cases(D::Int64)
+      if D==2
+            cases = [Airfoil,Cylinder,LidDriven,TaylorGreen]
+            airfoil_mesh_file = joinpath(@__DIR__, "..", "models", "DU89_2D_A1_M.msh")
+            cylinder_mesh_file = joinpath(@__DIR__, "..", "models", "Cylinder_2D.msh")
+            mesh_files = [airfoil_mesh_file,cylinder_mesh_file,"",""]
+      elseif D ==3
+            cases = [Airfoil]
+            airfoil_mesh_file = joinpath(@__DIR__, "..", "models", "sd7003s_3D_simple.msh")
+            mesh_files = [airfoil_mesh_file]
+
+      end
+
+      return zip(cases,mesh_files)
+end
+
+#mpiexecjl --project=../. -n 4 julia case_test.jl
+

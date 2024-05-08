@@ -1,87 +1,97 @@
 # Index
 
-## Initialize Parameters
-```@docs
-init_params
-verifykey
+
+
+```@meta
+CurrentModule = SegregatedVMSSolver.ParametersDef
 ```
 
-## Commons Procedures
-```@docs
-print_model
-creation_fe_spaces
-create_initial_conditions
-create_PETSc_setup
-solve_case
+# ParametersDef
+
+```@autodocs
+Modules = [ParametersDef,]
 ```
 
-## AddNewTags
-```@docs
-create_new_tag!
-add_new_tag!
-add_centre_tag!
+```@meta
+CurrentModule = SegregatedVMSSolver.CreateProblem
 ```
 
-## Stabilization Parameters
-```@docs
-h_param
-G_params
-compute_d
-compute_G
-compute_GG
-compute_gg
+# CreateProblem
+
+```@autodocs
+Modules = [CreateProblem,]
 ```
 
-## Linear Utilities
-```@docs
-create_ũ_vector
-update_ũ_vector!
-update_ũ
+```@meta
+CurrentModule = SegregatedVMSSolver.Equations
+```
+
+# Equations
+
+```@autodocs
+Modules = [Equations,]
 ```
 
 
-## Stabilized Equations
-```@docs
-cconv
-segregated_equations_SUPG!
-segregated_equations_VMS!
+```@meta
+CurrentModule = SegregatedVMSSolver.MatrixCreation
 ```
 
-## SolversOptions
-```@docs
-petsc_options
+# MatrixCreation
+
+```@autodocs
+Modules   = [MatrixCreation]
 ```
 
-## MatrixCreation
-```@docs
-allocate_Mat_inv_ML
-inv_lump_vel_mass!
-initialize_vectors
-matrices_and_vectors 
+
+```@meta
+CurrentModule = SegregatedVMSSolver.SolverOptions
 ```
 
-## Restart
-```@docs
-create_search_tree
-restart_uh_field
-restart_ph_field
+# SolverOptions
+
+```@autodocs
+Modules   = [SolverOptions]
+```
+
+
+```@meta
+CurrentModule = SegregatedVMSSolver.VectorsOperations
+```
+
+# VectorsOperations
+
+```@autodocs
+Modules   = [VectorsOperations]
 ```
 
 
 ```@meta
 CurrentModule = SegregatedVMSSolver.ExportUtility
 ```
-## SegregatedVMSSolver.ExportUtility
+
+# ExportUtility
 
 ```@autodocs
-Modules = [ ExportUtility,]
+Modules   = [ExportUtility]
 ```
 
+```@meta
+CurrentModule = SegregatedVMSSolver.SolveProblem
+```
 
+# SolveProblem
+
+```@autodocs
+Modules   = [SolveProblem]
+```
 
 ```@meta
 CurrentModule = SegregatedVMSSolver.ReadAirfoilResults
 ```
+
+# Utils
+
 ## SegregatedVMSSolver.ReadAirfoilResults
 
 ```@autodocs

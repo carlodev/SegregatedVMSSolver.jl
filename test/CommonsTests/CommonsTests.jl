@@ -3,49 +3,60 @@ using SegregatedVMSSolver
 using Test
 using PartitionedArrays
 using MPI
-include("InitializeParamsTests.jl")
-include("AddNewTagsTests.jl")
-include("StabParamsTests.jl")
-include("LinearUtilitiesTests.jl")
-include("StabilizedEquationsTests.jl")
+
+
+
+include(joinpath("CreateProblemTests", "CreateProblemTests.jl"))
+
 include("MatrixCreationTests.jl")
-include("RestartTests.jl")
+include("EquationsTests.jl")
 
-function test_common_debug()
-  with_debug() do distribute
-  InitializeParamsTests.main(distribute)
-  AddNewTagsTests.main(distribute)
-  StabParamsTests.main(distribute)
-  LinearUtilitiesTests.main(distribute)
-  StabilizedEquationsTests.main(distribute)
-  MatrixCreationTests.main(distribute)
-  RestartTests.main(distribute)
+
+function test_solve(backend)
+  @testset "Test Solve Problem $(backend)" begin
+    backend() do distribute
+      EquationsTests.main(distribute)
+      MatrixCreationTests.main(distribute)
+    end
   end
 end
 
-
-
-#with_debug
-@testset "Commons Debug" begin
-  test_common_debug()
-end
-
-
-
-pdir = joinpath(@__DIR__,"..","..",".")
-
-procs = 4
-function run_driver(procs,file)
-    mpiexec() do cmd
-      
-         run(`$cmd -n $procs $(Base.julia_cmd()) --project=$pdir $file`)
-      
-      @test true
-    
+function tests_common(backend)
+  backend() do distribute
+  if backend == with_mpi
+    comm = MPI.COMM_WORLD
+    ranks = MPI.Comm_rank(comm)
+    #To avoid multiple printing of the same line in parallel
+    if ranks != 0
+      redirect_stderr(devnull)
+      redirect_stdout(devnull)
+    end
   end
 end
-  
-run_driver(procs, "test/TestMPI.jl")
+
+  CreateProblemTests.test_create_problem(backend)
+  test_solve(backend)
+end
+
+
+
+
+
+
+# pdir = joinpath(@__DIR__,"..","..",".")
+
+# procs = 4
+# function run_driver(procs,file)
+#     mpiexec() do cmd
+
+#          run(`$cmd -n $procs $(Base.julia_cmd()) --project=$pdir $file`)
+
+#       @test true
+
+#   end
+# end
+
+# run_driver(procs, joinpath("test","TestMPI.jl"))
 
 
 end

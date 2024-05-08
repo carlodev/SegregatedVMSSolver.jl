@@ -1,5 +1,22 @@
+module MatrixCreation
+using Gridap
+using GridapDistributed
+using SparseArrays
+using PartitionedArrays
+using LinearAlgebra
+
+using Gridap.Arrays
+
+using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.Equations
+using SegregatedVMSSolver.VectorsOperations
+
+export initialize_vectors
+export initialize_matrices
+export compute_matrices
+
 """
-  allocate_Mat_inv_ML(Mat_ML::PSparseMatrix) 
+    allocate_Mat_inv_ML(Mat_ML::PSparseMatrix) 
 
 It allocates a zero vector where to store the inverse of the lumped matrix
 """
@@ -15,25 +32,9 @@ end
 
 
 
-"""
-    set_zeros!(fields::DebugArray)
-
-Set zeros as free values for a field
-"""
-function set_zeros!(fields::DebugArray)
-  for a in fields.items
-    a.free_values .= 0.0
-  end
-end
-
-
-function set_zeros!(fields::MPIArray)
-    fields.item.free_values .= 0.0
-end
-
 
 """
-  inv_lump_vel_mass!(Mat_inv_ML::PVector,Mat_ML::PSparseMatrix)
+    inv_lump_vel_mass!(Mat_inv_ML::PVector,Mat_ML::PSparseMatrix)
 
 It computes the lumped matrix, takes the inverse of the diagonal elements.
 """
@@ -67,7 +68,7 @@ function inv_lump_vel_mass!(Mat_inv_ML::Vector, Mat_ML::SparseMatrixCSC)
 end
 
 """
-  initialize_vectors(matrices::Tuple,uh0,ph0)
+    initialize_vectors(matrices::Tuple,uh0,ph0)
 
 It initializes vectors where velocity, pressure, acceleration and all the increments will be stored.
 """
@@ -92,24 +93,19 @@ end
 
 
 
-function initialize_matrices_and_vectors(trials,tests, t::Real, u_adv, params; method=:SUPG)
-  return matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=method)
+function initialize_matrices(trials,tests, t::Real, u_adv, params,simcase)
+  return compute_matrices(trials, tests, t::Real, u_adv, params,simcase)
 end
 
 
 """
-  matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=:VMS)
+    compute_matrices(trials, tests, t::Real, u_adv, params,simcase)
 
 It updates matrices and vectors
 """
-function matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=:VMS)
+function compute_matrices(trials, tests, t::Real, u_adv, params,simcase)
 
-  if method==:VMS
-    Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs = segregated_equations_VMS!(u_adv, params)
-
-  elseif method ==:SUPG
-    Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs = segregated_equations_SUPG!(u_adv, params)
-  end
+  Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs =  segregated_equations(u_adv,params,simcase)
 
     U,P = trials
     V,Q = tests
@@ -147,5 +143,8 @@ function matrices_and_vectors(trials, tests, t::Real, u_adv, params; method=:VMS
     Vec_Ap = Vec_Apu + Vec_App
     Vec_Au = Vec_Auu + Vec_Aup
     return  Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap
+
+end
+
 
 end

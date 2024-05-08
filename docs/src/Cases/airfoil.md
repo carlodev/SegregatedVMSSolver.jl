@@ -1,5 +1,7 @@
 # Airfoil
 
+![LSB-s7003](../assets/LSB-sd7003.png)
+
 It is one of the most complex and intersting case. The user has to create a proper mesh in [`gmsh`](https://gmsh.info/) setting the following physical boundaries:
 - `inlet` for the inlet
 - `outlet` for the outlet
@@ -20,8 +22,62 @@ The pressure is set `0.0` at the `outlet` section. The velocity on the `limits` 
 By setting `t_endramp > t0` automatically the code will create an inlet velocity which will increase linearly in time up to the `u_in` target value.
 
 ```julia
-uin(t) = (t < t_endramp) ? (u_in .*(t/t_endramp)) : u_in
+using PartitionedArrays
+using MPI
+using SegregatedVMSSolver
+using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.SolverOptions
 ```
+Calling the dependencies
+
+
+```julia
+t0 =0.0
+dt = 1e-3
+tF = 5e-3
+
+Re = 10
+D = 2
+rank_partition = (2,2)
+airfoil_mesh_file = joinpath(@__DIR__,"..", "..", "models", "DU89_2D_A1_M.msh")
+```
+
+```julia
+timep = TimeParameters(t0,dt,tF)
+
+physicalp = PhysicalParameters(Re=Re)
+solverp = SolverParameters(M=2)
+exportp = ExportParameters(printinitial=false,printmodel=false,name_tags=["airfoil"], fieldexport=[["uh"]])
+
+meshp= MeshParameters(rank_partition,D,airfoil_mesh_file)
+simparams = SimulationParameters(timep,physicalp,solverp,exportp)
+```
+Setting the parameters. This simulation will not converge, we are not using a suitable solver which needs hypre.
+
+
+Defining the stabilizatin problem and the simualtion case
+```julia
+sprob = StabilizedProblem(VMS(1))
+simcase = Airfoil(meshp,simparams,sprob)
+```
+
+Solve in Sequential - on 1 processor not using MPI, useful for debug.
+```julia
+ SegregatedVMSSolver.main(simcase,with_debug)
+```
+
+Solve in MPI - for HPC computing
+```julia
+ SegregatedVMSSolver.main(simcase,with_mpi)
+```
+
+Then in bash give the command. Check the MPI section for more details
+```bash
+ mpiexecjl -n 4 julia --project=. run_mysimulation.jl
+```
+
+
+
 
 
 
