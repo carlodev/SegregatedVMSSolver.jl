@@ -74,7 +74,7 @@ function get_geometry_info(df_nodes::DataFrame, df_normals::DataFrame; α::Float
         nodes_airfoil = df_nodes[XYunique, :]
         n_Γ_airfoil = df_normals[XYunique, :]
         Dtype = D3
-        meta = (ZPoints=ZPoints, XYunique=XYunique, NZ=NZ)
+        meta = (ZPoints=Zpoints, XYunique=XYunique, NZ=NZ)
 
     else
         D = 2
