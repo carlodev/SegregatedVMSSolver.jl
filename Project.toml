@@ -41,6 +41,7 @@ PartitionedArrays = "0.3.4"
 Revise = "3.5.9"
 ScatteredInterpolation = "0.3.6"
 Trapz = "2.0.3"
+UnPack = "1"
 julia = "1.8.2"
 
 [extras]
