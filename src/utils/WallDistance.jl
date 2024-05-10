@@ -92,7 +92,7 @@ end
 
 function initial_velocity_wall_distance((U0,Ug), (V0,Vg), Ω, dΩ, p::Int64, γ::Float64, u_in::Float64, δ99::Float64)
 
-  options = "-ksp_type gmres -pc_type gamg  -ksp_monitor -snes_rtol 1.0e-10 -ksp_converged_reason -ksp_error_if_not_converged true"
+  options = "-ksp_type gmres -pc_type gamg -snes_rtol 1.0e-10 -ksp_converged_reason -ksp_error_if_not_converged true" #-ksp_monitor
 
 
 
