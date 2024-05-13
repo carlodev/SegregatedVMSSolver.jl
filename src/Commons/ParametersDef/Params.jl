@@ -32,11 +32,12 @@ function PhysicalParameters(Re::Int64)
 end
 
 @with_kw struct SolverParameters <: UserParameters
-    θ::Float64=0.5
-    petsc_options::String=petsc_options_default()
-    matrix_freq_update::Int64=20
-    a_err_threshold::Int64=200
-    M::Int64=20
+    θ::Float64=0.5 #theta for velocity ODE solver
+    petsc_options::String=petsc_options_default() #solver options for velocity and pressure
+    matrix_freq_update::Int64=20 #update matrices and stabilization parameters every fixed number of time steps
+    a_err_threshold::Int64=200 ### threshold to be satisfied:: norm(accelation_initial)/norm(acceleration_final) > a_err_threshold
+    M::Int64=20 ## maximum number of internal iterations
+    Number_Skip_Expansion::Int64=100 #number of initial time steps where is not used the Taylor-Expansion to compute the velocity field at the next time step, but simply the velcity field at the previous one.
 end
 
 

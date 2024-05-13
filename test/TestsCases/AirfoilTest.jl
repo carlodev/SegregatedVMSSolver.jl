@@ -22,7 +22,7 @@ sprob = StabilizedProblem(VMS(1))
 timep = TimeParameters(t0=t0,dt=dt,tF=tF, time_window=(2*dt,4*dt))
 
 physicalp = PhysicalParameters(Re=Re)
-solverp = SolverParameters(M=2)
+solverp = SolverParameters(M=2,Number_Skip_Expansion=2)
 exportp = ExportParameters(printinitial=false,printmodel=false,name_tags=["airfoil"], fieldexport=[["uh","ph","friction"]])
 
 
