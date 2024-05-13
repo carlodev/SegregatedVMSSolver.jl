@@ -19,7 +19,7 @@ airfoil_restart_file = joinpath(@__DIR__,"..", "..", "restarts", "BL_DU89_2D_A1_
 
 
 sprob = StabilizedProblem(VMS(1))
-timep = TimeParameters(t0,dt,tF)
+timep = TimeParameters(t0=t0,dt=dt,tF=tF, time_window=(2*dt,4*dt))
 
 physicalp = PhysicalParameters(Re=Re)
 solverp = SolverParameters(M=2)
