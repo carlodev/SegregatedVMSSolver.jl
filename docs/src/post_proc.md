@@ -72,10 +72,10 @@ In this example we compute the time-average of the velocity field in the volume 
 ```julia
 tagname="topairfoil"
 
-topairfoil_nodes = get_nodes(res_path;tagname=tagname)
+topairfoil_nodes = get_nodes(res_path; tagname=tagname)
 
-Vel_avg_3D = compute_time_average(res_path)
-Vel_avg2D = compute_time_span_average(Vel_avg_3D)
+Vel_avg3D = compute_time_average(res_path; tagname=tagname)
+Vel_avg2D = compute_time_span_average(res_path,Vel_avg3D; tagname=tagname)
 ```
 
 It is possible to extract one of the components of the average velocity
