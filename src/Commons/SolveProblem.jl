@@ -171,7 +171,8 @@ println("Solution computed at time $tn")
 uh_tn = FEFunction(U(tn), vec_um)
 ph_tn = FEFunction(P(tn), vec_pm)
 
-update_time_average!(uh_tn,ph_tn, uh_avg, ph_avg, tn, time_step, simcase.simulationp.timep)
+uh_avg = update_time_average(uh_tn, uh_avg, U(tn), tn, ntime, time_step, simcase.simulationp.timep)
+ph_avg = update_time_average(ph_tn, ph_avg, P(tn), tn, ntime, time_step, simcase.simulationp.timep)
 
 writesolution(params, simcase, ntime, tn, (uh_tn,ph_tn,uh_tn_updt,uh_avg,ph_avg))
 
