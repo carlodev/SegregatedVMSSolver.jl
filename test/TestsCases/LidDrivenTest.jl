@@ -24,12 +24,15 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 
 mcase = LidDriven(meshp,simparams,sprob)
-printstructure(mcase)
-
 
 log_dir = "Log"
-mkdir(log_dir)
+mkpath(log_dir)
 open(joinpath(log_dir,"PrintSim.txt"), "w") do io
+end
+
+if backend == with_mpi
+    comm = MPI.COMM_WORLD
+    MPI.Barrier(comm)
 end
 
 @test SegregatedVMSSolver.solve(mcase,backend)
