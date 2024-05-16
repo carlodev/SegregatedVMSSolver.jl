@@ -5,7 +5,7 @@ using SegregatedVMSSolver.CreateProblem
 using SegregatedVMSSolver.SolveProblem
 using PartitionedArrays, Gridap, GridapDistributed
 
-function main(simcase::SimulationCase,backend::Function)
+function solve(simcase::SimulationCase,backend::Function)
     #check(simcase)
 
     backend() do distribute
@@ -19,6 +19,7 @@ function main(simcase::SimulationCase,backend::Function)
            
         end
 
+        printstructure(simcase)
         run_case(simcase,distribute)
     end
 

@@ -37,7 +37,7 @@ mcase = LidDriven(meshp,simparams,sprob)
 
 using SegregatedVMSSolver
 
-SegregatedVMSSolver.main(mcase,backend)
+SegregatedVMSSolver.solve(mcase,backend)
 
 
 #mpiexecjl --project=. -n 4 julia test/new_case.jl
@@ -59,5 +59,5 @@ SegregatedVMSSolver.main(mcase,backend)
 # mcase =TaylorGreen(meshp,simparams,sprob)
 # using SegregatedVMSSolver
 
-# SegregatedVMSSolver.main(mcase,with_debug)
+# SegregatedVMSSolver.solve(mcase,with_debug)
 

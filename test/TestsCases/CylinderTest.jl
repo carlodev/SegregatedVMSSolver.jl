@@ -32,6 +32,6 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 mcase = Cylinder(meshp,simparams,sprob)
 
-@test SegregatedVMSSolver.main(mcase,backend)
+@test SegregatedVMSSolver.solve(mcase,backend)
 
 end

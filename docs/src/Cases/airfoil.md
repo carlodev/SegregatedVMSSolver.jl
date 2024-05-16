@@ -63,12 +63,12 @@ simcase = Airfoil(meshp,simparams,sprob)
 
 Solve in Sequential - on 1 processor not using MPI, useful for debug.
 ```julia
- SegregatedVMSSolver.main(simcase,with_debug)
+ SegregatedVMSSolver.solve(simcase,with_debug)
 ```
 
 Solve in MPI - for HPC computing
 ```julia
- SegregatedVMSSolver.main(simcase,with_mpi)
+ SegregatedVMSSolver.solve(simcase,with_mpi)
 ```
 
 Then in bash give the command. Check the MPI section for more details

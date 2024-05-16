@@ -53,5 +53,5 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 mcase = TaylorGreen(meshp,simparams,sprob)
 
-SegregatedVMSSolver.main(mcase,with_debug)
+SegregatedVMSSolver.solve(mcase,with_debug)
 ```

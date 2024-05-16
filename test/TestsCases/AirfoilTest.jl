@@ -35,7 +35,7 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp,restartp)
 mcase = Airfoil(meshp,simparams,sprob)
 
 
-@test SegregatedVMSSolver.main(mcase,backend)
+@test SegregatedVMSSolver.solve(mcase,backend)
 end
 
 #airfoil_test(with_mpi)

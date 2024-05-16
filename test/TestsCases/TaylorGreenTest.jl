@@ -34,7 +34,7 @@ end
 mcase = TaylorGreen(meshp,simparams,sprob)
 
 
-@test SegregatedVMSSolver.main(mcase,backend)
+@test SegregatedVMSSolver.solve(mcase,backend)
 
 rm(log_dir, recursive=true)
 

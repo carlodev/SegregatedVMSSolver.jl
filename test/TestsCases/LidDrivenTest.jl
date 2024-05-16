@@ -32,7 +32,7 @@ mkdir(log_dir)
 open(joinpath(log_dir,"PrintSim.txt"), "w") do io
 end
 
-@test SegregatedVMSSolver.main(mcase,backend)
+@test SegregatedVMSSolver.solve(mcase,backend)
 
 rm(log_dir, recursive=true)
 
