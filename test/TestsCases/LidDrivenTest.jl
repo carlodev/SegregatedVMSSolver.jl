@@ -37,6 +37,4 @@ end
 
 @test SegregatedVMSSolver.solve(mcase,backend)
 
-rm(log_dir, recursive=true)
-
 end
