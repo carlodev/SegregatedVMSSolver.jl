@@ -28,7 +28,7 @@ function test_restart(rank_partition, distribute, D)
     tF = 1.0
     Re = 1000
     airfoil_mesh_file = joinpath(@__DIR__, "..","..","..", "models", "DU89_2D_A1_M.msh")
-    airfoil_restart_file = joinpath(@__DIR__, "..","..","..", "BL_DU89_2D_A1_M_p.csv")
+    airfoil_restart_file = joinpath(@__DIR__, "..","..","..","restarts", "BL_DU89_2D_A1_M_p.csv")
 
     sprob = StabilizedProblem()
     timep = TimeParameters(t0,dt,tF)
