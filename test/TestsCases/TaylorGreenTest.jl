@@ -26,20 +26,10 @@ exportp = ExportParameters(printinitial=false,printmodel=false)
 meshp= MeshParameters(rank_partition,D;N=32,L=0.5)
 simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
-log_dir = "Log"
-mkpath(log_dir)
-open(joinpath(log_dir,"PrintSim.txt"), "w") do io
-end
+
 
 mcase = TaylorGreen(meshp,simparams,sprob)
 
 @test SegregatedVMSSolver.solve(mcase,backend)
-
-if backend == with_mpi
-    comm = MPI.COMM_WORLD
-    MPI.Barrier(comm)
-end
-
-rm(log_dir, recursive=true)
 
 end
