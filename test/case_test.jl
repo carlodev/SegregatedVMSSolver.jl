@@ -7,13 +7,13 @@ using SegregatedVMSSolver
 function create_simulation_test(case, D; meshfile="", rank_partition=(2,2))
       t0 =0.0
       dt = 0.1
-      tF = 1.0
+      tF = 0.3
       Re = 1000
      
       sprob = StabilizedProblem()
       timep = TimeParameters(t0,dt,tF)
       physicalp = PhysicalParameters(Re=Re)
-      solverp = SolverParameters()
+      solverp = SolverParameters(M=2)
       exportp = ExportParameters(printmodel=false)
 
       if isempty(meshfile)

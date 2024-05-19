@@ -35,6 +35,6 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 mcase = LidDriven(meshp,simparams,sprob)
 
-SegregatedVMSSolver.main(mcase,with_debug)
+SegregatedVMSSolver.solve(mcase,with_debug)
 
 ```

@@ -13,7 +13,7 @@ export update_ũ_vector!
 export update_ũ
 export pazeros
 export set_zeros!
-export update_time_average!
+export update_time_average
 
 
 
@@ -95,9 +95,7 @@ end
 # end
 
 
-
-
-function update_time_average!(uh_tn,ph_tn, uh_avg, ph_avg, tn::Float64, time_step::Vector{Float64}, timep::TimeParameters)
+function update_time_average(field_tn, field_avg, U, tn::Float64, time_step_idx::Int64, time_step::Vector{Float64}, timep::TimeParameters)
 
   if timep.time_average
 
@@ -107,35 +105,39 @@ function update_time_average!(uh_tn,ph_tn, uh_avg, ph_avg, tn::Float64, time_ste
     
     first_time_step = findfirst(x->x==tw0,time_step)
     last_time_step = findfirst(x->x==twf,time_step)
-    
+    n_time_step = findfirst(x->x==tn,time_step)
+
+    n_window_step = n_time_step - first_time_step +1 
+
     Ntimes = last_time_step-first_time_step+1
+    @assert n_window_step<= Ntimes
+
     @info "updating time average"
-
-    update_avg_dofs!(deepcopy(uh_tn), uh_avg, Ntimes)
-    update_avg_dofs!(deepcopy(ph_tn), ph_avg, Ntimes)
-  end
-
-end
-end
-
-
-
-
-function update_avg_dofs!(f_tn, f_avg, N)
-  update_avg_dofs!(f_tn.fields,  f_avg.fields, N)
-end
-
-function update_avg_dofs!(fields_tn::MPIArray, fields_avg::MPIArray, N)
-  fields_avg.item.free_values .+= fields_tn.item.free_values ./N
-end
-
-
-function update_avg_dofs!(fields_tn::DebugArray, fields_avg::DebugArray, N)
-  for (ff_tn, ff_avg) in zip(fields_tn,fields_avg)
-    ff_avg.free_values .+= ff_tn.free_values ./N
+  
+    field_avg = update_avg_dofs(field_tn, field_avg, U, n_window_step)
+  
   end
 
 end
 
+return field_avg
+
+end
+
+
+function update_avg_dofs(field_tn, field_avg, U, n_step::Int64)
+  f_tn_free_dofs = get_free_dof_values(field_tn)
+
+  favg_free_dofs = get_free_dof_values(field_avg)
+  favg_free_dofs_update = get_free_dof_values(field_tn)
+
+  if n_step>1
+    favg_free_dofs_update = favg_free_dofs*(n_step-1)/n_step + f_tn_free_dofs/n_step
+  end
+
+  field_avg = FEFunction(U, favg_free_dofs_update)
+
+  return field_avg
+end
 
 end #end module

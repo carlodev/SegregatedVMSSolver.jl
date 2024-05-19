@@ -2,7 +2,7 @@ using PartitionedArrays
 using SegregatedVMSSolver
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
-
+using MPI
 
 function taylorgreen_test(backend)
 
@@ -27,7 +27,9 @@ meshp= MeshParameters(rank_partition,D;N=32,L=0.5)
 simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 
+
 mcase = TaylorGreen(meshp,simparams,sprob)
 
-@test SegregatedVMSSolver.main(mcase,backend)
+@test SegregatedVMSSolver.solve(mcase,backend)
+
 end

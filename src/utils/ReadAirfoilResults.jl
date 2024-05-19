@@ -13,6 +13,7 @@ export GeometryNodes
 export GeometryNormals
 
 export get_geometry_info
+export get_nodes
 export average_field
 export average_3D_field
 export time_space_average_field
@@ -58,7 +59,7 @@ end
 
 function get_geometry_info(path; tagname="airfoil", α::Float64, chord::Float64=1.0, der_slope=-1.0)
     df_nodes = get_nodes(path; tagname=tagname)
-    df_normals = get_nodes(path; tagname=tagname)
+    df_normals = get_normals(path; tagname=tagname)
     return get_geometry_info(df_nodes, df_normals; α, chord=chord, der_slope=der_slope)
 end
 
@@ -74,7 +75,7 @@ function get_geometry_info(df_nodes::DataFrame, df_normals::DataFrame; α::Float
         nodes_airfoil = df_nodes[XYunique, :]
         n_Γ_airfoil = df_normals[XYunique, :]
         Dtype = D3
-        meta = (ZPoints=ZPoints, XYunique=XYunique, NZ=NZ)
+        meta = (Zpoints=Zpoints, XYunique=XYunique, NZ=NZ)
 
     else
         D = 2
@@ -181,7 +182,7 @@ end
 
 It provides Array{DataFrame}, where each element is a DataFrame at a single time step of the average in z direction.
 """
-function average_3D_field(path::String, field_name::String; offset=1, offend=0, step::Int64=1, tagname="airfoil")
+function average_3D_field(path::String, field_name::String, nodes::GeometryNodes; offset=1, offend=0, step::Int64=1, tagname="airfoil")
     vector_files = get_field_filepaths(path, field_name; offset=offset, offend=offend, step=step, tagname=tagname)
     df_field = DataFrame[]
     for fread in vector_files[1:end]
@@ -191,16 +192,17 @@ function average_3D_field(path::String, field_name::String; offset=1, offend=0, 
         push!(df_field, ft_tmp_)
     end
 
-    return average_3D_field(nodes, df_field)
+    return df_field
 end
-
 
 function get_field_filepaths(path::String, field_name::String; offset=1, offend=0, step::Int64=1, tagname="airfoil")
     f_path = readdir(path)
     file_name = tagname * "_" * field_name
-    idx_n = findall(x -> occursin(file_name, x), f_path)
+    number_of_chars = length(file_name)
+    idx_n = findall(x -> file_name ==x[1:number_of_chars] , f_path)
 
     if isempty(idx_n)
+        @warn "In path $path no match with field $(field_name)"
         return Vector()
     else
 
@@ -230,7 +232,6 @@ function time_space_average_field(path::String, field_name::String, nodes::Geome
     vector_files = get_field_filepaths(path, field_name; offset=offset, offend=offend, step=step, tagname=tagname)
 
     if isempty(vector_files)
-        @warn "In path $path no match with field $(field_name)"
         return DataFrame()
     else
 
@@ -561,7 +562,7 @@ function compute_time_average(res_path::String; tagname="topairfoil", offset=1, 
 end
 
 
-function compute_time_span_average(Vel_avg3D::Matrix; tagname="topairfoil")
+function compute_time_span_average(res_path::String,Vel_avg3D::Matrix; tagname="topairfoil")
     tnodes = get_nodes(res_path; tagname=tagname)
 
     unique_z = unique(tnodes.z)

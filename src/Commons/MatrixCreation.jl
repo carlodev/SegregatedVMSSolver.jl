@@ -24,11 +24,11 @@ function allocate_Mat_inv_ML(Mat_ML::PSparseMatrix)
   return pzeros(Mat_ML.row_partition)
 end
 
-function allocate_Mat_inv_ML(Mat_ML::SparseMatrixCSC) 
-  l = size(Mat_ML)[1]
+# function allocate_Mat_inv_ML(Mat_ML::SparseMatrixCSC) 
+#   l = size(Mat_ML)[1]
 
-  return zeros(l)
-end
+#   return zeros(l)
+# end
 
 
 
@@ -57,15 +57,15 @@ function inv_lump_vel_mass!(Mat_inv_ML::PVector,Mat_ML::PSparseMatrix)
 end
 
 
-function inv_lump_vel_mass!(Mat_inv_ML::Vector, Mat_ML::SparseMatrixCSC)
-  inv_ML_vec = 1 ./ sum(Mat_ML, dims=2)[:,1]
-      if !isempty(inv_ML_vec[inv_ML_vec.==Inf])
-      error("The matrix ML can not be inverted because after lumping zero values are detected")
-  end
+# function inv_lump_vel_mass!(Mat_inv_ML::Vector, Mat_ML::SparseMatrixCSC)
+#   inv_ML_vec = 1 ./ sum(Mat_ML, dims=2)[:,1]
+#       if !isempty(inv_ML_vec[inv_ML_vec.==Inf])
+#       error("The matrix ML can not be inverted because after lumping zero values are detected")
+#   end
   
-  Mat_inv_ML.=inv_ML_vec
+#   Mat_inv_ML.=inv_ML_vec
   
-end
+# end
 
 """
     initialize_vectors(matrices::Tuple,uh0,ph0)

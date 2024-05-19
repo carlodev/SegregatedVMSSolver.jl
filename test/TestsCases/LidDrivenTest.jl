@@ -16,7 +16,7 @@ timep = TimeParameters(t0=t0,dt=dt,tF=tF, t_endramp=t_endramp)
 
 physicalp = PhysicalParameters(Re=Re)
 solverp = SolverParameters()
-exportp = ExportParameters(printinitial=false,printmodel=false)
+exportp = ExportParameters(printinitial=true,printmodel=true)
 
 
 meshp= MeshParameters(rank_partition,D;N=32,L=0.5)
@@ -25,6 +25,16 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 mcase = LidDriven(meshp,simparams,sprob)
 
-@test SegregatedVMSSolver.main(mcase,backend)
+log_dir = "Log"
+mkpath(log_dir)
+open(joinpath(log_dir,"PrintSim.txt"), "w") do io
+end
+
+if backend == with_mpi
+    comm = MPI.COMM_WORLD
+    MPI.Barrier(comm)
+end
+
+@test SegregatedVMSSolver.solve(mcase,backend)
 
 end

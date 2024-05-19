@@ -55,7 +55,7 @@ function solve_case(params::Dict{Symbol,Any},simcase::SimulationCase)
   U,P = trials
 
 @sunpack t0,dt,tF =  simcase.simulationp.timep
-@sunpack petsc_options,matrix_freq_update,M,a_err_threshold,θ = simcase.simulationp.solverp
+@sunpack petsc_options,matrix_freq_update,M,a_err_threshold,θ,Number_Skip_Expansion = simcase.simulationp.solverp
 time_step = collect(t0+dt:dt:tF)
 
 init_values = initialize_solve(simcase,params)
@@ -163,7 +163,7 @@ update_ũ_vector!(ũ_vector,vec_um)
 
 uh_tn_updt = FEFunction(U(tn+dt), vec_um)
 
-if ntime>100
+if ntime>Number_Skip_Expansion
   uh_tn_updt = FEFunction(U(tn+dt), update_ũ(ũ_vector))
 end
 
@@ -171,7 +171,8 @@ println("Solution computed at time $tn")
 uh_tn = FEFunction(U(tn), vec_um)
 ph_tn = FEFunction(P(tn), vec_pm)
 
-update_time_average!(uh_tn,ph_tn, uh_avg, ph_avg, tn, time_step, simcase.simulationp.timep)
+uh_avg = update_time_average(uh_tn, uh_avg, U(tn), tn, ntime, time_step, simcase.simulationp.timep)
+ph_avg = update_time_average(ph_tn, ph_avg, P(tn), tn, ntime, time_step, simcase.simulationp.timep)
 
 writesolution(params, simcase, ntime, tn, (uh_tn,ph_tn,uh_tn_updt,uh_avg,ph_avg))
 
