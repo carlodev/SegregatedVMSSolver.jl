@@ -45,7 +45,7 @@ mcase = Airfoil(meshp,simparams,sprob)
 end
 
 #turbulent_airfoil_test(with_mpi)
-turbulent_airfoil_test(with_debug)
+# turbulent_airfoil_test(with_debug)
 
 #mpiexecjl -n 4 julia --project=. test/TestsCases/TurbulentAirfoilTest.jl
 
