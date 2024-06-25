@@ -2,7 +2,9 @@ module ParametersDef
 
 using Parameters
 using Gridap
+using SyntheticEddyMethod
 
+using SegregatedVMSSolver.Interfaces
 using SegregatedVMSSolver.SolverOptions
 
 export SimulationCase
@@ -17,11 +19,13 @@ export VelocityBoundaryCase
 export printstructure
 export search_field
 export @sunpack
+export compute_fluctuation
 
 export UserParameters
 
 export TimeParameters
 export PhysicalParameters
+export TurbulenceParameters
 export SolverParameters
 export MeshInfo
 export GmshMeshParams
@@ -42,7 +46,6 @@ export VMS
 export SUPG
 
 include("AnalyticalSolution.jl")
-
 include("Params.jl")
 include("StabilizationStruct.jl")
 include("Cases.jl")

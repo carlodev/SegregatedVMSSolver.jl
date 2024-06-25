@@ -31,6 +31,23 @@ function PhysicalParameters(Re::Int64)
     PhysicalParameters(Re=Re)
 end
 
+
+@with_kw mutable struct TurbulenceParameters <: UserParameters
+    TI::Float64=0.0
+    Re_stress::Matrix=zeros(3,3)
+    Eddies::Vector=zeros(3) #Vector{SemEddy} when turbulence at the inlet is active, this is just a placeholder
+    Vboxinfo=nothing
+    TurbulenceInlet::Bool= (TI==0.0) ? false : true
+end
+
+function TurbulenceParameters(TI::Float64, Vboxinfo::VirtualBox, physicalp::PhysicalParameters)
+    @assert TI>0.0 "Turbulence Intensity Value must be >0.0" 
+    Re_stress, Eddies = initialize_eddies(physicalp.u_in, TI, Vboxinfo)
+    @info "Eddies initialized - total eddies: $(length(Eddies))"
+    TurbulenceParameters(TI=TI, Re_stress=Re_stress, Eddies=Eddies,Vboxinfo=Vboxinfo)
+end
+
+
 @with_kw struct SolverParameters <: UserParameters
     θ::Float64=0.5 #theta for velocity ODE solver
     petsc_options::String=petsc_options_default() #solver options for velocity and pressure

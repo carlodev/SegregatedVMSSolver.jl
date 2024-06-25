@@ -7,6 +7,7 @@ using MPI
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
 
+include("TurbulentAirfoilTest.jl")
 include("AirfoilTest.jl")
 include("CylinderTest.jl")
 include("LidDrivenTest.jl")
@@ -26,6 +27,7 @@ function tests_cases(backend)
   end
 
   @testset "Cases Tests $(typeof(backend))" begin
+    turbulent_airfoil_test(backend)
     airfoil_test(backend)
     cylinder_test(backend)
     liddriven_test(backend)

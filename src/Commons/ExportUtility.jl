@@ -14,6 +14,7 @@ export export_fields
 
 using SegregatedVMSSolver
 using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.Interfaces
 
 function unwrap_vector(a)
     V = Float64[]

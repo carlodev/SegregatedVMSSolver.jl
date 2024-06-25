@@ -1,6 +1,9 @@
 function boundary_velocities(simcase::VelocityBoundaryCase)
     @sunpack D, u_in, t_endramp = simcase
    
+    @sunpack TurbulenceInlet,Eddies,  Vboxinfo, Re_stress = simcase
+
+
 
     """ No ramp
     u_free(x,t) = (D == 2) ? VectorValue(u_in, 0.0) :  VectorValue(u_in, 0.0, 0.0)
@@ -15,10 +18,11 @@ function boundary_velocities(simcase::VelocityBoundaryCase)
     u_free(t::Real) = x -> u_free(x,t)
 
     #No generation of Eddies during ramping
-    uin0(t) = (t < t_endramp) ? 0.0 : 1
+    uin0(t) = (t < t_endramp) ? 0.0 : 1.0
     
 
-    u_SEM(x,t) = u_free(x,t) #: u_free(x,t) #.+ uin0(t) .* generation_u_fluct!(x,t, params[:sem_cache])
+    u_SEM(x,t) = u_free(x,t) .+ uin0(t) .* compute_fluctuation(x,t, (TurbulenceInlet,Eddies, u_in, Vboxinfo, Re_stress,D))
+    
     u_SEM(t::Real) = x -> u_SEM(x,t)
     
 

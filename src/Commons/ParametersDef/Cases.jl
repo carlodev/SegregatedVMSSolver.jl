@@ -3,16 +3,25 @@ abstract type SimulationCase end
 struct SimulationParameters
     timep::TimeParameters
     physicalp::PhysicalParameters
+    turbulencep::TurbulenceParameters
     solverp::SolverParameters
     exportp::ExportParameters
     restartp::RestartParameters
 end
 
-function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters, 
+function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters,
                             solverp::SolverParameters,exportp::ExportParameters)
+    turbulencep=TurbulenceParameters()
     restartp=RestartParameters()
-    SimulationParameters(timep,physicalp,solverp,exportp,restartp)
+    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,restartp)
 end
+
+function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters,    turbulencep::TurbulenceParameters,
+    solverp::SolverParameters,exportp::ExportParameters)
+    restartp=RestartParameters()
+    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,restartp)
+end
+
 
 
 for case in (:Airfoil,:WindTunnel,:Cylinder,:LidDriven)
@@ -60,6 +69,8 @@ function printstructure(s::MyStructurePrint)
         if fnfield_type
             println(typeof(fnfield))
             printstructure(fnfield)
+        elseif  typeof(fnfield)<:Vector{SemEddy} 
+            println("$fn = $(fnfield[1]) - total Eddies $(length(fnfield))")
         else
             println("$fn = $fnfield")
         end
@@ -94,7 +105,6 @@ function search_field(s::MyStructurePrint, ::Val{f}, flag::Bool, a) where {f}
 end
 
 
-
 ### Macro inspired from @unpack from UnPack.jl package
 macro sunpack(args)
     args.head!=:(=) && error("Expression needs to be of form `a, b = c`")
@@ -112,3 +122,25 @@ macro sunpack(args)
     kdblock = Expr(:block, kd...)
     esc(kdblock)
 end
+
+
+"""
+    compute_fluctuation(x,t, simcase::SimulationCase)
+
+For the point x, at the time t it computes the velocity fluctuations in all the direction. Each time the time t is increased the Eddy are convected.
+The time informations are coded in the VirtualBox.
+"""
+function compute_fluctuation(x,t, (TurbulenceInlet,Eddies, u_in, Vboxinfo, Re_stress,D))
+u_fluct = zeros(D)
+if TurbulenceInlet
+    xplane = [x...]
+    xplane[1] = 0.0 #As the inlet was a vertical plane, reduce the dimensions of virtual box
+    u_fluct = compute_fluct(xplane, t, Eddies, u_in, Vboxinfo, Re_stress)
+    @assert length(u_fluct)==D
+    u_fluct[1] = u_fluct[1] - u_in #remove the inlet velocity component
+end
+
+return VectorValue(u_fluct...)
+end
+
+
