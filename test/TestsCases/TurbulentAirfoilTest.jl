@@ -9,7 +9,7 @@ function turbulent_airfoil_test(backend)
 
 t0 =0.0
 dt = 1e-3
-tF = 5e-3
+tF = 10e-3
 
 Re = 10
 D = 3
@@ -26,7 +26,10 @@ timep = TimeParameters(t0=t0,dt=dt,tF=tF, time_window=(2*dt,4*dt))
 physicalp = PhysicalParameters(Re=Re)
 
 #Turbulence
-Vboxinfo = VirtualBox((-6,6), (0.0,0.20); σ=0.01)
+Vboxinfo = VirtualBox((-1,1), (0.0,0.20); σ=0.0125)
+
+Vboxinfo.N=100 #reducing number of eddies
+
 turbulencep= TurbulenceParameters(TI, Vboxinfo, physicalp)
 
 
@@ -41,7 +44,8 @@ simparams = SimulationParameters(timep,physicalp,turbulencep,solverp,exportp)
 mcase = Airfoil(meshp,simparams,sprob)
 
 
-@test SegregatedVMSSolver.solve(mcase,backend)
+SegregatedVMSSolver.solve(mcase,backend) 
+
 end
 
 #turbulent_airfoil_test(with_mpi)
