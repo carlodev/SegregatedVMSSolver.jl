@@ -143,7 +143,6 @@ if TurbulenceInlet
     u_fluct = compute_fluct(xplane, t, Eddies, u_in, Vboxinfo, Re_stress)
     @assert length(u_fluct)==D
     u_fluct[1] = u_fluct[1] - u_in #remove the inlet velocity component
-    println(u_fluct)
 end
 
 return VectorValue(u_fluct...)
