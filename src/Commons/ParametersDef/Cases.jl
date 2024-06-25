@@ -16,12 +16,17 @@ function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameter
     SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,restartp)
 end
 
-function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters,    turbulencep::TurbulenceParameters,
+function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters, turbulencep::TurbulenceParameters,
     solverp::SolverParameters,exportp::ExportParameters)
     restartp=RestartParameters()
     SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,restartp)
 end
 
+function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters,
+    solverp::SolverParameters,exportp::ExportParameters, restartp::RestartParameters)
+    turbulencep=TurbulenceParameters()
+    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,restartp)
+end
 
 
 for case in (:Airfoil,:WindTunnel,:Cylinder,:LidDriven)
@@ -138,6 +143,7 @@ if TurbulenceInlet
     u_fluct = compute_fluct(xplane, t, Eddies, u_in, Vboxinfo, Re_stress)
     @assert length(u_fluct)==D
     u_fluct[1] = u_fluct[1] - u_in #remove the inlet velocity component
+    println(u_fluct)
 end
 
 return VectorValue(u_fluct...)
