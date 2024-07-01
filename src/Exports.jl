@@ -26,5 +26,5 @@ end
 @publish ParametersDef CartesianMeshParams
 @publish ParametersDef GmshMeshParams
 @publish ParametersDef ExportParameters
-@publish ParametersDef RestartParameters
+@publish ParametersDef InitialParameters
 

@@ -11,7 +11,7 @@ It is one of the most complex and intersting case. The user has to create a prop
 !!! info ".geo file" 
     In the folder `models/geofile/` is possible to find some `.geo` file created using [`gmsh`](https://gmsh.info/) both for 3D and 2D simulations. Different parameters can be modified: angle of attack, domain dimension, mesh divisions... feel free to explore it.
 
-The velocity at the inlet is incresed from `0.0` arriving to the target value `u_in` at `:t_endramp`. This increase the numeric stability. If `:t_endramp` = `:t0` the velocity at the inlet will be immediately `:u_in`. For numeric stability is better to keep `u_in = 1.0`, then fix the Reynolds and so the viscosity will be automatically computed as: `ν = 1/Reynolds`
+The velocity at the inlet is incresed from `0.0` arriving to the target value `u_in` at `:t_endramp`. This increase the numeric stability. If `:t_endramp` = `:t0` the velocity at the inlet will be immediately `:u_in`. For numeric stability is better to keep `u_in = [1.0,0.0,0.0]`, then fix the Reynolds and so the viscosity will be automatically computed as: `ν = 1/Reynolds`
 
 The pressure is set `0.0` at the `outlet` section. The velocity on the `limits` is set equal to the one at `inlet`.
 

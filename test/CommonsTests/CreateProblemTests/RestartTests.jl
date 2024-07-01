@@ -35,11 +35,11 @@ function test_restart(rank_partition, distribute, D)
     physicalp = PhysicalParameters(Re=Re)
     solverp = SolverParameters()
     exportp = ExportParameters(printmodel=false)
-    restartp = RestartParameters(airfoil_restart_file)
+    intialp = InitialParameters(airfoil_restart_file)
     meshp= MeshParameters(rank_partition,D,airfoil_mesh_file)
 
     
-    simparams = SimulationParameters(timep,physicalp,solverp,exportp,restartp)
+    simparams = SimulationParameters(timep,physicalp,solverp,exportp,intialp)
 
     simcase = Airfoil(meshp,simparams,sprob)
     @sunpack order = simcase

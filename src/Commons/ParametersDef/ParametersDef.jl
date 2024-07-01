@@ -3,6 +3,8 @@ module ParametersDef
 using Parameters
 using Gridap
 using SyntheticEddyMethod
+using LinearAlgebra
+using Random
 
 using SegregatedVMSSolver.Interfaces
 using SegregatedVMSSolver.SolverOptions
@@ -16,6 +18,7 @@ export TaylorGreen
 export LidDriven
 export VelocityBoundaryCase
 
+export create_new_case
 export printstructure
 export search_field
 export @sunpack
@@ -31,7 +34,7 @@ export MeshInfo
 export GmshMeshParams
 export CartesianMeshParams
 export ExportParameters
-export RestartParameters
+export InitialParameters
 
 
 export StabilizationMethod

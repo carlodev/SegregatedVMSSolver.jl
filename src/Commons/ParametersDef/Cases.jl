@@ -1,4 +1,5 @@
 abstract type SimulationCase end
+abstract type VelocityBoundaryCase<:SimulationCase end
 
 struct SimulationParameters
     timep::TimeParameters
@@ -6,39 +7,50 @@ struct SimulationParameters
     turbulencep::TurbulenceParameters
     solverp::SolverParameters
     exportp::ExportParameters
-    restartp::RestartParameters
+    intialp::InitialParameters
 end
 
 function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters,
                             solverp::SolverParameters,exportp::ExportParameters)
     turbulencep=TurbulenceParameters()
-    restartp=RestartParameters()
-    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,restartp)
+    intialp=InitialParameters()
+    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,intialp)
 end
 
 function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters, turbulencep::TurbulenceParameters,
     solverp::SolverParameters,exportp::ExportParameters)
-    restartp=RestartParameters()
-    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,restartp)
+    intialp=InitialParameters()
+    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,intialp)
 end
 
 function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters,
-    solverp::SolverParameters,exportp::ExportParameters, restartp::RestartParameters)
+    solverp::SolverParameters,exportp::ExportParameters, intialp::InitialParameters)
     turbulencep=TurbulenceParameters()
-    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,restartp)
+    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,intialp)
 end
 
+"""
+    create_new_case(case::Symbol)
 
-for case in (:Airfoil,:WindTunnel,:Cylinder,:LidDriven)
+It creates a new case, named `case`. It is useful to add new simulation cases in a high level way.
+"""
+function create_new_case(case::Symbol)
     @eval begin
-        struct $case <: SimulationCase
+        struct $case <: VelocityBoundaryCase
             meshp::MeshParameters
             simulationp::SimulationParameters
             sprob::StabilizedProblem
         end
+        export $case
     end
 end
-  
+
+for case in (:Airfoil,:WindTunnel,:Cylinder,:LidDriven)
+    create_new_case(case::Symbol)
+end
+
+
+
 struct TaylorGreen <: SimulationCase
     analyticalsol
     meshp::MeshParameters
@@ -59,7 +71,11 @@ function TaylorGreen(meshp::MeshParameters, simulationp::SimulationParameters, s
     TaylorGreen(analyticalsol, meshp, simulationp, sprob)
 end
 
-VelocityBoundaryCase = Union{Airfoil,WindTunnel,Cylinder, LidDriven}
+
+
+
+# VelocityBoundaryCase = Union{Airfoil,WindTunnel,Box,Cylinder, LidDriven}
+
 
 
 MyStructurePrint = Union{SimulationCase,StabilizedProblem,SimulationParameters,
@@ -135,17 +151,21 @@ end
 For the point x, at the time t it computes the velocity fluctuations in all the direction. Each time the time t is increased the Eddy are convected.
 The time informations are coded in the VirtualBox.
 """
-function compute_fluctuation(x,t, (TurbulenceInlet,Eddies, u_in, Vboxinfo, Re_stress,D))
-u_fluct = zeros(D)
-if TurbulenceInlet
-    xplane = [x...]
-    xplane[1] = 0.0 #As the inlet was a vertical plane, reduce the dimensions of virtual box
-    u_fluct = compute_fluct(xplane, t, Eddies, u_in, Vboxinfo, Re_stress)
-    @assert length(u_fluct)==D
-    u_fluct[1] = u_fluct[1] - u_in #remove the inlet velocity component
+function compute_fluctuation(x,t, (TurbulenceInlet,Eddies, u_in_mag, Vboxinfo, Re_stress,D))
+    u_fluct = zeros(D)
+
+
+    if TurbulenceInlet
+        xplane = [x...]
+        if D == 2 
+            xplane = [xplane...,0.0]
+        end
+
+        xplane[1] = 0.0 #As the inlet was a vertical plane, reduce the dimensions of virtual box
+        u_fluct = compute_fluct(xplane, t, Eddies, u_in_mag, Vboxinfo, Re_stress)
+        u_fluct[1] = u_fluct[1] - u_in_mag #remove the inlet velocity component
+    end
+
+
+    return VectorValue(u_fluct[1:D]...)
 end
-
-return VectorValue(u_fluct...)
-end
-
-

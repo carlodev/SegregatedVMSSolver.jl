@@ -18,12 +18,12 @@ function TimeParameters(t0::Float64,dt::Float64,tF::Float64)
 end
 
 
-
 @with_kw struct PhysicalParameters <: UserParameters
     Re::Int64
-    u_in::Float64=1.0
+    u_in::Vector=[1.0,0.0,0.0]
+    u_in_mag::Float64 = LinearAlgebra.norm(u_in)
     c::Float64=1.0
-    ν::Float64=(c*u_in)/Re
+    ν::Float64=(c*u_in_mag)/Re
     # @info "Viscosity set ν = $ν"
 end
 
@@ -40,9 +40,10 @@ end
     TurbulenceInlet::Bool= (TI==0.0) ? false : true
 end
 
-function TurbulenceParameters(TI::Float64, Vboxinfo::VirtualBox, physicalp::PhysicalParameters)
+function TurbulenceParameters(TI::Float64, Vboxinfo::VirtualBox, physicalp::PhysicalParameters; seed = 1234)
     @assert TI>0.0 "Turbulence Intensity Value must be >0.0" 
-    Re_stress, Eddies = initialize_eddies(physicalp.u_in, TI, Vboxinfo)
+    Random.seed!(seed)
+    Re_stress, Eddies = initialize_eddies(physicalp.u_in_mag, TI, Vboxinfo)
     @info "Eddies initialized - total eddies: $(length(Eddies))"
     TurbulenceParameters(TI=TI, Re_stress=Re_stress, Eddies=Eddies,Vboxinfo=Vboxinfo)
 end
@@ -109,14 +110,13 @@ end
 end
 
 
-@with_kw struct RestartParameters <: UserParameters
+@with_kw struct InitialParameters <: UserParameters
+    u0::Vector = [0.0, 0.0, 0.0]
     restartfile::String = ""
     restart::Bool= (isempty(restartfile)) ? false : true
 end
 
-function RestartParameters(restartfile::String)
-    RestartParameters(restartfile=restartfile, restart=true)
+function InitialParameters(restartfile::String)
+    InitialParameters(restartfile=restartfile, restart=true)
 end
-
-
 
