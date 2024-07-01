@@ -14,7 +14,7 @@ function boundary_velocities(simcase::VelocityBoundaryCase)
     
     """
   
-
+    u_in = u_in[1:D]
     uin(t) = (t < t_endramp) ? (u_in .*(t/t_endramp)) : u_in
 
     function u_free(x, t)
@@ -34,8 +34,8 @@ function boundary_velocities(simcase::VelocityBoundaryCase)
 
             return  u_free(x,t) .+ sem_fluctuation
         end
-    
     end
+
     u_SEM(t::Real) = x -> u_SEM(x,t)
     
 
@@ -46,7 +46,7 @@ function boundary_velocities(simcase::VelocityBoundaryCase)
 
     u_wall(t::Real) = x -> u_wall(x,t)
 
-    return u_free,u_SEM, u_wall
+    return u_free, u_SEM, u_wall
 end
 
 
@@ -80,14 +80,6 @@ function create_boundary_conditions(simcase::Cylinder, u_free,u_SEM, u_wall)
     return u_diri_tags,u_diri_values,p_diri_tags,p_diri_values
 end 
 
-
-# function create_boundary_conditions(simcase::Box, u_free,u_SEM, u_wall) 
-#     u_diri_tags=["inlet"]
-#     u_diri_values = [u_SEM]
-#     p_diri_tags=["outlet","limits"]
-#     p_diri_values = [0.0, 0.0]
-#     return u_diri_tags,u_diri_values,p_diri_tags,p_diri_values
-# end 
 
 function create_boundary_conditions(simcase::LidDriven, u_free,u_SEM, u_wall) 
     p_diri_values = 0.0
