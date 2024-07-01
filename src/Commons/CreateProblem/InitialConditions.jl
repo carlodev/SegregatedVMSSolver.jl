@@ -6,11 +6,11 @@ It creates the initial conditions for velocity and pressure. If `restart` is `tr
 function create_initial_conditions(simcase::VelocityBoundaryCase,params::Dict{Symbol,Any})
     @unpack U,P = params
 
-    @sunpack restart,D,t0 = simcase
+    @sunpack restart,D,t0,u0 = simcase
 
-    uh0v = VectorValue(zeros(D)...)
-    uh0 = interpolate_everywhere(uh0v, U(t0))
-    ph0 = interpolate_everywhere(0.0, P(t0))
+    uh0v = VectorValue(u0...)
+    uh0 = interpolate(uh0v, U(t0))
+    ph0 = interpolate(0.0, P(t0))
 
     if restart
         @sunpack restartfile =simcase

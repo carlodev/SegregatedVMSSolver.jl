@@ -1,7 +1,10 @@
-function boundary_velocities(simcase::VelocityBoundaryCase)
-    @sunpack D, u_in, t_endramp = simcase
-   
-    @sunpack TurbulenceInlet,Eddies,  Vboxinfo, Re_stress = simcase
+function boundary_velocities(simcase::VelocityBoundaryCase)   
+    t_endramp = simcase.simulationp.timep.t_endramp
+    u_in = simcase.simulationp.physicalp.u_in
+    u_in_mag = simcase.simulationp.physicalp.u_in_mag
+    
+    D =  simcase.meshp.D
+    @unpack TurbulenceInlet,Eddies,  Vboxinfo, Re_stress = simcase.simulationp.turbulencep
 
 
 
@@ -14,20 +17,33 @@ function boundary_velocities(simcase::VelocityBoundaryCase)
 
     uin(t) = (t < t_endramp) ? (u_in .*(t/t_endramp)) : u_in
 
-    u_free(x, t) = (D == 2) ? VectorValue(uin(t), 0.0) :  VectorValue(uin(t), 0.0, 0.0)
+    function u_free(x, t)
+    (D == 2) ? VectorValue(uin(t)...) :  VectorValue(uin(t)...)
+    end
+
     u_free(t::Real) = x -> u_free(x,t)
 
     #No generation of Eddies during ramping
     uin0(t) = (t < t_endramp) ? 0.0 : 1.0
     
+    function u_SEM(x,t::Real)
+     if uin0(t)==0.0
+        return return u_free(x,t)
+    else
+            sem_fluctuation = compute_fluctuation(x,t, (TurbulenceInlet,Eddies, u_in_mag, Vboxinfo, Re_stress,D))
 
-    u_SEM(x,t) = (uin0(t)==0.0) ? u_free(x,t) : u_free(x,t) .+ compute_fluctuation(x,t, (TurbulenceInlet,Eddies, u_in, Vboxinfo, Re_stress,D))
+            return  u_free(x,t) .+ sem_fluctuation
+        end
     
+    end
     u_SEM(t::Real) = x -> u_SEM(x,t)
     
 
 
-    u_wall(x,t) = (D == 2) ? VectorValue(0.0, 0.0) : VectorValue(0.0, 0.0, 0.0) 
+    function u_wall(x,t::Real)
+        return VectorValue(zeros(D)...)
+    end 
+
     u_wall(t::Real) = x -> u_wall(x,t)
 
     return u_free,u_SEM, u_wall
@@ -41,7 +57,7 @@ end
 
 function create_boundary_conditions(simcase::Airfoil, u_free,u_SEM, u_wall) 
     u_diri_tags=["inlet", "limits", "airfoil"]
-    u_diri_values = [u_SEM, u_SEM, u_wall]
+    u_diri_values = [u_SEM, u_free, u_wall]
     p_diri_tags=["outlet"]
     p_diri_values = [0.0]
     return u_diri_tags,u_diri_values,p_diri_tags,p_diri_values
@@ -63,6 +79,15 @@ function create_boundary_conditions(simcase::Cylinder, u_free,u_SEM, u_wall)
     p_diri_values = [0.0]
     return u_diri_tags,u_diri_values,p_diri_tags,p_diri_values
 end 
+
+
+# function create_boundary_conditions(simcase::Box, u_free,u_SEM, u_wall) 
+#     u_diri_tags=["inlet"]
+#     u_diri_values = [u_SEM]
+#     p_diri_tags=["outlet","limits"]
+#     p_diri_values = [0.0, 0.0]
+#     return u_diri_tags,u_diri_values,p_diri_tags,p_diri_values
+# end 
 
 function create_boundary_conditions(simcase::LidDriven, u_free,u_SEM, u_wall) 
     p_diri_values = 0.0
