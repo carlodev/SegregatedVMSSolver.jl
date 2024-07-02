@@ -27,7 +27,7 @@ function boundary_velocities(simcase::VelocityBoundaryCase)
     uin0(t) = (t < t_endramp) ? 0.0 : 1.0
     
     function u_SEM(x,t::Real)
-     if uin0(t)==0.0
+     if uin0(t)==0.0 || TurbulenceInlet == 0.0
         return return u_free(x,t)
     else
             sem_fluctuation = compute_fluctuation(x,t, (TurbulenceInlet,Eddies, u_in_mag, Vboxinfo, Re_stress,D))
