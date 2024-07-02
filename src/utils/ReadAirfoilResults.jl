@@ -20,7 +20,7 @@ export time_space_average_field
 export extract_Cp
 export extract_Cf
 export compute_CL_CD
-export compute_CL_CD_time
+export compute_CL_CD_separation_time
 
 export read_fluctuations
 export compute_time_average
@@ -343,6 +343,17 @@ function compute_CL_CD(nodes::GeometryNodes, cp_top, cp_bottom,
 end
 
 
+function find_separation_point(nodesx::Vector, friction_top::Vector; safe_threshold=0.25)
+    idx_sep = findall(friction_top[2:end] .* friction_top[1:end-1] .< 0) 
+    idx_nodes_sep = findall(nodesx[idx_sep] .>safe_threshold)
+    location = 0.0
+
+    if !isempty(idx_sep)
+        location = nodesx[idx_sep[idx_nodes_sep[1]]]
+    end
+    return location
+end
+
 ### Plotting Istantaneus CL - CD
 """
     compute_CL_CD(top_nodesx,bottom_nodesx,top_nodesy,bottom_nodesy,cp_top,cp_bottom,
@@ -350,7 +361,7 @@ end
 
 It computes lift and drag coefficients
 """
-function compute_CL_CD_time(nodes::GeometryNodes, path, μ::Float64; offset=1, offend=0, step::Int64=1, tagname="airfoil", chord=1.0)
+function compute_CL_CD_separation_time(nodes::GeometryNodes, path, μ::Float64; offset=1, offend=0, step::Int64=1, tagname="airfoil", chord=1.0, safe_threshold=0.25)
     
     vector_files_cp = get_field_filepaths(path, "ph"; offset=offset, offend=offend, step=step, tagname=tagname)
     vector_files_cf = get_field_filepaths(path, "friction"; offset=offset, offend=offend, step=step, tagname=tagname)
@@ -359,6 +370,7 @@ function compute_CL_CD_time(nodes::GeometryNodes, path, μ::Float64; offset=1, o
     @assert length(vector_files_cp) == length(vector_files_cf)
     CL_t = zeros(length(vector_files_cp))
     CD_t = zeros(length(vector_files_cp))
+    Sep_t = zeros(length(vector_files_cp))
 
     for (i,(cpread,cfread)) in enumerate(zip(vector_files_cp, vector_files_cf) )
         println(cpread)
@@ -377,9 +389,13 @@ function compute_CL_CD_time(nodes::GeometryNodes, path, μ::Float64; offset=1, o
         CD = (CD_p + CD_f) ./ chord
         CL_t[i] = CL
         CD_t[i] = CD
+
+        xsep = find_separation_point(nodes.top.x, friction_top; safe_threshold=safe_threshold)
+
+        Sep_t[i] = xsep
     end
 
-    return CL_t, CD_t
+    return CL_t, CD_t, Sep_t
 
 end
 
