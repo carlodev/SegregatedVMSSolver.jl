@@ -104,8 +104,8 @@ end
 
 "add the SEM tag to the nodes in front of the airfoil. c: chord of the airfoil, the points are on a circle at 1 chord of distance from the leading edge. 
 set a_tol for selecting only one lines of points, it depends on how fine the mesh is. "
-function add_SEM_tag!(model; c=1.0, a_tol = 1e-1)
-
+function add_SEM_tag!(model, c::Float64)
+    a_tol = 1e-1
     v1(v) = v[1]
     v2(v) = v[2]
  
@@ -117,7 +117,7 @@ function add_SEM_tag!(model; c=1.0, a_tol = 1e-1)
 
   
     function create_SEM_tag!(model::GridapDistributed.DistributedDiscreteModel)
-        map_parts(model.models) do model
+        map(model.models) do model
             create_SEM_tag!(model)
         end
 
@@ -140,4 +140,13 @@ function add_SEM_tag!(model; c=1.0, a_tol = 1e-1)
     create_SEM_tag!(model)
 
     return model
+end
+
+
+function add_SEM_tag!(model, turbulencep::TurbulenceParameters{Internal} )
+        add_SEM_tag!(model,  turbulencep.Domain.SEM_Boundary_Distance)
+end
+
+function add_SEM_tag!(model, turbulencep::TurbulenceParameters{Inlet} )
+
 end

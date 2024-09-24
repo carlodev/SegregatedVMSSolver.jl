@@ -1,55 +1,61 @@
 using PartitionedArrays
+
 using SegregatedVMSSolver
+
 using SyntheticEddyMethod
 using Test
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
 
-function turbulent_airfoil_test(backend)
+
+function turbulent_airfoil_test(backend, create_sem_boundary)
 
 t0 =0.0
-dt = 1e-3
-tF = 10e-3
 
-Re = 10
-D = 3
+dt = 0.001
+
+tF = 1.0
+
+Re = 1
+D = 2
+
 ##Turbulence Intensity
-TI = 0.001
+TI = 0.1
 
-rank_partition = (2,2,1)
-airfoil_mesh_file = joinpath(@__DIR__,"..", "..", "models", "sd7003s_3D_simple.msh")
+rank_partition = (2,2)
+airfoil_mesh_file = joinpath(@__DIR__,"..", "..", "models", "DU89_2D_A1_M.msh")
 
 
 sprob = StabilizedProblem(VMS(1))
-timep = TimeParameters(t0=t0,dt=dt,tF=tF, time_window=(2*dt,4*dt))
+timep = TimeParameters(t0=t0,dt=dt,tF=tF)
 
 physicalp = PhysicalParameters(Re=Re)
+initialp = InitialParameters(u0=[1.0,0.0])
 
 #Turbulence
-Vboxinfo = VirtualBox((-1,1), (0.0,0.20); σ=0.0125)
+Vboxinfo = VirtualBox((-1,1), (-0.1,0.1); σ=0.0125)
+@test typeof(Vboxinfo.N) == Int64
 
-Vboxinfo.N=100 #reducing number of eddies
 
-turbulencep= TurbulenceParameters(TI, Vboxinfo, physicalp)
+turbulencep= TurbulenceParameters(TI, Vboxinfo, physicalp, create_sem_boundary)
 
 
 solverp = SolverParameters(M=2,Number_Skip_Expansion=2)
-exportp = ExportParameters(printinitial=false,printmodel=false,name_tags=["airfoil"], fieldexport=[["uh","ph","friction"]])
+# exportp = ExportParameters(printinitial=true,printmodel=true)
+exportp = ExportParameters(printinitial=false,printmodel=false)
+
+
 meshp= MeshParameters(rank_partition,D,airfoil_mesh_file)
 
-
-simparams = SimulationParameters(timep,physicalp,turbulencep,solverp,exportp)
+simparams = SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,initialp)
 
 
 mcase = Airfoil(meshp,simparams,sprob)
-
 
 SegregatedVMSSolver.solve(mcase,backend) 
 
 end
 
-#turbulent_airfoil_test(with_mpi)
-# turbulent_airfoil_test(with_debug)
 
 #mpiexecjl -n 4 julia --project=. test/TestsCases/TurbulentAirfoilTest.jl
 

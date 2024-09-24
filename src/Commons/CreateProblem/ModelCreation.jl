@@ -1,6 +1,9 @@
 function create_model(parts, simcase::VelocityBoundaryCase)
     mesh = simcase.meshp
+    turbulencep = simcase.simulationp.turbulencep
     model = create_model(parts, mesh.meshinfo, mesh.D, mesh.rank_partition)
+    add_SEM_tag!(model, turbulencep)
+    
     print_model(model,simcase)
     return model
 end

@@ -4,15 +4,16 @@
 It creates the initial conditions for velocity and pressure. If `restart` is `true` then the velocity and the pressure field are interpoled on the specified DataFrame.  
 """
 function create_initial_conditions(simcase::VelocityBoundaryCase,params::Dict{Symbol,Any})
-    @unpack U,P = params
-
+    @unpack Utn, Ptn = params ## initial fields
 
     @sunpack restart,D,t0, u0 = simcase
 
+    Ut0 = Utn
+    Pt0 = Ptn
 
     uh0v = VectorValue(u0[1:D]...)
-    uh0 = interpolate(uh0v, U(t0))
-    ph0 = interpolate(0.0, P(t0))
+    uh0 = interpolate(uh0v, Ut0)
+    ph0 = interpolate(0.0, Pt0)
 
     if restart
         @sunpack restartfile =simcase
@@ -20,8 +21,8 @@ function create_initial_conditions(simcase::VelocityBoundaryCase,params::Dict{Sy
         tree = create_search_tree(restart_df)
         uh_0 = restart_uh_field(D,tree,restart_df)
         ph_0 = restart_ph_field(tree,restart_df)
-        uh0 = interpolate(uh_0, U(t0))
-        ph0 = interpolate(ph_0, P(t0))
+        uh0 = interpolate(uh_0, Ut0)
+        ph0 = interpolate(ph_0, Pt0)
     end
 
     print_initial_conditions((uh0,ph0,uh0,uh0,ph0), simcase,params)

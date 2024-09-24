@@ -31,6 +31,9 @@ export PhysicalParameters
 export TurbulenceParameters
 export SolverParameters
 export MeshInfo
+export TurbulenceDomain
+export Internal
+export Inlet
 export GmshMeshParams
 export CartesianMeshParams
 export ExportParameters

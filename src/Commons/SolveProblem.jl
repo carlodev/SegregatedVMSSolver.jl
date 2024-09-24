@@ -5,6 +5,7 @@ using GridapPETSc
 using SparseArrays
 using PartitionedArrays
 using Parameters
+using Gridap.FESpaces
 
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
@@ -21,23 +22,35 @@ export solve_case
 function initialize_solve(simcase::SimulationCase,params::Dict{Symbol,Any})
   @unpack trials,tests = params
   U,P = trials
-
+  
   @sunpack t0,dt,save_sim_dir = simcase
+
+
+  Ut0 = U(t0)
+  Pt0 = P(t0)
+
+  Ut0_1 = U(t0+dt)
+  Pt0_1 = P(t0+dt)
+
+  merge!(params, Dict(:Utn => Ut0, :Ptn => Pt0, :Utn1 => Ut0_1, :Ptn1 => Pt0_1))
+
 
   uh0, ph0 = create_initial_conditions(simcase,params)
   @info "Initial Conditions Created"
 
-  matrices = initialize_matrices(trials,tests, t0+dt, uh0, params,simcase)
+  matrices = initialize_matrices(uh0, params,simcase)
   vectors = initialize_vectors(matrices,uh0,ph0)
+
 
   initialize_export_nodes(params, simcase)
 
   mkpath(save_sim_dir)
 
 
-  uh_avg = FEFunction(U(t0), vectors[2])
+  println("time 0")
+  @time uh_avg = FEFunction(Ut0, vectors[2])
   set_zeros!(uh_avg.fields)
-  ph_avg = FEFunction(P(t0),  vectors[1])
+  ph_avg = FEFunction(Pt0,  vectors[1])
   set_zeros!(ph_avg.fields)
   return matrices, vectors, (uh_avg,ph_avg)
 end
@@ -53,12 +66,17 @@ It solves iteratively the velocity and pressure system.
 function solve_case(params::Dict{Symbol,Any},simcase::SimulationCase)
   @unpack trials,tests = params
   U,P = trials
-
+  
+  @unpack trials,tests = params
+  
 @sunpack t0,dt,tF =  simcase.simulationp.timep
 @sunpack petsc_options,matrix_freq_update,M,a_err_threshold,θ,Number_Skip_Expansion = simcase.simulationp.solverp
 time_step = collect(t0+dt:dt:tF)
 
 init_values = initialize_solve(simcase,params)
+
+
+@unpack Utn, Utn1, Ptn, Ptn1 = params
 
 matrices, vectors, (uh_avg,ph_avg) =  init_values
 
@@ -73,7 +91,7 @@ vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector = vectors
 
 ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
 ns2 = create_PETSc_setup(Mat_S,pres_kspsetup)
-uh_tn_updt = FEFunction(U(t0), vec_um)
+uh_tn_updt = FEFunction(Utn, vec_um)
 
 
 for (ntime,tn) in enumerate(time_step)
@@ -161,18 +179,28 @@ for (ntime,tn) in enumerate(time_step)
 
 update_ũ_vector!(ũ_vector,vec_um)
 
-uh_tn_updt = FEFunction(U(tn+dt), vec_um)
+
+
+
+println("time 1")
+Utn = Utn1
+@time Utn1 = U(tn+dt)
+
+Ptn = Ptn1
+Ptn1 = P(tn+dt)
+
+
+uh_tn_updt = FEFunction(Utn1, vec_um)
 
 if ntime>Number_Skip_Expansion
-  uh_tn_updt = FEFunction(U(tn+dt), update_ũ(ũ_vector))
+  uh_tn_updt = FEFunction(Utn1, update_ũ(ũ_vector))
 end
 
-println("Solution computed at time $tn")
-uh_tn = FEFunction(U(tn), vec_um)
-ph_tn = FEFunction(P(tn), vec_pm)
+uh_tn = FEFunction(Utn, vec_um)
+ph_tn = FEFunction(Ptn, vec_pm)
 
-uh_avg = update_time_average(uh_tn, uh_avg, U(tn), tn, ntime, time_step, simcase.simulationp.timep)
-ph_avg = update_time_average(ph_tn, ph_avg, P(tn), tn, ntime, time_step, simcase.simulationp.timep)
+uh_avg = update_time_average(uh_tn, uh_avg, Utn, tn, ntime, time_step, simcase.simulationp.timep)
+ph_avg = update_time_average(ph_tn, ph_avg, Ptn, tn, ntime, time_step, simcase.simulationp.timep)
 
 writesolution(params, simcase, ntime, tn, (uh_tn,ph_tn,uh_tn_updt,uh_avg,ph_avg))
 

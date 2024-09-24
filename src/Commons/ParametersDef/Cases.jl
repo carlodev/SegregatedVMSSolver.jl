@@ -1,32 +1,32 @@
 abstract type SimulationCase end
-abstract type VelocityBoundaryCase<:SimulationCase end
+abstract type VelocityBoundaryCase <: SimulationCase end
 
-struct SimulationParameters
+struct SimulationParameters{T<:TurbulenceDomain}
     timep::TimeParameters
     physicalp::PhysicalParameters
-    turbulencep::TurbulenceParameters
+    turbulencep::TurbulenceParameters{T}
     solverp::SolverParameters
     exportp::ExportParameters
     intialp::InitialParameters
 end
 
-function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters,
-                            solverp::SolverParameters,exportp::ExportParameters)
-    turbulencep=TurbulenceParameters()
-    intialp=InitialParameters()
-    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,intialp)
+function SimulationParameters(timep::TimeParameters, physicalp::PhysicalParameters,
+    solverp::SolverParameters, exportp::ExportParameters)
+    turbulencep = TurbulenceParameters()
+    intialp = InitialParameters()
+    SimulationParameters(timep, physicalp, turbulencep, solverp, exportp, intialp)
 end
 
-function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters, turbulencep::TurbulenceParameters,
-    solverp::SolverParameters,exportp::ExportParameters)
-    intialp=InitialParameters()
-    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,intialp)
+function SimulationParameters(timep::TimeParameters, physicalp::PhysicalParameters, turbulencep::TurbulenceParameters,
+    solverp::SolverParameters, exportp::ExportParameters)
+    intialp = InitialParameters()
+    SimulationParameters(timep, physicalp, turbulencep, solverp, exportp, intialp)
 end
 
-function SimulationParameters(timep::TimeParameters,physicalp::PhysicalParameters,
-    solverp::SolverParameters,exportp::ExportParameters, intialp::InitialParameters)
-    turbulencep=TurbulenceParameters()
-    SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,intialp)
+function SimulationParameters(timep::TimeParameters, physicalp::PhysicalParameters,
+    solverp::SolverParameters, exportp::ExportParameters, intialp::InitialParameters)
+    turbulencep = TurbulenceParameters()
+    SimulationParameters(timep, physicalp, turbulencep, solverp, exportp, intialp)
 end
 
 """
@@ -45,7 +45,7 @@ function create_new_case(case::Symbol)
     end
 end
 
-for case in (:Airfoil,:WindTunnel,:Cylinder,:LidDriven)
+for case in (:Airfoil, :WindTunnel, :Cylinder, :LidDriven)
     create_new_case(case::Symbol)
 end
 
@@ -64,10 +64,10 @@ function TaylorGreen(meshp::MeshParameters, simulationp::SimulationParameters, s
     Ua = 0.3 #0.3 [m/s]convective velocity in x
     Va = 0.2 #0.2 [m/s]convective velocity in y
     ν = 0.001 #0.001 m2/s 
-  
-  
+
+
     velocity, pressure, ωa = analytical_solution(diameter, Vs, Ua, Va, ν)
-    analyticalsol = Dict(:velocity=>velocity, :pressure=>pressure)
+    analyticalsol = Dict(:velocity => velocity, :pressure => pressure)
     TaylorGreen(analyticalsol, meshp, simulationp, sprob)
 end
 
@@ -79,48 +79,48 @@ end
 
 
 MyStructurePrint = Union{SimulationCase,StabilizedProblem,SimulationParameters,
-                        UserParameters,MeshInfo, StabilizationMethod,StabilizationFormulation}
+    UserParameters,MeshInfo,StabilizationMethod,StabilizationFormulation}
 
 
 function printstructure(s::MyStructurePrint)
     fnames = fieldnames(typeof(s))
     for fn in fnames
-        fnfield = getfield(s,fn)
+        fnfield = getfield(s, fn)
         fnfield_type = typeof(fnfield) <: MyStructurePrint
         if fnfield_type
             println(typeof(fnfield))
             printstructure(fnfield)
-        elseif  typeof(fnfield)<:Vector{SemEddy} 
+        elseif typeof(fnfield) <: Vector{SemEddy}
             println("$fn = $(fnfield[1]) - total Eddies $(length(fnfield))")
         else
             println("$fn = $fnfield")
         end
-    end 
+    end
     println()
 end
 
-Base.show(io::IO,s::MyStructurePrint) = printstructure(s)
+Base.show(io::IO, s::MyStructurePrint) = printstructure(s)
 
 
 
 function search_field(s::MyStructurePrint, ::Val{f}, flag::Bool, a) where {f}
     fnames = fieldnames(typeof(s))
-    i = 1 
-    while i<= length(fnames) && !flag
+    i = 1
+    while i <= length(fnames) && !flag
         fn = fnames[i]
 
-        fnfield = getfield(s,fn)
+        fnfield = getfield(s, fn)
         fnfield_type = typeof(fnfield) <: MyStructurePrint
 
         if f == fn
-            flag= true
+            flag = true
             a = fnfield
         elseif fnfield_type
             flag, a = search_field(fnfield, Val{f}(), flag, a)
         end
 
-        i = i+1
-    end 
+        i = i + 1
+    end
 
     return flag, a
 end
@@ -128,17 +128,17 @@ end
 
 ### Macro inspired from @unpack from UnPack.jl package
 macro sunpack(args)
-    args.head!=:(=) && error("Expression needs to be of form `a, b = c`")
+    args.head != :(=) && error("Expression needs to be of form `a, b = c`")
     items, suitecase = args.args
     items = isa(items, Symbol) ? [items] : items.args
     kd = Vector{Expr}(undef, length(items))
-    
-    for (i,key) in enumerate(items)
+
+    for (i, key) in enumerate(items)
         kd[i] = quote
             flag, val = search_field($suitecase, Val{$(Expr(:quote, key))}(), false, nothing)
             $key = val
         end
-    
+
     end
     kdblock = Expr(:block, kd...)
     esc(kdblock)
@@ -151,21 +151,25 @@ end
 For the point x, at the time t it computes the velocity fluctuations in all the direction. Each time the time t is increased the Eddy are convected.
 The time informations are coded in the VirtualBox.
 """
-function compute_fluctuation(x,t, (TurbulenceInlet,Eddies, u_in_mag, Vboxinfo, Re_stress,D))
-    u_fluct = zeros(D)
+function compute_fluctuation(x, t, (TurbulenceInlet, Eddies, u_in_mag, Vboxinfo, Re_stress, D, R))
+   u_fluct = zeros(D)
+   
+   R_tol = 0.01
 
 
-    if TurbulenceInlet
+
+   if x[1]< 0.0 &&  R^2 - R_tol < x[1].^2 + x[2].^2 < R^2 + R_tol
+
         xplane = [x...]
-        if D == 2 
-            xplane = [xplane...,0.0]
+        if D == 2
+            xplane = [xplane..., 0.0]
         end
 
         xplane[1] = 0.0 #As the inlet was a vertical plane, reduce the dimensions of virtual box
         u_fluct = compute_fluct(xplane, t, Eddies, u_in_mag, Vboxinfo, Re_stress)
         u_fluct[1] = u_fluct[1] - u_in_mag #remove the inlet velocity component
-    end
-
+        end 
 
     return VectorValue(u_fluct[1:D]...)
+
 end

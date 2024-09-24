@@ -27,7 +27,8 @@ function tests_cases(backend)
   end
 
   @testset "Cases Tests $(typeof(backend))" begin
-    turbulent_airfoil_test(backend)
+    turbulent_airfoil_test(backend, true)
+    turbulent_airfoil_test(backend, false)
     airfoil_test(backend)
     cylinder_test(backend)
     liddriven_test(backend)
