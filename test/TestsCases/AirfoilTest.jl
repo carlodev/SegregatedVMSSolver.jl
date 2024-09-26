@@ -27,9 +27,9 @@ exportp = ExportParameters(printinitial=false,printmodel=false,name_tags=["airfo
 
 
 meshp= MeshParameters(rank_partition,D,airfoil_mesh_file)
-restartp = RestartParameters(airfoil_restart_file)
+intialp = InitialParameters(airfoil_restart_file)
 
-simparams = SimulationParameters(timep,physicalp,solverp,exportp,restartp)
+simparams = SimulationParameters(timep,physicalp,solverp,exportp,intialp)
 
 
 mcase = Airfoil(meshp,simparams,sprob)

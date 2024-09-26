@@ -1,5 +1,4 @@
 using MPI
-
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.CreateProblem
 using SegregatedVMSSolver.SolveProblem

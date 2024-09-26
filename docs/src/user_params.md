@@ -22,7 +22,7 @@ The user can specify a `t_endramp`, the boundary-velocity is then increased from
 ```julia
 Re = 1000
 c= 1.0
-u_in = 1.0
+u_in = [1.0,0.0]
 physicalp = PhysicalParameters(Re=Re,c=c,u_in=u_in)
 ```
 The viscosity `ν` is computed automatically in this way
@@ -74,9 +74,9 @@ In this example, the velocity field (or better, the gradient of the velocity fie
     Exporting `.vtu` files can rapidly fill the disk space. By default, a `.vtu` file is exported every 100 time steps. You can enable a continuous exporting of `.vtu` files creating the following file : `Log/PrintSim.txt`
 
 
-### RestartParameters
+### InitialParameters
 ```julia
-restartp = RestartParameters()
+intialp = InitialParameters()
 ```
-The creation of RestartParameters is optional is not enabled by default.
+The creation of InitialParameters is optional is not enabled by default.
 The user can specify a `.csv` file path containing the columns `Points_0,Points_1,Points_2,uh_0,uh_1,uh_2`.

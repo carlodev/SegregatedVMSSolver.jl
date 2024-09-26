@@ -4,6 +4,7 @@ using GridapDistributed
 using SparseArrays
 using PartitionedArrays
 using LinearAlgebra
+using Parameters
 
 using Gridap.Arrays
 
@@ -93,8 +94,8 @@ end
 
 
 
-function initialize_matrices(trials,tests, t::Real, u_adv, params,simcase)
-  return compute_matrices(trials, tests, t::Real, u_adv, params,simcase)
+function initialize_matrices(u_adv, params,simcase)
+  return compute_matrices(u_adv, params,simcase)
 end
 
 
@@ -103,23 +104,25 @@ end
 
 It updates matrices and vectors
 """
-function compute_matrices(trials, tests, t::Real, u_adv, params,simcase)
+function compute_matrices(u_adv, params,simcase)
 
   Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs =  segregated_equations(u_adv,params,simcase)
 
-    U,P = trials
+    @unpack Utn1, Ptn1, tests = params
     V,Q = tests
 
-    Af_Tuu = AffineFEOperator(Tuu,rhs,U(t),V)
-    Af_Tpu = AffineFEOperator(Tpu,rhs,U(t),Q)
 
-    Af_Auu = AffineFEOperator(Auu,rhs,U(t),V)
-    Af_Aup = AffineFEOperator(Aup,rhs,P(t),V)
-    Af_Apu = AffineFEOperator(Apu,rhs,U(t),Q)
-    Af_App = AffineFEOperator(App,rhs,P(t),Q)
 
-    Af_ML = AffineFEOperator(ML,rhs,U(t),V)
-    Af_S = AffineFEOperator(S,rhs,P(t),Q)
+    Af_Tuu = AffineFEOperator(Tuu,rhs,Utn1,V)
+    Af_Tpu = AffineFEOperator(Tpu,rhs,Utn1,Q)
+
+    Af_Auu = AffineFEOperator(Auu,rhs,Utn1,V)
+    Af_Aup = AffineFEOperator(Aup,rhs,Ptn1,V)
+    Af_Apu = AffineFEOperator(Apu,rhs,Utn1,Q)
+    Af_App = AffineFEOperator(App,rhs,Ptn1,Q)
+
+    Af_ML = AffineFEOperator(ML,rhs,Utn1,V)
+    Af_S = AffineFEOperator(S,rhs,Ptn1,Q)
 
     Mat_Tuu = get_matrix(Af_Tuu)
     Mat_Tpu = get_matrix(Af_Tpu)

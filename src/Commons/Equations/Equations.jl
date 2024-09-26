@@ -10,7 +10,6 @@ using Gridap.CellData
 using Gridap.Arrays
 using Gridap.CellData
 using GridapDistributed: Algebra
-
 using SegregatedVMSSolver.ParametersDef
 
 export segregated_equations
