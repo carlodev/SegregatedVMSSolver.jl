@@ -93,7 +93,6 @@ ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
 ns2 = create_PETSc_setup(Mat_S,pres_kspsetup)
 uh_tn_updt = FEFunction(Utn, vec_um)
 
-
 for (ntime,tn) in enumerate(time_step)
 
       m = 0
@@ -103,7 +102,7 @@ for (ntime,tn) in enumerate(time_step)
     
         @time begin
          Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
-          Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = compute_matrices(trials, tests, tn+dt, uh_tn_updt, params,simcase)
+          Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = compute_matrices(uh_tn_updt, params, simcase)
          
           matrices = ( Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
           Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap)
@@ -143,9 +142,10 @@ for (ntime,tn) in enumerate(time_step)
 
         solve_pressure!(ns2,matrices,vectors,dt,θ)
       
-        Δpm1 = GridapDistributed.change_ghost(Δpm1, Mat_Aup)
-
-        Δa .= Δa_star - θ .* Mat_inv_ML .* (Mat_Aup * Δpm1)
+     
+           Δpm1 = GridapDistributed.change_ghost(Δpm1, Mat_Aup)
+        println("Update Δa")
+        @time Δa .= Δa_star - θ .* Mat_inv_ML .* (Mat_Aup * Δpm1)
 
         vec_um .+=  dt * Δa
         vec_pm .+= Δpm1
@@ -157,8 +157,8 @@ for (ntime,tn) in enumerate(time_step)
           norm_Δa0 = norm(Δa)
           norm_Δp0 = norm(Δpm1)
         else
-          vec_sum_pm .+= Δpm1
-          vec_am .+= Δa
+          @time vec_sum_pm .+= Δpm1
+          @time vec_am .+= Δa
         end
         
         err_norm_Δa0 = norm_Δa0/norm(Δa)
@@ -168,6 +168,7 @@ for (ntime,tn) in enumerate(time_step)
         evaluate_convergence(err_norm_Δp0, "pressure")
 
         m = m + 1
+      
 
     end  #end while
   end #end elapsed
@@ -181,14 +182,14 @@ update_ũ_vector!(ũ_vector,vec_um)
 
 
 
-
-println("time 1")
 Utn = Utn1
 @time Utn1 = U(tn+dt)
 
 Ptn = Ptn1
 Ptn1 = P(tn+dt)
 
+params[:Ptn1] = Ptn1
+params[:Utn1] = Utn1
 
 uh_tn_updt = FEFunction(Utn1, vec_um)
 
@@ -201,6 +202,8 @@ ph_tn = FEFunction(Ptn, vec_pm)
 
 uh_avg = update_time_average(uh_tn, uh_avg, Utn, tn, ntime, time_step, simcase.simulationp.timep)
 ph_avg = update_time_average(ph_tn, ph_avg, Ptn, tn, ntime, time_step, simcase.simulationp.timep)
+
+
 
 writesolution(params, simcase, ntime, tn, (uh_tn,ph_tn,uh_tn_updt,uh_avg,ph_avg))
 

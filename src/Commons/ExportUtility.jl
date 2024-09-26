@@ -39,8 +39,6 @@ function wrap_vector(vv, p::Int64)
 end
 
 
-
-
 # """
 #     conv_VectorValue(v::VectorValue)
 
@@ -386,8 +384,8 @@ end
 
 
 function writesolution(simcase::TaylorGreen, Ω, save_path, tn::Float64, fields::Tuple)
-    u_analytic = simcase.analyticalsol[:velocity]
-    p_analytic = simcase.analyticalsol[:pressure]
+    u_analytic = simcase.bc_type.a_solution[:velocity]
+    p_analytic = simcase.bc_type.a_solution[:pressure]
     uh, ph = fields
     writevtk(Ω, save_path, cellfields=["uh" => uh, "uh_analytic" => u_analytic(tn), "ph" => ph, "ph_analytic" => p_analytic(tn)])
 end
@@ -405,9 +403,9 @@ end
 
 It computes the velocity and pressure L2 error for the Taylor-Green case 
 """
-function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen, tn::Float64, fields::Tuple)
-    u_analytic = simcase.analyticalsol[:velocity](tn)
-    p_analytic = simcase.analyticalsol[:pressure](tn)
+function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Periodic}, tn::Float64, fields::Tuple)
+    u_analytic = simcase.bc_type.a_solution[:velocity](tn)
+    p_analytic = simcase.bc_type.a_solution[:pressure](tn)
     uh, ph = fields
     @unpack dΩ = params
     #error velocity and pressure
@@ -421,7 +419,7 @@ function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen, tn::Float
     println("L2 prssure error = $l2ep")
 end
 
-function compute_error(params::Dict{Symbol,Any}, simcase::VelocityBoundaryCase, tn::Float64, fields::Tuple)
+function compute_error(params::Dict{Symbol,Any}, simcase, tn::Float64, fields::Tuple)
 
 end
 

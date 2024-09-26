@@ -18,6 +18,14 @@ export TaylorGreen
 export LidDriven
 export VelocityBoundaryCase
 
+export TGVBoundaryConditionsType
+export TaylorGreen_Periodic_Parameters
+export TaylorGreen_Natural_Parameters
+export Natural
+export Periodic
+
+
+
 export create_new_case
 export printstructure
 export search_field

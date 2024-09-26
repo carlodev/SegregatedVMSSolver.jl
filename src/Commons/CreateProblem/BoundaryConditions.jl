@@ -104,13 +104,28 @@ function create_boundary_conditions(simcase::LidDriven, u_free,u_SEM, u_wall)
 end 
 
 
-function create_boundary_conditions(simcase::TaylorGreen)
-    @unpack analyticalsol = simcase
-    @unpack pressure = analyticalsol
+function create_boundary_conditions(simcase::TaylorGreen{Periodic})
+    @unpack a_solution = simcase.bc_type
+    @unpack pressure = a_solution
 
   u_diri_tags=[]
   u_diri_values = []
   p_diri_tags= ["centre"]
   p_diri_values=pressure
   return u_diri_tags,u_diri_values,p_diri_tags,p_diri_values
+end
+
+
+function create_boundary_conditions(simcase::TaylorGreen{Natural})
+    @unpack a_solution = simcase.bc_type
+    @unpack pressure = a_solution
+
+
+    u_diri_tags=[]
+    u_diri_values = []
+    
+    p_diri_tags= ["external"]
+    p_diri_values=  a_solution[:pressure]
+
+    return u_diri_tags,u_diri_values,p_diri_tags,p_diri_values
 end

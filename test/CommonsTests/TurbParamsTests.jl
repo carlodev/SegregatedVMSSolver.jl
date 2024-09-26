@@ -16,9 +16,11 @@ using SegregatedVMSSolver.ParametersDef
     rank_partition=(2,2,1)
 
     #VirtualBox creation
-    Vboxinfo = VirtualBox((-6,6), (-0.50,0.50); σ=0.02)
+    
+    Vboxinfo = VirtualBox((-1.0,1.0), (0.0,0.2); σ=0.0125)
     physicalp = PhysicalParameters(Re=1000)
-
+    Vboxinfo.N
+    
     turbulencep= TurbulenceParameters(TI, Vboxinfo, physicalp)
     sprob = StabilizedProblem()
 
@@ -33,11 +35,26 @@ using SegregatedVMSSolver.ParametersDef
 
     @test typeof(tcase) <: SimulationCase
 
-    eval_point = [0.0, 1.0, 0.0] #Point in the domain
-    # for tt = 0.0:0.1:0.5
+    eval_point = [ rand(3) for i = 1:1:   1000    ]
+   
+    
     tt = 0.1  
-        u_fluct = compute_fluctuation(eval_point, tt, tcase)
-        @test typeof(u_fluct) <: AbstractVector
+    @unpack TurbulenceInlet,Eddies,   Vboxinfo, Re_stress = tcase.simulationp.turbulencep
+    Vboxinfo.σ
+    
+    for ep in eval_point
+        @time compute_fluctuation(ep, tt, (TurbulenceInlet,Eddies, u_in_mag, Vboxinfo, Re_stress,D))
+    end
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
     # end
 
 end

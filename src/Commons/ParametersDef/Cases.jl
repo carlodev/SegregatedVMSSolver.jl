@@ -1,6 +1,10 @@
 abstract type SimulationCase end
 abstract type VelocityBoundaryCase <: SimulationCase end
 
+
+abstract type TGVBoundaryConditionsType end
+
+
 struct SimulationParameters{T<:TurbulenceDomain}
     timep::TimeParameters
     physicalp::PhysicalParameters
@@ -51,32 +55,93 @@ end
 
 
 
-struct TaylorGreen <: SimulationCase
-    analyticalsol
+@with_kw struct TaylorGreenParameters
+    Vs::Float64 = 1.0
+    # diameter::Float64 = 0.5 # It is defined in the PhysicalParameter c
+    Ua::Float64 = 0.3
+    Va::Float64 = 0.2
+    # ν::Float64 = 0.001  # It is now defined in the PhysicalParameter
+end
+
+
+function TaylorGreen_Periodic_Parameters()
+    Vs::Float64 = 1.0
+    # diameter::Float64 = 0.5 # It is defined in the PhysicalParameter c
+    Ua::Float64 = 0.3
+    Va::Float64 = 0.2
+    # ν::Float64 = 0.001  # It is now defined in the PhysicalParameter
+    return TaylorGreenParameters(Vs, Ua, Va)
+end
+
+
+function TaylorGreen_Natural_Parameters()
+    Vs::Float64 = 1.0
+    # diameter::Float64 = 0.5 # It is defined in the PhysicalParameter c
+    Ua::Float64 = 0.0
+    Va::Float64 = 0.0
+    # ν::Float64 = 0.001  # It is now defined in the PhysicalParameter
+    return  TaylorGreenParameters(Vs, Ua, Va)
+
+end
+
+
+@with_kw mutable struct Periodic <: TGVBoundaryConditionsType
+    params::TaylorGreenParameters = TaylorGreen_Periodic_Parameters()
+    bc::Tuple = (true, true)
+    a_solution::Dict 
+end
+
+@with_kw mutable struct Natural <: TGVBoundaryConditionsType
+    params::TaylorGreenParameters = TaylorGreen_Natural_Parameters()
+    bc::Tuple = (false, false)
+    a_solution::Dict 
+end
+
+function Periodic(mp::MeshParameters, fp::PhysicalParameters) 
+    params = TaylorGreen_Periodic_Parameters()
+    return Periodic(mp, fp, params)
+end
+
+function Periodic(mp::MeshParameters, fp::PhysicalParameters, params::TaylorGreenParameters) 
+    @unpack D = mp
+    @unpack Vs, Ua, Va = params
+    @unpack ν,c = fp
+
+    @assert D == 2 "TGV Periodic 3D not supported yet"
+
+    bc = ntuple(i -> true, D)
+
+    velocity, pressure, _ = analytical_solution(c*0.5, Vs, Ua, Va, ν)
+    a_solution = Dict(:velocity => velocity, :pressure => pressure)
+    return Periodic(params, bc, a_solution )
+end
+
+function Natural(mp::MeshParameters, fp::PhysicalParameters) 
+    params = TaylorGreen_Natural_Parameters()
+    return Natural(mp, fp, params)
+end
+
+function Natural(mp::MeshParameters, fp::PhysicalParameters, params::TaylorGreenParameters) 
+    @unpack D = mp
+    @unpack L = mp.meshinfo
+    @unpack Vs, Ua, Va = params
+    @unpack ν,c = fp
+    
+    bc = ntuple(i -> false, D)
+
+    velocity, pressure  = TGV_initial(Vs, D, L)
+    a_solution = Dict(:velocity => velocity, :pressure => pressure)
+
+    return Natural(params, bc, a_solution)
+end
+
+
+struct TaylorGreen{T<:TGVBoundaryConditionsType} <: SimulationCase
+    bc_type::T
     meshp::MeshParameters
     simulationp::SimulationParameters
     sprob::StabilizedProblem
 end
-
-function TaylorGreen(meshp::MeshParameters, simulationp::SimulationParameters, sprob::StabilizedProblem)
-    diameter = 0.5 #0.5 [m] vortex dimension
-    Vs = 1 #1[m/s]swirling speed
-    Ua = 0.3 #0.3 [m/s]convective velocity in x
-    Va = 0.2 #0.2 [m/s]convective velocity in y
-    ν = 0.001 #0.001 m2/s 
-
-
-    velocity, pressure, ωa = analytical_solution(diameter, Vs, Ua, Va, ν)
-    analyticalsol = Dict(:velocity => velocity, :pressure => pressure)
-    TaylorGreen(analyticalsol, meshp, simulationp, sprob)
-end
-
-
-
-
-# VelocityBoundaryCase = Union{Airfoil,WindTunnel,Box,Cylinder, LidDriven}
-
-
 
 MyStructurePrint = Union{SimulationCase,StabilizedProblem,SimulationParameters,
     UserParameters,MeshInfo,StabilizationMethod,StabilizationFormulation}
@@ -100,7 +165,6 @@ function printstructure(s::MyStructurePrint)
 end
 
 Base.show(io::IO, s::MyStructurePrint) = printstructure(s)
-
 
 
 function search_field(s::MyStructurePrint, ::Val{f}, flag::Bool, a) where {f}

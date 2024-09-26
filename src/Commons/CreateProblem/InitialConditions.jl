@@ -3,7 +3,7 @@
 
 It creates the initial conditions for velocity and pressure. If `restart` is `true` then the velocity and the pressure field are interpoled on the specified DataFrame.  
 """
-function create_initial_conditions(simcase::VelocityBoundaryCase,params::Dict{Symbol,Any})
+function create_initial_conditions(simcase::VelocityBoundaryCase, params::Dict{Symbol,Any})
     @unpack Utn, Ptn = params ## initial fields
 
     @sunpack restart,D,t0, u0 = simcase
@@ -31,17 +31,19 @@ function create_initial_conditions(simcase::VelocityBoundaryCase,params::Dict{Sy
 end
 
 
-#TaylorGreenCase
+#TaylorGreenCase Natural and Periodic
 function create_initial_conditions(simcase::TaylorGreen,params::Dict{Symbol,Any})
     @unpack U,P = params
-    @unpack analyticalsol = simcase
+    @unpack a_solution = simcase.bc_type
     @sunpack t0 =  simcase
 
-    uh0 = interpolate(analyticalsol[:velocity](t0), U(t0))
-    ph0 = interpolate(analyticalsol[:pressure](t0), P(t0))
+    uh0 = interpolate(a_solution[:velocity](t0), U(t0))
+    ph0 = interpolate(a_solution[:pressure](t0), P(t0))
     print_initial_conditions((uh0,ph0), simcase,params)
     return uh0,ph0
 end
+
+
 
 function print_initial_conditions(fields, simcase::SimulationCase,params::Dict{Symbol,Any})
     if simcase.simulationp.exportp.printinitial
