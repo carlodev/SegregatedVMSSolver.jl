@@ -8,7 +8,7 @@ using MPI
 function TGV_Periodic_test(backend)
     t0 =0.0
     dt = 0.02
-    tF = 2.0
+    tF = dt * 5
     vortex_diameter = 1.0
 
     Re = 1000
@@ -24,7 +24,7 @@ function TGV_Periodic_test(backend)
     exportp = ExportParameters(printinitial=true,printmodel=true)
 
 
-    meshp= MeshParameters(rank_partition,D;N=32,L=vortex_diameter/2)
+    meshp= MeshParameters(rank_partition,D;N=16,L=vortex_diameter/2)
     simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
     bc_tgv = Periodic(meshp,physicalp ) 
