@@ -10,7 +10,7 @@ function TGV_Periodic_test(backend)
     dt = 0.02
     tF = 2.0
     vortex_diameter = 1.0
-
+    N = 16
     Re = 1000
     D = 2
     rank_partition = (2,2)
@@ -21,10 +21,10 @@ function TGV_Periodic_test(backend)
 
     physicalp = PhysicalParameters(Re=Re,c=vortex_diameter)
     solverp = SolverParameters(matrix_freq_update = 1)
-    exportp = ExportParameters(printinitial=true,printmodel=true)
+    exportp = ExportParameters(printinitial=false,printmodel=false)
 
 
-    meshp= MeshParameters(rank_partition,D;N=32,L=vortex_diameter/2)
+    meshp= MeshParameters(rank_partition,D;N=N,L=vortex_diameter/2)
     simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
     bc_tgv = Periodic(meshp,physicalp ) 
