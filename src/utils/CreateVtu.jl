@@ -1,7 +1,7 @@
 module CreateVtu
 
 using FileIO
-
+export create_vtu_file
 
 function create_vtu_file(results_folder::String)
   ff = cd(readdir, results_folder)
