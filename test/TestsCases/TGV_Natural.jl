@@ -5,8 +5,7 @@ using SegregatedVMSSolver.SolverOptions
 using MPI
 using Test
 
-# function TGV_Natural_test(backend)
-backend = with_debug
+function TGV_Natural_test(backend)
     t0 =0.0
     dt = 0.1
     tF = 3.0
@@ -39,6 +38,6 @@ backend = with_debug
 
     @test SegregatedVMSSolver.solve(mcase,backend)
 
-# end
+end
 
 
