@@ -2,7 +2,7 @@ module ExportUtility
 
 using Gridap
 using GridapDistributed
-using CSV
+using CSV, DelimitedFiles
 using DataFrames
 using Parameters
 using PartitionedArrays
@@ -383,11 +383,17 @@ function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime:
 end
 
 
-function writesolution(simcase::TaylorGreen, Ω, save_path, tn::Float64, fields::Tuple)
+function writesolution(simcase::TaylorGreen{Periodic}, Ω, save_path, tn::Float64, fields::Tuple)
     u_analytic = simcase.bc_type.a_solution[:velocity]
     p_analytic = simcase.bc_type.a_solution[:pressure]
     uh, ph = fields
     writevtk(Ω, save_path, cellfields=["uh" => uh, "uh_analytic" => u_analytic(tn), "ph" => ph, "ph_analytic" => p_analytic(tn)])
+end
+
+
+function writesolution(simcase::TaylorGreen{Natural}, Ω, save_path, tn::Float64, fields::Tuple)
+    uh, ph = fields
+    writevtk(Ω, save_path, cellfields=["uh" => uh, "ph" => ph])
 end
 
 
@@ -418,6 +424,34 @@ function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Periodic},
     println("L2 velocity error = $l2eu")
     println("L2 prssure error = $l2ep")
 end
+
+function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Natural}, tn::Float64, fields::Tuple)
+    uh, _ = fields
+    @unpack dΩ = params
+
+    wh = ∇×uh
+    ### Compute Kinetic Energy
+    Ek = 0.5 .* sum(∫(uh ⋅ uh) * dΩ) #not normalized with the volume
+    println("Ek = $Ek")
+    ### Compute Dissipation or Enstrophy https://en.wikipedia.org/wiki/Enstrophy
+    Enstrophy = sum(∫(wh ⋅ wh) * dΩ) #not normalized with the volume
+
+    println("Enstrophy = $Enstrophy")
+
+    # Define the file path
+    file_path = "TGV_output.csv"
+
+    # Open the file in append mode, create it if it doesn't exist, write a line, and close it
+    open(file_path, "a") do file
+        writedlm(file, [[tn, Ek, Enstrophy]], ',')
+    end
+
+
+end
+
+
+
+
 
 function compute_error(params::Dict{Symbol,Any}, simcase, tn::Float64, fields::Tuple)
 
