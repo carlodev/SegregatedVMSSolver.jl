@@ -174,7 +174,7 @@ for (ntime,tn) in enumerate(time_step)
   end #end elapsed
 
 
-  println("solution time")
+  println("solution time at time $tn")
   println(time_solve)
     GridapPETSc.GridapPETSc.gridap_petsc_gc()
 

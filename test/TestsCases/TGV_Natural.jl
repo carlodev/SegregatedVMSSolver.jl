@@ -8,7 +8,7 @@ using Test
 function TGV_Natural_test(backend)
     t0 =0.0
     dt = 0.1
-    tF = 3.0
+    tF = dt * 21
     vortex_diameter = 1.0
     
     N = 16
@@ -26,7 +26,8 @@ function TGV_Natural_test(backend)
     exportp = ExportParameters(printinitial=false,printmodel=false)
 
 
-    meshp= MeshParameters(rank_partition,D;N=N,L=vortex_diameter/2)
+    meshp= MeshParameters(rank_partition,D;N=16,L=vortex_diameter/2)
+
     simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
     bc_tgv = Natural(meshp,physicalp ) 
