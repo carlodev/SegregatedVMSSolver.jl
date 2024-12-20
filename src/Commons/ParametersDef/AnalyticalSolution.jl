@@ -27,7 +27,29 @@ function analytical_solution(diameter, Vs, Ua, Va, ν)
 end
 
 
-function TGV_initial(u0::Float64, D::Int64, L::Vector)
+function TGV_initial(u0::Float64, D::Int64, c::Real)
+  
+  Npi(x::VectorValue,i::Int64) = x[i] /c
+
+  ux(x,t) =u0*cos(Npi(x,1))*sin(Npi(x,2))*sin(Npi(x,3))
+  uy(x,t) =-u0*sin(Npi(x,1))*cos(Npi(x,2))*sin(Npi(x,3))
+  uz(x,t) = 0.0
+  velocity(x,t) = (D==2) ? VectorValue(ux(x,t), uy(x,t)) :  VectorValue(ux(x,t), uy(x,t), uz(x,t))
+
+  p0(x,t) = 1/16 * (cos(2*Npi(x,1)) + cos(2*Npi(x,2)))*(cos(2*Npi(x,3))+2)
+
+
+  ux(t::Real) = x -> ux(x, t)
+  vy(t::Real) = x -> uy(x, t)
+  uz(t::Real) = x -> uy(x, t)
+
+  velocity(t::Real) = x -> velocity(x, t)
+  p0(t::Real) = x -> p0(x, t)
+  return velocity, p0
+end
+
+### Natural Case Initial and BC conditions
+function TGV_Natural_initial(u0::Float64, D::Int64, L::Vector)
 
   Npi(x::VectorValue,i::Int64) = x[i] * (pi)/(2*L[i])
 
@@ -35,7 +57,7 @@ function TGV_initial(u0::Float64, D::Int64, L::Vector)
   uy(x,t) = (D==2) ? -u0*sin(Npi(x,1))*cos(Npi(x,2)) : -u0*sin(Npi(x,1))*cos(Npi(x,2))*cos(Npi(x,3)) 
   uz(x,t) = 0.0
   velocity(x,t) = (D==2) ? VectorValue(ux(x,t), uy(x,t)) :  VectorValue(ux(x,t), uy(x,t), uz(x,t))
-  p0(x,t) =  0.0  # (D==2) ? 1/16 * (cos(2*Npi(x,1)) + cos(2*Npi(x,2)))*(2) : 1/16 * (cos(2*Npi(x,1)) + cos(2*Npi(x,2)))*(cos(2*Npi(x,3))+2)
+  p0(x,t) = 0.0
 
   ux(t::Real) = x -> ux(x, t)
   vy(t::Real) = x -> uy(x, t)

@@ -1,5 +1,6 @@
 module SegregatedVMSSolver
 
+__precompile__(false)
 
 include(joinpath("Commons","SolverOptions.jl"))
 include(joinpath("Commons","Interfaces.jl"))

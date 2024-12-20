@@ -43,12 +43,14 @@ end
 
 It add a new tag named `tagname` at the specified `tag_coordinates`    
 """
-function add_new_tag!(model, tag_coordinate::Point, tagname::String)
+function add_new_tag!(model, tag_coordinate::Point, tagname::String; a_tol=1e-8)
     
-  
-a_tol = 1e-8
+    #   function is_tag(x::Vector{VectorValue{2,Float64}})
+    #     isapprox(norm(getindex.(x,1)), tag_coordinate[1], atol=a_tol) && isapprox(norm( getindex.(x,2) ), tag_coordinate[2], atol=a_tol)
+    # end
     function is_tag(x::Vector{VectorValue{2,Float64}})
-        isapprox(norm(getindex.(x,1)), tag_coordinate[1], atol=a_tol) && isapprox(norm( getindex.(x,2) ), tag_coordinate[2], atol=a_tol)
+        x = x[1]
+        isapprox(getindex(x,1), tag_coordinate[1], atol=a_tol) && isapprox(getindex(x,2), tag_coordinate[2], atol=a_tol)
     end
 
     function is_tag(x::Vector{VectorValue{3,Float64}})
@@ -65,7 +67,7 @@ function add_new_tag!(model, range_coordinate::Tuple, tagname::String)
         @assert length(range_coordinate) == 2 "Range new tags not the same dimension of the problem"
         range_x = getindex(range_coordinate,1)
         range_y = getindex(range_coordinate,2)
-       x = getindex(x,1)
+        x = getindex(x,1)
 
         return getindex.(x,1) .> range_x[1] && getindex.(x,1) .< range_x[2] && 
                getindex.(x,2) .> range_y[1] && getindex.(x,2) .< range_y[2]
