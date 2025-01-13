@@ -28,7 +28,10 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 
 
-mcase = TaylorGreen(meshp,simparams,sprob)
+bc_tgv = Periodic(meshp,physicalp ) 
+
+mcase = TaylorGreen(bc_tgv, meshp,simparams,sprob)
+
 
 @test SegregatedVMSSolver.solve(mcase,backend)
 
