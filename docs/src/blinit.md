@@ -11,20 +11,22 @@ The idea is to compute the wall-normal distance, from the airfoil, for each poin
 
 
 ## How to use it
-It is possible to initialize the airfoil simulation using the `WallDistance` module. It works only in serial and for 2D meshes but it is possible to initilize a 3D solution from a 2D results.
+It is possible to initialize the airfoil simulation using the `WallDistance` module. It works only in serial and for 2D meshes but it is possible to initialize a 3D solution from a 2D results.
 
 ```julia
 using SegregatedVMSSolver
 using SegregatedVMSSolver.WallDistance
 
-mesh_file = "models/DU89_2D_A1_M.msh"
+
+mesh_file = joinpath(@__DIR__, "../../models", "DU89_2D_A1_M.msh")
+
 D = 2
-u_in = [1.0,0.0,0.0]
+u_in = 1.0
 Re = 500e3
 chord = 1.0
-walltag = ["airfoil","wake"]
+walltag = ["airfoil"]
 
-get_initial_conditions(mesh_file, D, u_in, Re, chord, walltag)
+df_start = get_initial_conditions(mesh_file, u_in, Re, walltag; D=D, chord=chord)
 ```
 This will create a `Initial_Conditions.vtu` which can be open in ParaView and `BoundaryLayerInit.csv` which can be used to restart the simulation.
 Only the velocity is initilized, not the pressure.
