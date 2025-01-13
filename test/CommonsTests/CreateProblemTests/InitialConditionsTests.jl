@@ -52,6 +52,11 @@ function test_initialconditions(rank_partition, distribute, D)
         :tests => tests)
         merge!(params, new_dict)
         
+        Ut0 = U(0)
+        Pt0 = P(0)
+      
+        merge!(params, Dict(:Utn => Ut0, :Ptn => Pt0))
+
         uh0,ph0 = create_initial_conditions(simcase,params)
 
         return true
