@@ -39,7 +39,7 @@ tF = 5e-3
 Re = 10
 D = 2
 rank_partition = (2,2)
-airfoil_mesh_file = joinpath(@__DIR__,"..", "..", "models", "DU89_2D_A1_M.msh")
+airfoil_mesh_file = joinpath(@__DIR__,"..", "assets", "sd7003s_2D_test.msh")
 ```
 
 ```julia
@@ -75,10 +75,6 @@ Then in bash give the command. Check the MPI section for more details
 ```bash
  mpiexecjl -n 4 julia --project=. run_mysimulation.jl
 ```
-
-
-
-
 
 
 

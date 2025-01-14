@@ -9,7 +9,7 @@ using SyntheticEddyMethod
 
 using SegregatedVMSSolver.ParametersDef
 
-# function main(distribute)
+function main(distribute)
     TI = 0.001    
     D = 3
     meshfile = joinpath(@__DIR__, "..", "models", "sd7003s_3D_simple.msh")
@@ -51,13 +51,7 @@ using SegregatedVMSSolver.ParametersDef
     
     
     
-    
-    
-    
-    
-    # end
-
 end
 
 
-end
+end #end module

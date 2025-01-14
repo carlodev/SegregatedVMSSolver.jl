@@ -410,6 +410,8 @@ end
 It computes the velocity and pressure L2 error for the Taylor-Green case 
 """
 function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Periodic}, tn::Float64, fields::Tuple)
+    @sunpack D = simcase
+    if D == 2
     u_analytic = simcase.bc_type.a_solution[:velocity](tn)
     p_analytic = simcase.bc_type.a_solution[:pressure](tn)
     uh, ph = fields
@@ -422,12 +424,10 @@ function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Periodic},
     l2eu = sqrt(sum(∫(eu ⋅ eu) * dΩ))
     l2ep = sqrt(sum(∫(ep * ep) * dΩ))
     println("L2 velocity error = $l2eu")
-    println("L2 prssure error = $l2ep")
-end
-
-function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Natural}, tn::Float64, fields::Tuple)
-    uh, _ = fields
-    @unpack dΩ = params
+    println("L2 pressure error = $l2ep")
+    elseif D == 3 
+        uh, _ = fields
+    @unpack dΩ,parts = params
 
     wh = ∇×uh
     ### Compute Kinetic Energy
@@ -442,11 +442,22 @@ function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Natural}, 
     file_path = "TGV_output.csv"
 
     # Open the file in append mode, create it if it doesn't exist, write a line, and close it
-    open(file_path, "a") do file
-        writedlm(file, [[tn, Ek, Enstrophy]], ',')
+
+    map( parts) do part
+        if part == 1
+            open(file_path, "a") do file
+                writedlm(file, [[tn, Ek, Enstrophy]], ',')
+            end
+        end
+
     end
 
+    end
 
+end
+
+function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Natural}, tn::Float64, fields::Tuple)
+    
 end
 
 

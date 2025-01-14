@@ -35,6 +35,7 @@ Re = 1000
 D = 2
 rank_partition = (2,2)
 
+backend = with_debug
 
 sprob = StabilizedProblem(VMS(1))
 timep = TimeParameters(t0=t0,dt=dt,tF=tF)
@@ -50,8 +51,16 @@ We create a mesh of 32x32 elements
 meshp= MeshParameters(rank_partition,D;N=32,L=0.5)
 simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
+bc_tgv = Periodic(meshp,physicalp ) 
+mcase = TaylorGreen(bc_tgv, meshp,simparams,sprob)
 
-mcase = TaylorGreen(meshp,simparams,sprob)
+SegregatedVMSSolver.solve(mcase,backend)
+```
 
-SegregatedVMSSolver.solve(mcase,with_debug)
+It is also possible to use natural boundary conditions:
+
+```julia
+bc_tgv = Natural(meshp,physicalp) 
+mcase = TaylorGreen(bc_tgv, meshp,simparams,sprob)
+SegregatedVMSSolver.solve(mcase,backend)
 ```

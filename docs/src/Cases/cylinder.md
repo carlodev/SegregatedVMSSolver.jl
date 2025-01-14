@@ -22,7 +22,7 @@ tF = 0.5
 Re = 100
 D = 2
 rank_partition = (2,2)
-cylinder_mesh_file = joinpath(@__DIR__,"..", "..", "models", "Cylinder_2D.msh")
+cylinder_mesh_file = joinpath(@__DIR__,"..", "assets", "Cylinder_2D.msh")
 
 
 sprob = StabilizedProblem(SUPG(1))
