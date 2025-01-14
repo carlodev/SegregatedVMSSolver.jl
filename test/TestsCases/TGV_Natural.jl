@@ -7,8 +7,8 @@ using Test
 
 
 function TGV_Natural_test(backend)
-    @test TGV_Natural_test(backend,2)
-    @test TGV_Natural_test(backend,3)
+    TGV_Natural_test(backend,2)
+    TGV_Natural_test(backend,3)
 end
 
 

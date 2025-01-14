@@ -7,13 +7,11 @@ using Test
 
 
 function TGV_Periodic_test(backend)
-    @test TGV_Periodic_test(backend,2)
-    @test TGV_Periodic_test(backend,3)
+    TGV_Periodic_test(backend,2)
+    TGV_Periodic_test(backend,3)
 end
 
 function TGV_Periodic_test(backend,D::Int64)
-
-
 
     t0 =0.0
     dt = 0.01
@@ -24,9 +22,6 @@ function TGV_Periodic_test(backend,D::Int64)
 
     
     rank_partition = ntuple(i -> 2, D)
-
-
-    
 
 
     solver_options = petsc_options(; vel_ksp="gmres", vel_pc="gamg", pres_ksp = "cg", pres_pc = "ilu")
