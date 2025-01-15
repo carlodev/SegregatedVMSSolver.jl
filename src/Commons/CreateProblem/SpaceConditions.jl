@@ -63,10 +63,3 @@ function creation_fe_spaces(simcase, model, boundary_conditions)
 
 end
 
-
-function creation_∇fe_space(simcase,model)
-    @sunpack D,order = simcase
-    reffe_∇u = ReferenceFE(lagrangian,VectorValue{D^2,Float64},order)
-    ∇U = TestFESpace(model,reffe_∇u,conformity=:H1)
-    return ∇U
-end

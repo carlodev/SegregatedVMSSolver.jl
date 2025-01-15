@@ -36,10 +36,10 @@ function initialize_solve(simcase::SimulationCase,params::Dict{Symbol,Any})
 
 
   uh0, ph0 = create_initial_conditions(simcase,params)
-  ∇uh0 = create_initial_∇uh(uh0,params)
+
   @info "Initial Conditions Created"
 
-  matrices = initialize_matrices((uh0,∇uh0), params,simcase)
+  matrices = initialize_matrices(uh0, params,simcase)
   vectors = initialize_vectors(matrices,uh0,ph0)
 
 
@@ -93,7 +93,6 @@ ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
 ns2 = create_PETSc_setup(Mat_S,pres_kspsetup)
 
 uh_tn_updt = FEFunction(Utn, vec_um)
-∇uh_tn = interpolate(∇(uh_tn_updt),params[:∇U])
 
 for (ntime,tn) in enumerate(time_step)
 
@@ -103,7 +102,7 @@ for (ntime,tn) in enumerate(time_step)
         println("update_matrices")
     
         @time begin
-          update_all_matrices_vectors!(matrices, (uh_tn_updt,∇uh_tn), params,simcase)
+          update_all_matrices_vectors!(matrices, uh_tn_updt, params,simcase)
         end
 
         println("update numerical set up")
@@ -196,7 +195,6 @@ end
 
 uh_tn = FEFunction(Utn, vec_um)
 ph_tn = FEFunction(Ptn, vec_pm)
-∇uh_tn = interpolate(∇(uh_tn),params[:∇U])
 
 uh_avg = update_time_average(uh_tn, uh_avg, Utn, tn, ntime, time_step, simcase.simulationp.timep)
 ph_avg = update_time_average(ph_tn, ph_avg, Ptn, tn, ntime, time_step, simcase.simulationp.timep)

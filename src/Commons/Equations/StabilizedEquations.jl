@@ -6,7 +6,7 @@ Wrapper for the convective term
 """
 cconv(u, ∇u) = (∇u') ⋅ u
 
-function segregated_equations((u_adv,∇u_adv),params::Dict{Symbol,Any},simcase::SimulationCase)
+function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::SimulationCase)
   @sunpack skew, ν,dt, θ,D = simcase
   
   sprob = simcase.sprob
@@ -16,8 +16,7 @@ function segregated_equations((u_adv,∇u_adv),params::Dict{Symbol,Any},simcase:
     skewcoeff = skew * 0.5 # ==0 if skew == false
     vms_activation = is_VMS(sprob.method)
     
-    visc_term =   - ν* VectorValue( create_tensor_laplacian(D))⋅∇u_adv
-
+    visc_term =   - ν* compute_Δ(u_adv,D) # compute the laplacian of the previous time step
     stab_coeff = compute_stab_coeff(simcase,params)
     Tm = momentum_stabilization(u_adv, stab_coeff, simcase)
     Tc = continuity_stabilization(u_adv, stab_coeff, simcase)
@@ -63,8 +62,14 @@ function is_VMS(method::SUPG)
   return 0
 end
 
-
-function create_tensor_laplacian(D::Int64)
-  vec = [i == j for i in 1:D, j in 1:D] |> vec -> vec[:]
-  return vec
+function Gridap.Fields.push_∇∇(∇∇a::Field,ϕ::Field)
+  s = pinvJt(∇(ϕ))
+  return  tr(s⋅∇∇a⋅transpose(s))  
 end
+
+function compute_Δ(u,D::Int64)
+  return Δ(u)⋅VectorValue(ones(D)...)
+end
+
+    
+

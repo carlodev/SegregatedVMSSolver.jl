@@ -97,17 +97,17 @@ end
 
 
 
-function initialize_matrices((u_adv,∇u_adv), params,simcase)
-  matrices = allocate_all_matrices_vectors((u_adv,∇u_adv), params,simcase)
+function initialize_matrices(u_adv, params,simcase)
+  matrices = allocate_all_matrices_vectors(u_adv, params,simcase)
   @info "matrix and vectors allocated"
-  update_all_matrices_vectors!(matrices,(u_adv,∇u_adv), params,simcase)
+  update_all_matrices_vectors!(matrices,u_adv, params,simcase)
 
   return matrices
 end
 
 
-function allocate_all_matrices_vectors((u_adv,∇u_adv), params,simcase)
-  Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs =  segregated_equations((u_adv,∇u_adv),params,simcase)
+function allocate_all_matrices_vectors(u_adv, params,simcase)
+  Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs =  segregated_equations(u_adv,params,simcase)
 
   @unpack Utn1, Ptn1, tests = params
   V,Q = tests
@@ -131,14 +131,14 @@ function allocate_all_matrices_vectors((u_adv,∇u_adv), params,simcase)
   return  Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Auu, Vec_Aup, Vec_Apu, Vec_App, Vec_Au, Vec_Ap
 end
 
-function update_all_matrices_vectors!(matrices::Tuple, (u_adv,∇u_adv), params,simcase)
+function update_all_matrices_vectors!(matrices::Tuple, u_adv, params,simcase)
 
   Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Auu, Vec_Aup, Vec_Apu, Vec_App, Vec_Au, Vec_Ap = matrices
 
   @unpack Utn1, Ptn1, tests = params
   V,Q = tests
 
-  Tuu,Tpu,Auu,Aup,Apu,App,ML,S,_ =  segregated_equations((u_adv,∇u_adv),params,simcase)
+  Tuu,Tpu,Auu,Aup,Apu,App,ML,S,_ =  segregated_equations(u_adv,params,simcase)
 
   update_matrix!(Mat_Tuu,Tuu,Utn1,V)
   update_matrix!(Mat_Tpu,Tpu,Utn1,Q)

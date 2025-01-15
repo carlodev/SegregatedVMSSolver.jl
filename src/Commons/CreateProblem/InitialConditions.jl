@@ -31,13 +31,6 @@ function create_initial_conditions(simcase::VelocityBoundaryCase, params::Dict{S
     return uh0,ph0
 end
 
-function create_initial_∇uh(uh0,params)
-    @unpack ∇U = params ## initial 
-
-    ∇uh =  interpolate(∇(uh0),∇U)
-
-    return ∇uh
-end
 
 #TaylorGreenCase Natural and Periodic
 function create_initial_conditions(simcase::TaylorGreen,params::Dict{Symbol,Any})

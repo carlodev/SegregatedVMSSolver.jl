@@ -19,9 +19,8 @@ using SegregatedVMSSolver.ExportUtility
 export create_model
 export create_boundary_conditions
 export creation_fe_spaces
-export creation_∇fe_space
 export create_initial_conditions
-export create_initial_∇uh
+
 include("AddNewTags.jl")
 include("Restart.jl")
 
