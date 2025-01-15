@@ -23,7 +23,7 @@ makedocs(;plugins=[bib],
 
         "Post Processing" => "post_proc.md",
         "Boundary Layer Initialization" => "blinit.md",
-        
+        "Create your Own Case" => "create_case.md",
         "API information" => "api_info.md",
         "References" => "references.md",
     ],
