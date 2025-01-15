@@ -57,10 +57,12 @@ function print_initial_conditions(fields, simcase::SimulationCase,params::Dict{S
     if simcase.simulationp.exportp.printinitial
       case = typeof(simcase)
       @unpack Ω = params
+      @sunpack order = simcase
       dir = "Initial_Conditions"
       mkpath(dir)
       save_path = joinpath("Initial_Conditions","InitialCondition_$(case)_.vtu")
       
-      writesolution(simcase, Ω, save_path,0.0, fields)
+      
+      writesolution(simcase, Ω, order, save_path,0.0, fields)
     end
 end

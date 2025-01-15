@@ -368,6 +368,7 @@ end
 function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime::Int64, tn::Float64, fields::Tuple)
     benchmark = simcase.simulationp.exportp.benchmark
     log_dir = simcase.simulationp.exportp.log_dir
+    nsub = simcase.sprob.method.order
 
     if !benchmark
         if (mod(ntime, 100) == 0 || print_on_request(log_dir))
@@ -375,7 +376,7 @@ function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime:
             case = typeof(simcase)
             save_path = joinpath(save_sim_dir, "$(case)_$(tn)_.vtu")
             @unpack Ω = params
-            writesolution(simcase, Ω, save_path, tn, fields)
+            writesolution(simcase, Ω, nsub, save_path, tn, fields)
         end
         compute_error(params, simcase, tn, fields)
     end
@@ -383,23 +384,26 @@ function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime:
 end
 
 
-function writesolution(simcase::TaylorGreen{Periodic}, Ω, save_path, tn::Float64, fields::Tuple)
+function writesolution(simcase::TaylorGreen{Periodic}, Ω, nsub::Int64, save_path, tn::Float64, fields::Tuple)
     u_analytic = simcase.bc_type.a_solution[:velocity]
     p_analytic = simcase.bc_type.a_solution[:pressure]
     uh, ph = fields
-    writevtk(Ω, save_path, cellfields=["uh" => uh, "uh_analytic" => u_analytic(tn), "ph" => ph, "ph_analytic" => p_analytic(tn)])
+
+    writevtk(Ω, save_path, nsubcells=nsub, cellfields=["uh" => uh, "uh_analytic" => u_analytic(tn), "ph" => ph, "ph_analytic" => p_analytic(tn)])
 end
 
 
-function writesolution(simcase::TaylorGreen{Natural}, Ω, save_path, tn::Float64, fields::Tuple)
+function writesolution(simcase::TaylorGreen{Natural}, Ω, nsub::Int64, save_path, tn::Float64, fields::Tuple)
     uh, ph = fields
-    writevtk(Ω, save_path, cellfields=["uh" => uh, "ph" => ph])
+    writevtk(Ω, save_path, nsubcells=nsub, cellfields=["uh" => uh, "ph" => ph])
 end
 
 
-function writesolution(simcase::VelocityBoundaryCase, Ω, save_path, tn, fields::Tuple)
+function writesolution(simcase::VelocityBoundaryCase, Ω, nsub::Int64, save_path, tn, fields::Tuple)
     uh_tn, ph_tn, uh_tn_updt, uh_avg, ph_avg = fields
-    writevtk(Ω, save_path, cellfields=["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
+    @info "Number of subcells $nsub"
+
+    writevtk(Ω, save_path, nsubcells=nsub, cellfields=["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
         "uh_avg" => uh_avg, "ph_avg" => ph_avg])
 end
 
