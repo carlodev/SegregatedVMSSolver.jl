@@ -39,7 +39,9 @@ function run_case(simcase::SimulationCase,distribute)
     boundary_conditions = create_boundary_conditions(simcase) 
     @info "boundary conditions created"
 
-    V, U, P, Q, Y, X = creation_fe_spaces(simcase, model, boundary_conditions)
+    V, U, P, Q = creation_fe_spaces(simcase, model, boundary_conditions)
+    ∇U = creation_∇fe_space(simcase, model)
+
     @info "FE Spaces Created"
 
     trials = [U, P]
@@ -51,10 +53,8 @@ function run_case(simcase::SimulationCase,distribute)
 
     
     new_dict = Dict(:parts=>parts, :model=>model,
-    :U => U,
-    :P => P,
-    :X => X,
-    :Y => Y,
+    :U=>U,:V=>V,:P=>P,:Q=>Q,
+    :∇U=>∇U,
     :Ω => Ω,
     :dΩ => dΩ,
     :degree => degree,

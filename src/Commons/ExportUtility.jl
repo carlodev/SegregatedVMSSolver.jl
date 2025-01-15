@@ -399,7 +399,7 @@ end
 
 function writesolution(simcase::VelocityBoundaryCase, Ω, save_path, tn, fields::Tuple)
     uh_tn, ph_tn, uh_tn_updt, uh_avg, ph_avg = fields
-    @time writevtk(Ω, save_path, cellfields=["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
+    writevtk(Ω, save_path, cellfields=["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
         "uh_avg" => uh_avg, "ph_avg" => ph_avg])
 end
 
