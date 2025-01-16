@@ -16,7 +16,7 @@ function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::Simulation
     skewcoeff = skew * 0.5 # ==0 if skew == false
     vms_activation = is_VMS(sprob.method)
     
-    visc_term =   - ν* compute_Δ(u_adv,D) # compute the laplacian of the previous time step
+    visc_term =   0.0 #- ν* compute_Δ(u_adv,D) # compute the laplacian of the previous time step
     stab_coeff = compute_stab_coeff(simcase,params)
     Tm = momentum_stabilization(u_adv, stab_coeff, simcase)
     Tc = continuity_stabilization(u_adv, stab_coeff, simcase)
