@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-      - SEM-coupling
     tags: ['*']
 jobs:
   VMSTests:

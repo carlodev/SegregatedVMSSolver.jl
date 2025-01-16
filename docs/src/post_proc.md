@@ -3,7 +3,14 @@
 In this section is explained how to visualize the results and use the integrated post processing api for studying airfoils. All the results are saved in the folder `/Results`. 
 
 ## Using Paraview
-[ParaView](https://www.paraview.org/) which allows to graphically visualize the results and open `.vtu` and `.pvtu` files. There are a lot of embedded and avanced tools.
+[ParaView](https://www.paraview.org/) which allows to graphically visualize the results and open `.vtu` and `.pvtu` files. There are a lot of embedded and advanced tools.
+
+You can create a Paraview files collecting in sequence all the  `.vtu` to visualize them in temporal sequence. Use the provided api specifing the folder where your `.vtu` are stored.
+´´´julia
+using SegregatedVMSSolver.CreateVtu
+
+create_vtu_file("Results_vtu/")
+´´´
 
 !!! info "numeric info" 
     Creating `Log/PrintSim.txt` allows to monitor the current state of the simulation creating `.pvtu` files.

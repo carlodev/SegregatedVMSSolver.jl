@@ -46,7 +46,7 @@ function run_case(simcase::SimulationCase,distribute)
     trials = [U, P]
     tests = [V, Q]
     
-    degree = 4*order
+    degree = 2*order
     Ω = Triangulation(model)
     dΩ = Measure(Ω, degree)
 

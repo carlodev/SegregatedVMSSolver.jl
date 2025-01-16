@@ -50,5 +50,15 @@ For creating mesh and physical boundary conditions is suggested to install the f
 - Possibility of choosing the backend thanks to `PartitionedArrays.jl`. It can be run in the `REPL` for debugging or in `MPI`
 
 
+## Examples
+
+| ![](docs/figs/TGV.gif)  [Taylor-Green Vortices](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/Cases/taylorgreen/) |  ![](docs/figs/Ldx.png)  [Lid Driven Cavity Flow](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/Cases/liddriven/) |
+|:-------------:|:-------------:|
+
+| ![](docs/figs/Cyl3D.gif)  [Cylinder Vortex Shedding](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/Cases/cylinder/)  | ![](docs/figs/DU89.gif) [Airfoil](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/Cases/airfoil/)   | 
+|:-------------:|:-------------:|
+
+
+
 ## Packages
 It relies on the  [`Gridap`](https://github.com/gridap/Gridap.jl) ecosystem. It is also completely written in Julia and allows parallelization. The [`MPI`](https://github.com/JuliaParallel/MPI.jl) and [`PartititionedArrays`](https://github.com/fverdugo/PartitionedArrays.jl) are also at the basis of the parallelization.
