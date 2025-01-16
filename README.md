@@ -62,3 +62,11 @@ For creating mesh and physical boundary conditions is suggested to install the f
 
 ## Packages
 It relies on the  [`Gridap`](https://github.com/gridap/Gridap.jl) ecosystem. It is also completely written in Julia and allows parallelization. The [`MPI`](https://github.com/JuliaParallel/MPI.jl) and [`PartititionedArrays`](https://github.com/fverdugo/PartitionedArrays.jl) are also at the basis of the parallelization.
+
+
+
+## Contributing
+It is a collaborative project open to contributions. You can:
+- Open a new issue
+- Contact the project administator
+- Open a PR with the contribution
