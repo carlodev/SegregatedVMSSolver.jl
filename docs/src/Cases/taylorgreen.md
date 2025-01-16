@@ -1,7 +1,10 @@
 # Taylor Green Vortex
 ![TGx](../assets/TGx.png)
 
-It solves the 2D Taylor Green Vortex case. It is the only case where analtical solution are available:
+It solves the Taylor Green Vortex case. 
+
+
+For the 2D case there is an analytical solution for velocity and pressure:
 
 
 ``u_x= U_{a}-V_{s} \cos \bigg (\frac{\pi}{D}(x-U_{a} t)\bigg ) \sin \bigg (\frac{\pi}{D}(y-V_{a} t)\bigg ) e^{-\frac{2 v \pi^{2}}{D^{2}} t}``

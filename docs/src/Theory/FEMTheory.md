@@ -11,7 +11,7 @@ In FEM, the governing equations are reformulated in their weak form. This involv
 
 The weak form of the equations is:
 
-``\int_\Omega \left (  \frac{\partial u}{\partial t}\cdot v + u\cdot\nabla(u) \cdot v +\nu \nabla(u)\nabla(v) - v\cdot f )\;d\Omega + \int_\Omega \left ( \nabla\cdot(u) \cdot q \right )\;d\Omega`` 
+``\int_\Omega  (  \frac{\partial u}{\partial t}\cdot v + u \cdot\nabla (u) \cdot v +\nu \nabla (u) \nabla (v) - v\cdot f )\;d\Omega + \int_\Omega  ( \nabla\cdot (u) \cdot q  )\;d\Omega`` 
 
 ## Elements and Instabilities
 
