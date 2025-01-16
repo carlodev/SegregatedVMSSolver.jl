@@ -101,6 +101,7 @@ function initialize_matrices(u_adv, params,simcase)
   matrices = allocate_all_matrices_vectors(u_adv, params,simcase)
   @info "matrix and vectors allocated"
   update_all_matrices_vectors!(matrices,u_adv, params,simcase)
+  @info "matrix and vectors updated"
 
   return matrices
 end
