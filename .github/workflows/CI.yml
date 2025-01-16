@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - refactor-matrix-assemble
     tags: ['*']
 jobs:
   VMSTests:

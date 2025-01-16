@@ -99,13 +99,13 @@ for (ntime,tn) in enumerate(time_step)
       m = 0
 
       if mod(ntime,matrix_freq_update)==0
-        println("update_matrices")
-    
-        @time begin
-          update_all_matrices_vectors!(matrices, uh_tn_updt, params,simcase)
-        end
 
-        println("update numerical set up")
+        @info "updating matrix and vectors"
+        @time update_all_matrices_vectors!(matrices, uh_tn_updt, params,simcase)
+        @info "matrix and vectors updated"
+
+
+        @info "update numerical set up"
         @time begin
           numerical_setup!(ns1,Mat_ML)
           numerical_setup!(ns2,Mat_S)
