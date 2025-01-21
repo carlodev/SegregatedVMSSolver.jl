@@ -23,13 +23,14 @@ rank_partition = (1,1,1)
 
 
 
+sol_options= petsc_options(; vel_ksp="gmres", vel_pc="gamg", pres_ksp = "cg", pres_pc = "asm")
 
 
 sprob = StabilizedProblem(VMS(2))
 timep = TimeParameters(t0=t0, dt=dt, tF=tF)
 
 physicalp = PhysicalParameters(Re=Re, c=vortex_diameter)
-solverp = SolverParameters(matrix_freq_update=1, Number_Skip_Expansion=10e6, M=40)
+solverp = SolverParameters(matrix_freq_update=1, Number_Skip_Expansion=10e6, M=40,petsc_options=sol_options)
 exportp = ExportParameters(printinitial=true, printmodel=true)
 
 
@@ -46,10 +47,10 @@ mcase = TaylorGreen(bc_tgv, meshp, simparams, sprob)
 
 
 
-# Create folder and file
-mkdir("Log")
-open("Log/PrintSim.txt", "w") do file
-end
+# # Create folder and file
+# mkdir("Log")
+# open("Log/PrintSim.txt", "w") do file
+# end
 
 
 
