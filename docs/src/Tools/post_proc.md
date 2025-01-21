@@ -42,7 +42,7 @@ Get the nodes and normals
 ```julia
 nodes, normals = get_geometry_info(res_path;α=α)
 ```
-You can get the everage - in time and spanwise direction - of velocity and friction field. It is possible to specify the number of time-step that you want to skip at the beginning of the averaging using the keyword `offset`. It allows to avoid averaging also the initils time-steps where the solution is still evolving.
+You can get the average - in time and spanwise direction - of velocity and friction field. It is possible to specify the number of time-step that you want to skip at the beginning of the averaging using the keyword `offset`. It allows to avoid averaging also the initils time-steps where the solution is still evolving.
 
 ```julia
 Ph = time_space_average_field(res_path, "ph", nodes)
@@ -51,7 +51,7 @@ Friction = time_space_average_field(res_path, "friction", nodes)
 ```
 
 
-Writing the parameters of the simulation allows the code to get the local values for Cp and Cf distiguishing between top and bottom side. 
+Writing the parameters of the simulation allows the code to get the local values for Cp and Cf splitting between top and bottom side. 
 ```julia
 cp_top, cp_bottom = extract_Cp(nodes, Ph; u0=u0, rho=rho)
 friction_top, friction_bottom = extract_Cf(nodes, Friction, μ; u0=u0, rho=rho)
