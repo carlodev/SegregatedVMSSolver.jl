@@ -19,7 +19,8 @@ function solve(simcase::SimulationCase,backend::Function)
         end
 
         printstructure(simcase)
-        run_case(simcase,distribute)
+        params = setup_case(simcase,distribute)
+        solve_case(params,simcase)
     end
 
 return true
@@ -27,7 +28,7 @@ return true
 end
 
 
-function run_case(simcase::SimulationCase,distribute)
+function setup_case(simcase::SimulationCase,distribute)
     params = Dict{Symbol,Any}()
     @sunpack rank_partition,order = simcase
 
@@ -60,7 +61,7 @@ function run_case(simcase::SimulationCase,distribute)
     :tests => tests)
     merge!(params, new_dict)
     
-    solve_case(params,simcase)
+    return params
 
 
 end
