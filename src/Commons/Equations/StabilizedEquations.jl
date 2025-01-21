@@ -62,14 +62,5 @@ function is_VMS(method::SUPG)
   return 0
 end
 
-function Gridap.Fields.push_∇∇(∇∇a::Field,ϕ::Field)
-  s = pinvJt(∇(ϕ))
-  return  tr(s⋅∇∇a⋅transpose(s))  
-end
-
-function compute_Δ(u,D::Int64)
-  return Δ(u)⋅VectorValue(ones(D)...)
-end
-
     
 
