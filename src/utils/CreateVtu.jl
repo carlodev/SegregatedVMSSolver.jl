@@ -36,7 +36,9 @@ function create_vtu_file(results_folder::String)
   println(io, end_string)
   close(io)
 
+  return fname
 
 end
+
 
 end
