@@ -38,15 +38,26 @@ The package relies on `Gridap.jl`[@Verdugo:2022],[@Badia:2020] package to implem
 It solves a Linearized and Segregated version of VMS (LS-VMS) and SUPG. It is based on an iterative predictor-corrector scheme and it avoids the resolution of a non-linear problem.
 It uses the $\theta$ method to solve the time-marching problem. 
 
-A suite of different problems are encoded: Taylor-Green vortices (2D), lid-driven cavity, vortex shedding over a cylinder and airfoil. The package is actually dedicated to study airfoils aerodynamic features low-Reynolds regime (up to Renynolds number $500 000$).
+This package focuses on solving fluid dynamics problems, with a particular emphasis on the study of 2D and 3D airfoil aerodynamics at low Reynolds numbers (tested up to 500,000). The primary objective is to provide researchers and engineers with a versatile tool for analyzing aerodynamic features in this regime.
 
-Different 3D problems, including Taylor-Green vortices (only 2D), lid-driven cavity, vortex shedding over a cylinder, and airfoil aerodynamics within the low-Reynolds regime (tested up to Reynolds number $500,000$), are meticulously coded for comprehensive analysis.
+A suite of benchmark cases is implemented to ensure reliability and applicability across a range of scenarios. These include:
+- **Taylor-Green vortices**: Simulated in both 2D and 3D.
+- **Lid-driven cavity**: Solvable in 2D; the 3D version is not currently supported.
+- **Vortex shedding over a cylinder**: Available in both 2D and 3D.
+- **Airfoil aerodynamics**: Extensive support for both 2D and 3D simulations.
+
+This comprehensive implementation ensures that the package can address a variety of fluid dynamics problems, while its focus on 2D and 3D airfoil analysis fills a gap in the current Julia ecosystem for low-Reynolds-number aerodynamic studies.
 
 
 It has a suite of tools for post-processing the results like performing time and spanwise averaging, obtaining. It is possible to control the simulation in real-time, enabling/disabling the creation of output files at each time-step. The user can load own airfoil meshes also usign the package [`AirfoilGmsh.jl`](https://github.com/carlodev/AirfoilGmsh.jl). Additionally, the package provides tools for initializing boundary layers in 2D simulations, enhancing its versatility and utility for researchers and practitioners in the field of fluid dynamics.
 
-Different software packages have been developed in the field of fluid dynamics in Julia: [Julia Packages fluid-dynamics](https://juliapackages.com/c/fluid-dynamics) showing a growing interest in the field by the Julia community.
+The field of fluid dynamics in Julia has seen significant growth, with several software packages emerging to address various computational challenges. This reflects the growing interest and engagement of the Julia community in this domain. A comprehensive list of packages can be found on [Julia Packages - Fluid Dynamics](https://juliapackages.com/c/fluid-dynamics). Among the most notable are:
 
+- **[Trixi.jl](https://github.com/trixi-framework/Trixi.jl)**: A framework for numerical simulation of hyperbolic PDEs, particularly suited for high-order methods and adaptive mesh refinement.
+- **[WaterLily.jl](https://github.com/WaterLily-jl/WaterLily.jl/tree/master)**: A tool focused on simulating fluid flows using a Lattice Boltzmann method, aimed at educational and research applications.
+- **[Oceananigans.jl](https://github.com/CliMA/Oceananigans.jl)**: A GPU-accelerated model for simulating incompressible fluid dynamics, widely used in geophysical and oceanographic studies.
+
+While these packages vary in scope and functionality, they collectively highlight the flexibility and performance benefits of Julia in computational fluid dynamics. However, the ecosystem is still maturing compared to more established environments like Python or MATLAB. This paper contributes to this evolving field by introducing a new package tailored for Large Eddy Simulations.
 
 
 ## Results
@@ -58,7 +69,7 @@ Different software packages have been developed in the field of fluid dynamics i
 
 
 
-![Friction coefficient on the suction side of the sd7003 airfoil, Reynolds 60 000, angle of attack 4°,\label{fig:cfsd7003}](images/VMS7003s.pdf){ width=50%  }
+![Friction coefficient on the suction side of the sd7003 airfoil, time averaged and span averaged, Reynolds 60 000, angle of attack 4°,\label{fig:cfsd7003}](images/VMS7003s.pdf){ width=50%  }
 
 Figure \ref{fig:cfsd7003} shows the comparison of the time averaged results obtained using the LS-VMS, compared with the results obtained by Calderer et al. [@Calderer:2013] and Galbraith [@Galbraith:2008].
 
