@@ -18,11 +18,8 @@ function creation_fe_spaces(simcase::TaylorGreen{Periodic}, model, boundary_cond
     end
 
     
-
-    Y = MultiFieldFESpace([V, Q])
-    X = TransientMultiFieldFESpace([U, P])
-
-    return V, U, P, Q, Y, X
+  
+    return V, U, P, Q
 
 end
 
@@ -42,10 +39,7 @@ function creation_fe_spaces(simcase::TaylorGreen{Natural}, model, boundary_condi
     Q = TestFESpace(model, reffeₚ, conformity=:H1, dirichlet_tags=p_diri_tags)
     P = TransientTrialFESpace(Q, p_diri_values)
 
-    Y = MultiFieldFESpace([V, Q])
-    X = TransientMultiFieldFESpace([U, P])
-
-    return V, U, P, Q, Y, X
+    return V, U, P, Q
 
 end
 
@@ -65,9 +59,7 @@ function creation_fe_spaces(simcase, model, boundary_conditions)
     Q = TestFESpace(model, reffeₚ, conformity=:H1, dirichlet_tags=p_diri_tags)
     P = TrialFESpace(Q, p_diri_values)
 
-    Y = MultiFieldFESpace([V, Q])
-    X = TransientMultiFieldFESpace([U, P])
-
-    return V, U, P, Q, Y, X
+    return V, U, P, Q
 
 end
+

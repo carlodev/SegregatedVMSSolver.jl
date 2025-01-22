@@ -9,7 +9,7 @@ using SegregatedVMSSolver.SolverOptions
 
 
 
-function turbulent_airfoil_test(backend, create_sem_boundary)
+function turbulent_airfoil_test(create_sem_boundary)
 
 t0 =0.0
 
@@ -53,7 +53,9 @@ simparams = SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,ini
 
 mcase = Airfoil(meshp,simparams,sprob)
 
-@test SegregatedVMSSolver.solve(mcase,backend) 
+@test typeof(mcase) <: SimulationCase
+
+return mcase
 
 end
 

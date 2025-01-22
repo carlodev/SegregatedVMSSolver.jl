@@ -18,7 +18,7 @@ The user has to specify where `julia` is installed and to activate a suitable pr
 
 ```bash
 #!/bin/sh
-export PATH=$HOME/julia-1.8.5/bin/:$PATH
+export PATH=$HOME/julia-1.11.1/bin/:$PATH
 
 srun julia --project=../../../ -O3 --check-bounds=no -L run_simulation.jl
 ```

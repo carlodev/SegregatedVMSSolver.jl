@@ -48,8 +48,8 @@ function test_restart(rank_partition, distribute, D)
     
         boundary_conditions = create_boundary_conditions(simcase) 
     
-        V, U, P, Q, Y, X = creation_fe_spaces(simcase, model, boundary_conditions)
-       
+        V, U, P, Q = creation_fe_spaces(simcase, model, boundary_conditions)
+
 
         trials = [U, P]
         tests = [V, Q]
@@ -62,8 +62,6 @@ function test_restart(rank_partition, distribute, D)
         new_dict = Dict(:parts=>parts,
         :U => U,
         :P => P,
-        :X => X,
-        :Y => Y,
         :Ω => Ω,
         :dΩ => dΩ,
         :degree => degree,

@@ -1,7 +1,7 @@
 name = "SegregatedVMSSolver"
 uuid = "90220dfc-fac3-4908-b895-51c1a1f4cb85"
 authors = ["Carlo Brunelli"]
-version = "2.0.1"
+version = "3.0.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -34,11 +34,12 @@ UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 [compat]
 DataInterpolations = "6.6.0"
 DelimitedFiles = "1.9.1"
-Gridap = "0.17.20"
-GridapDistributed = "0.3.2"
-GridapGmsh = "0.7.1"
-GridapPETSc = "0.5.3"
+Gridap = "=0.17.20"
+GridapDistributed = "=0.3.2"
+GridapGmsh = "=0.7.1"
+GridapPETSc = "=0.5.3"
 LinearAlgebra = "1.11.0"
 SparseArrays = "1.11.0"
+SyntheticEddyMethod = "=0.4.4"
 Test = "1.11.0"
 UnPack = "1.0.2"

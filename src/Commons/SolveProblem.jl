@@ -36,6 +36,7 @@ function initialize_solve(simcase::SimulationCase,params::Dict{Symbol,Any})
 
 
   uh0, ph0 = create_initial_conditions(simcase,params)
+
   @info "Initial Conditions Created"
 
   matrices = initialize_matrices(uh0, params,simcase)
@@ -47,8 +48,7 @@ function initialize_solve(simcase::SimulationCase,params::Dict{Symbol,Any})
   mkpath(save_sim_dir)
 
 
-  println("time 0")
-  @time uh_avg = FEFunction(Ut0, vectors[2])
+  uh_avg = FEFunction(Ut0, vectors[2])
   set_zeros!(uh_avg.fields)
   ph_avg = FEFunction(Pt0,  vectors[1])
   set_zeros!(ph_avg.fields)
@@ -85,31 +85,29 @@ GridapPETSc.with(args=split(petsc_options)) do
 
 
 Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
-  Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices
+  Mat_ML, Mat_inv_ML, Mat_S, Vec_Auu, Vec_Aup, Vec_Apu, Vec_App, Vec_Au, Vec_Ap = matrices
 
 vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector = vectors
 
 ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
 ns2 = create_PETSc_setup(Mat_S,pres_kspsetup)
+
 uh_tn_updt = FEFunction(Utn, vec_um)
 
 for (ntime,tn) in enumerate(time_step)
 
       m = 0
+     
+      @info "inner iteration $m | outer iteration $ntime"
 
       if mod(ntime,matrix_freq_update)==0
-        println("update_matrices")
-    
-        @time begin
-         Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
-          Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = compute_matrices(uh_tn_updt, params, simcase)
-         
-          matrices = ( Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
-          Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap)
 
-        end
+        @info "updating matrix and vectors"
+        @time update_all_matrices_vectors!(matrices, uh_tn_updt, params,simcase)
+        @info "matrix and vectors updated"
 
-        println("update numerical set up")
+
+        @info "update numerical set up"
         @time begin
           numerical_setup!(ns1,Mat_ML)
           numerical_setup!(ns2,Mat_S)
@@ -143,22 +141,21 @@ for (ntime,tn) in enumerate(time_step)
         solve_pressure!(ns2,matrices,vectors,dt,θ)
       
      
-           Δpm1 = GridapDistributed.change_ghost(Δpm1, Mat_Aup)
-        println("Update Δa")
-        @time Δa .= Δa_star - θ .* Mat_inv_ML .* (Mat_Aup * Δpm1)
+        Δpm1 = GridapDistributed.change_ghost(Δpm1, Mat_Aup)
+
+       Δa .= Δa_star - θ .* Mat_inv_ML .* (Mat_Aup * Δpm1)
 
         vec_um .+=  dt * Δa
         vec_pm .+= Δpm1
 
-        println("inner iter = $m")
         if m == 0
           vec_sum_pm .= Δpm1
           vec_am .= Δa
           norm_Δa0 = norm(Δa)
           norm_Δp0 = norm(Δpm1)
         else
-          @time vec_sum_pm .+= Δpm1
-          @time vec_am .+= Δa
+          vec_sum_pm .+= Δpm1
+          vec_am .+= Δa
         end
         
         err_norm_Δa0 = norm_Δa0/norm(Δa)
@@ -176,14 +173,14 @@ for (ntime,tn) in enumerate(time_step)
 
   println("solution time at time $tn")
   println(time_solve)
-    GridapPETSc.GridapPETSc.gridap_petsc_gc()
+    @time GridapPETSc.GridapPETSc.gridap_petsc_gc()
 
 update_ũ_vector!(ũ_vector,vec_um)
 
 
 
 Utn = Utn1
-@time Utn1 = U(tn+dt)
+Utn1 = U(tn+dt)
 
 Ptn = Ptn1
 Ptn1 = P(tn+dt)
@@ -209,7 +206,6 @@ writesolution(params, simcase, ntime, tn, (uh_tn,ph_tn,uh_tn_updt,uh_avg,ph_avg)
 
 export_fields(params,simcase, tn, uh_tn, ph_tn)
 
-
   end #end for
 end #end GridapPETSc
 
@@ -217,24 +213,23 @@ end #end solve_case
 
 
 function solve_velocity!(ns1, matrices, vectors, dt::Float64, θ::Float64)
-  Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices
+  Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S,Vec_Auu, Vec_Aup, Vec_Apu, Vec_App, Vec_Au, Vec_Ap = matrices
   vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector = vectors
 
   vec_um = GridapDistributed.change_ghost(vec_um, Mat_Auu)
   vec_pm = GridapDistributed.change_ghost(vec_pm, Mat_Aup)
   vec_am = GridapDistributed.change_ghost(vec_am, Mat_ML)
 
-  println("solving velocity")
-    
-    b1 .= -Mat_Auu * vec_um - Mat_Aup * vec_pm - Mat_ML * vec_am +
+  b1 .= -Mat_Auu * vec_um - Mat_Aup * vec_pm - Mat_ML * vec_am +
     Mat_Auu * dt * vec_am + (1 - θ) * Mat_Aup * vec_sum_pm + Vec_Au
-
+    println("solving velocity")
   @time solve!(Δa_star,ns1,b1)
+
 end
 
 
 function solve_pressure!(ns2, matrices, vectors, dt::Float64, θ::Float64)
-  Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Au, Vec_Ap = matrices
+  Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Auu, Vec_Aup, Vec_Apu, Vec_App, Vec_Au, Vec_Ap = matrices
   vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector = vectors
 
   vec_um = GridapDistributed.change_ghost(vec_um, Mat_Apu)
@@ -242,11 +237,10 @@ function solve_pressure!(ns2, matrices, vectors, dt::Float64, θ::Float64)
   vec_am = GridapDistributed.change_ghost(vec_am, Mat_Tpu)
   Δa_star = GridapDistributed.change_ghost(Δa_star, Mat_Tpu)
 
-  println("solving pressure")
 
   #-Vec_A because changing sign in the continuity equations
   b2 .= Mat_Tpu * Δa_star + Mat_Apu * (vec_um + dt * Δa_star) + Mat_App * vec_pm + Mat_Tpu * vec_am - Vec_Ap
-
+  println("solving pressure")
   @time solve!(Δpm1,ns2,b2)
 
 end
