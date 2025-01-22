@@ -2,7 +2,7 @@ module ExportUtility
 
 using Gridap
 using GridapDistributed
-using CSV
+using CSV, DelimitedFiles
 using DataFrames
 using Parameters
 using PartitionedArrays
@@ -14,6 +14,7 @@ export export_fields
 
 using SegregatedVMSSolver
 using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.Interfaces
 
 function unwrap_vector(a)
     V = Float64[]
@@ -36,8 +37,6 @@ function wrap_vector(vv, p::Int64)
 
     return V
 end
-
-
 
 
 # """
@@ -369,6 +368,7 @@ end
 function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime::Int64, tn::Float64, fields::Tuple)
     benchmark = simcase.simulationp.exportp.benchmark
     log_dir = simcase.simulationp.exportp.log_dir
+    nsub = simcase.sprob.method.order
 
     if !benchmark
         if (mod(ntime, 100) == 0 || print_on_request(log_dir))
@@ -376,7 +376,7 @@ function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime:
             case = typeof(simcase)
             save_path = joinpath(save_sim_dir, "$(case)_$(tn)_.vtu")
             @unpack Ω = params
-            writesolution(simcase, Ω, save_path, tn, fields)
+            writesolution(simcase, Ω, nsub, save_path, tn, fields)
         end
         compute_error(params, simcase, tn, fields)
     end
@@ -384,17 +384,24 @@ function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime:
 end
 
 
-function writesolution(simcase::TaylorGreen, Ω, save_path, tn::Float64, fields::Tuple)
-    u_analytic = simcase.analyticalsol[:velocity]
-    p_analytic = simcase.analyticalsol[:pressure]
+function writesolution(simcase::TaylorGreen{Periodic}, Ω, nsub::Int64, save_path, tn::Float64, fields::Tuple)
+    u_analytic = simcase.bc_type.a_solution[:velocity]
+    p_analytic = simcase.bc_type.a_solution[:pressure]
     uh, ph = fields
-    writevtk(Ω, save_path, cellfields=["uh" => uh, "uh_analytic" => u_analytic(tn), "ph" => ph, "ph_analytic" => p_analytic(tn)])
+
+    writevtk(Ω, save_path, nsubcells=nsub, cellfields=["uh" => uh, "uh_analytic" => u_analytic(tn), "ph" => ph, "ph_analytic" => p_analytic(tn)])
 end
 
 
-function writesolution(simcase::VelocityBoundaryCase, Ω, save_path, tn, fields::Tuple)
+function writesolution(simcase::TaylorGreen{Natural}, Ω, nsub::Int64, save_path, tn::Float64, fields::Tuple)
+    uh, ph = fields
+    writevtk(Ω, save_path, nsubcells=nsub, cellfields=["uh" => uh, "ph" => ph])
+end
+
+
+function writesolution(simcase::VelocityBoundaryCase, Ω, nsub::Int64, save_path, tn, fields::Tuple)
     uh_tn, ph_tn, uh_tn_updt, uh_avg, ph_avg = fields
-    @time writevtk(Ω, save_path, cellfields=["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
+    writevtk(Ω, save_path, nsubcells=nsub, cellfields=["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
         "uh_avg" => uh_avg, "ph_avg" => ph_avg])
 end
 
@@ -404,9 +411,11 @@ end
 
 It computes the velocity and pressure L2 error for the Taylor-Green case 
 """
-function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen, tn::Float64, fields::Tuple)
-    u_analytic = simcase.analyticalsol[:velocity](tn)
-    p_analytic = simcase.analyticalsol[:pressure](tn)
+function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Periodic}, tn::Float64, fields::Tuple)
+    @sunpack D = simcase
+    if D == 2
+    u_analytic = simcase.bc_type.a_solution[:velocity](tn)
+    p_analytic = simcase.bc_type.a_solution[:pressure](tn)
     uh, ph = fields
     @unpack dΩ = params
     #error velocity and pressure
@@ -417,10 +426,47 @@ function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen, tn::Float
     l2eu = sqrt(sum(∫(eu ⋅ eu) * dΩ))
     l2ep = sqrt(sum(∫(ep * ep) * dΩ))
     println("L2 velocity error = $l2eu")
-    println("L2 prssure error = $l2ep")
+    println("L2 pressure error = $l2ep")
+    elseif D == 3 
+        uh, _ = fields
+    @unpack dΩ,parts = params
+
+    wh = ∇×uh
+    ### Compute Kinetic Energy
+    Ek = 0.5 .* sum(∫(uh ⋅ uh) * dΩ) #not normalized with the volume
+    println("Ek = $Ek")
+    ### Compute Dissipation or Enstrophy https://en.wikipedia.org/wiki/Enstrophy
+    Enstrophy = sum(∫(wh ⋅ wh) * dΩ) #not normalized with the volume
+
+    println("Enstrophy = $Enstrophy")
+
+    # Define the file path
+    file_path = "TGV_output.csv"
+
+    # Open the file in append mode, create it if it doesn't exist, write a line, and close it
+
+    map( parts) do part
+        if part == 1
+            open(file_path, "a") do file
+                writedlm(file, [[tn, Ek, Enstrophy]], ',')
+            end
+        end
+
+    end
+
+    end
+
 end
 
-function compute_error(params::Dict{Symbol,Any}, simcase::VelocityBoundaryCase, tn::Float64, fields::Tuple)
+function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Natural}, tn::Float64, fields::Tuple)
+    
+end
+
+
+
+
+
+function compute_error(params::Dict{Symbol,Any}, simcase, tn::Float64, fields::Tuple)
 
 end
 

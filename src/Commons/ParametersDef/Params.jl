@@ -1,5 +1,6 @@
 abstract type UserParameters end
 abstract type MeshInfo <: UserParameters end
+abstract type TurbulenceDomain end
 
 @with_kw struct TimeParameters <: UserParameters
     t0::Float64 = 0.0
@@ -18,18 +19,60 @@ function TimeParameters(t0::Float64,dt::Float64,tF::Float64)
 end
 
 
-
 @with_kw struct PhysicalParameters <: UserParameters
     Re::Int64
-    u_in::Float64=1.0
+    u_in::Vector=[1.0,0.0,0.0]
+    u_in_mag::Float64 = LinearAlgebra.norm(u_in)
     c::Float64=1.0
-    ν::Float64=(c*u_in)/Re
+    ν::Float64=(c*u_in_mag)/Re
     # @info "Viscosity set ν = $ν"
 end
+
 
 function PhysicalParameters(Re::Int64)
     PhysicalParameters(Re=Re)
 end
+
+
+@with_kw mutable struct TurbulenceParameters{T<:TurbulenceDomain} <: UserParameters
+    TI::Float64=0.0
+    Re_stress::Matrix=zeros(3,3)
+    Eddies::Vector=zeros(3) #Vector{SemEddy} when turbulence at the inlet is active, this is just a placeholder
+    Vboxinfo=nothing
+    TurbulenceInlet::Bool= (TI==0.0) ? false : true
+    Domain::T=Inlet(false)
+    R::Float64 = (typeof(Domain)==Inlet) ? 6.0 : Domain.SEM_Boundary_Distance ## radius of the curvature of the SEM domain
+end
+
+@with_kw mutable struct Internal <: TurbulenceDomain
+    SEM_Boundary_Distance::Real = 1.0
+    Create_SEM_Boundary::Bool = true
+end
+
+@with_kw mutable struct Inlet <: TurbulenceDomain
+    Create_SEM_Boundary::Bool = false
+end
+
+function TurbulenceParameters(TI::Float64, Vboxinfo::VirtualBox, physicalp::PhysicalParameters, Create_SEM_Boundary::Bool=false)
+    Domain = Inlet()
+
+    if Create_SEM_Boundary
+        Domain = Internal()
+    end
+
+    TurbulenceParameters(TI, Vboxinfo,physicalp,Domain)
+end
+
+
+function TurbulenceParameters(TI::Float64, Vboxinfo::VirtualBox, physicalp::PhysicalParameters, Domain::TurbulenceDomain; seed = 1234)
+    @assert TI>0.0 "Turbulence Intensity Value must be >0.0" 
+    Random.seed!(seed)
+    Re_stress, Eddies = initialize_eddies(physicalp.u_in_mag, TI, Vboxinfo)
+    @info "Eddies initialized - total eddies: $(length(Eddies))"
+
+    TurbulenceParameters(TI=TI, Re_stress=Re_stress, Eddies=Eddies,Vboxinfo=Vboxinfo,Domain=Domain)
+end
+
 
 @with_kw struct SolverParameters <: UserParameters
     θ::Float64=0.5 #theta for velocity ODE solver
@@ -92,14 +135,13 @@ end
 end
 
 
-@with_kw struct RestartParameters <: UserParameters
+@with_kw struct InitialParameters <: UserParameters
+    u0::Vector = [0.0, 0.0, 0.0]
     restartfile::String = ""
     restart::Bool= (isempty(restartfile)) ? false : true
 end
 
-function RestartParameters(restartfile::String)
-    RestartParameters(restartfile=restartfile, restart=true)
+function InitialParameters(restartfile::String)
+    InitialParameters(restartfile=restartfile, restart=true)
 end
-
-
 

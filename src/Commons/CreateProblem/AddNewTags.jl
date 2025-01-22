@@ -43,12 +43,14 @@ end
 
 It add a new tag named `tagname` at the specified `tag_coordinates`    
 """
-function add_new_tag!(model, tag_coordinate::Point, tagname::String)
+function add_new_tag!(model, tag_coordinate::Point, tagname::String; a_tol=1e-8)
     
-  
-a_tol = 1e-8
+    #   function is_tag(x::Vector{VectorValue{2,Float64}})
+    #     isapprox(norm(getindex.(x,1)), tag_coordinate[1], atol=a_tol) && isapprox(norm( getindex.(x,2) ), tag_coordinate[2], atol=a_tol)
+    # end
     function is_tag(x::Vector{VectorValue{2,Float64}})
-        isapprox(norm(getindex.(x,1)), tag_coordinate[1], atol=a_tol) && isapprox(norm( getindex.(x,2) ), tag_coordinate[2], atol=a_tol)
+        x = x[1]
+        isapprox(getindex(x,1), tag_coordinate[1], atol=a_tol) && isapprox(getindex(x,2), tag_coordinate[2], atol=a_tol)
     end
 
     function is_tag(x::Vector{VectorValue{3,Float64}})
@@ -65,7 +67,7 @@ function add_new_tag!(model, range_coordinate::Tuple, tagname::String)
         @assert length(range_coordinate) == 2 "Range new tags not the same dimension of the problem"
         range_x = getindex(range_coordinate,1)
         range_y = getindex(range_coordinate,2)
-       x = getindex(x,1)
+        x = getindex(x,1)
 
         return getindex.(x,1) .> range_x[1] && getindex.(x,1) .< range_x[2] && 
                getindex.(x,2) .> range_y[1] && getindex.(x,2) .< range_y[2]
@@ -104,8 +106,8 @@ end
 
 "add the SEM tag to the nodes in front of the airfoil. c: chord of the airfoil, the points are on a circle at 1 chord of distance from the leading edge. 
 set a_tol for selecting only one lines of points, it depends on how fine the mesh is. "
-function add_SEM_tag!(model; c=1.0, a_tol = 1e-1)
-
+function add_SEM_tag!(model, c::Float64)
+    a_tol = 1e-1
     v1(v) = v[1]
     v2(v) = v[2]
  
@@ -117,7 +119,7 @@ function add_SEM_tag!(model; c=1.0, a_tol = 1e-1)
 
   
     function create_SEM_tag!(model::GridapDistributed.DistributedDiscreteModel)
-        map_parts(model.models) do model
+        map(model.models) do model
             create_SEM_tag!(model)
         end
 
@@ -140,4 +142,13 @@ function add_SEM_tag!(model; c=1.0, a_tol = 1e-1)
     create_SEM_tag!(model)
 
     return model
+end
+
+
+function add_SEM_tag!(model, turbulencep::TurbulenceParameters{Internal} )
+        add_SEM_tag!(model,  turbulencep.Domain.SEM_Boundary_Distance)
+end
+
+function add_SEM_tag!(model, turbulencep::TurbulenceParameters{Inlet} )
+
 end

@@ -20,6 +20,7 @@ export time_space_average_field
 export extract_Cp
 export extract_Cf
 export compute_CL_CD
+export compute_CL_CD_separation_time
 
 export read_fluctuations
 export compute_time_average
@@ -342,6 +343,63 @@ function compute_CL_CD(nodes::GeometryNodes, cp_top, cp_bottom,
 end
 
 
+function find_separation_point(nodesx::Vector, friction_top::Vector; safe_threshold=0.25)
+    idx_sep = findall(friction_top[2:end] .* friction_top[1:end-1] .< 0) 
+    idx_nodes_sep = findall(nodesx[idx_sep] .>safe_threshold)
+    location = 0.0
+
+    if !isempty(idx_sep)
+        location = nodesx[idx_sep[idx_nodes_sep[1]]]
+    end
+    return location
+end
+
+### Plotting Istantaneus CL - CD
+"""
+    compute_CL_CD(top_nodesx,bottom_nodesx,top_nodesy,bottom_nodesy,cp_top,cp_bottom,
+    friction_top,friction_bottom; chord = 1.0)
+
+It computes lift and drag coefficients
+"""
+function compute_CL_CD_separation_time(nodes::GeometryNodes, path, μ::Float64; offset=1, offend=0, step::Int64=1, tagname="airfoil", chord=1.0, safe_threshold=0.25)
+    
+    vector_files_cp = get_field_filepaths(path, "ph"; offset=offset, offend=offend, step=step, tagname=tagname)
+    vector_files_cf = get_field_filepaths(path, "friction"; offset=offset, offend=offend, step=step, tagname=tagname)
+
+    println(length(vector_files_cf))
+    @assert length(vector_files_cp) == length(vector_files_cf)
+    CL_t = zeros(length(vector_files_cp))
+    CD_t = zeros(length(vector_files_cp))
+    Sep_t = zeros(length(vector_files_cp))
+
+    for (i,(cpread,cfread)) in enumerate(zip(vector_files_cp, vector_files_cf) )
+        println(cpread)
+
+        df_cp_tmp = DataFrame(CSV.File(cpread))
+        df_cf_tmp = DataFrame(CSV.File(cfread))
+        cp_tmp = average_3D_field(nodes, df_cp_tmp)
+        cf_tmp = average_3D_field(nodes, df_cf_tmp)
+        cp_top, cp_bottom = extract_Cp(nodes, cp_tmp)
+        friction_top, friction_bottom =extract_Cf(nodes, cf_tmp, μ::Float64)
+
+        CL = (trapz(nodes.bottom.x, cp_bottom) - trapz(nodes.top.x, cp_top)) ./ chord    
+        #CD pressure
+        CD_p = trapz(nodes.top.y, cp_top) - trapz(nodes.bottom.y, cp_bottom) + trapz([nodes.bottom.y[1], nodes.top.y[1]], [cp_bottom[1], cp_top[1]])
+        CD_f = trapz(nodes.top.x, friction_top) + trapz(nodes.bottom.x, friction_bottom)
+        CD = (CD_p + CD_f) ./ chord
+        CL_t[i] = CL
+        CD_t[i] = CD
+
+        xsep = find_separation_point(nodes.top.x, friction_top; safe_threshold=safe_threshold)
+
+        Sep_t[i] = xsep
+    end
+
+    return CL_t, CD_t, Sep_t
+
+end
+
+
 
 
 
@@ -642,6 +700,11 @@ function compute_scatter_interp(res_path, velocity::Vector{Float64}, zp::Float64
     return xgrid, ygrid, velocity_dense
 
 end
+
+
+
+
+
 
 
 

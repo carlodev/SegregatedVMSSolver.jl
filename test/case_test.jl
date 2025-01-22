@@ -2,8 +2,6 @@
 using Test
 using SegregatedVMSSolver
 
-
-
 function create_simulation_test(case, D; meshfile="", rank_partition=(2,2))
       t0 =0.0
       dt = 0.1
@@ -23,8 +21,14 @@ function create_simulation_test(case, D; meshfile="", rank_partition=(2,2))
       end    
       
       simparams = SimulationParameters(timep,physicalp,solverp,exportp)
-        
-      new_case = case(meshp,simparams,sprob)
+      if case == TaylorGreen
+            bc_tgv = Periodic(meshp,physicalp ) 
+
+            new_case = case(bc_tgv, meshp,simparams,sprob)
+      else
+            new_case = case(meshp,simparams,sprob)
+      end
+
       return new_case
 
 end
@@ -44,6 +48,40 @@ function iterate_test_cases(D::Int64)
 
       return zip(cases,mesh_files)
 end
+
+
+
+"""
+    create_turbulent_simulation_test()
+
+Testing an `Airfoil` simulation where the inlet is set as turbulent
+"""
+function create_turbulent_simulation_test()
+      TI = 0.001    
+      D = 3
+      meshfile = joinpath(@__DIR__, "..", "models", "sd7003s_3D_simple.msh")
+      rank_partition=(2,2,1)
+  
+      #VirtualBox creation
+      Vboxinfo = VirtualBox((-6,6), (-0.1,0.3); σ=0.02)
+      physicalp = PhysicalParameters(Re=1000)
+  
+      turbulencep= TurbulenceParameters(TI, Vboxinfo, physicalp)
+      sprob = StabilizedProblem()
+  
+      timep = TimeParameters(0.0,0.1, 1.0)
+  
+      solverp = SolverParameters(M=2)
+      exportp = ExportParameters(printmodel=false)
+      meshp= MeshParameters(rank_partition,D,meshfile)
+  
+      simparams = SimulationParameters(timep,physicalp,turbulencep,solverp,exportp)
+      tcase = Airfoil(meshp,simparams,sprob)
+  
+      return tcase
+
+end
+
 
 #mpiexecjl --project=../. -n 4 julia case_test.jl
 

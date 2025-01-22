@@ -1,5 +1,6 @@
 module SegregatedVMSSolver
 
+__precompile__(false)
 
 include(joinpath("Commons","SolverOptions.jl"))
 include(joinpath("Commons","Interfaces.jl"))
@@ -22,7 +23,7 @@ include("Main.jl")
 
 include(joinpath("utils","ReadAirfoilResults.jl"))
 include(joinpath("utils","WallDistance.jl"))
-
+include(joinpath("utils","CreateVtu.jl"))
 
 include("Exports.jl")
 

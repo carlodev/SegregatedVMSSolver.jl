@@ -4,11 +4,13 @@ using Test
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
 
-function airfoil_test(backend)
+
+
+function airfoil_test()
 
 t0 =0.0
 dt = 1e-3
-tF = 5e-3
+tF = 2e-3
 
 Re = 10
 D = 2
@@ -18,8 +20,8 @@ airfoil_restart_file = joinpath(@__DIR__,"..", "..", "restarts", "BL_DU89_2D_A1_
 
 
 
-sprob = StabilizedProblem(VMS(1))
-timep = TimeParameters(t0=t0,dt=dt,tF=tF, time_window=(2*dt,4*dt))
+sprob = StabilizedProblem(method=VMS(1),coeff_method=ScalarFormulation())
+timep = TimeParameters(t0=t0,dt=dt,tF=tF, time_window=(1*dt,2*dt))
 
 physicalp = PhysicalParameters(Re=Re)
 solverp = SolverParameters(M=2,Number_Skip_Expansion=2)
@@ -27,15 +29,17 @@ exportp = ExportParameters(printinitial=false,printmodel=false,name_tags=["airfo
 
 
 meshp= MeshParameters(rank_partition,D,airfoil_mesh_file)
-restartp = RestartParameters(airfoil_restart_file)
+intialp = InitialParameters(airfoil_restart_file)
 
-simparams = SimulationParameters(timep,physicalp,solverp,exportp,restartp)
+simparams = SimulationParameters(timep,physicalp,solverp,exportp,intialp)
 
 
 mcase = Airfoil(meshp,simparams,sprob)
 
 
-@test SegregatedVMSSolver.solve(mcase,backend)
+@test typeof(mcase) <: SimulationCase
+
+return mcase
 end
 
 #airfoil_test(with_mpi)

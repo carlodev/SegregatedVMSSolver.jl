@@ -1,25 +1,23 @@
 module CommonsTests
+
 using SegregatedVMSSolver
 using Test
 using PartitionedArrays
 using MPI
+using Gridap,GridapDistributed
 
 
-
+include(joinpath("..","case_test.jl")) 
 include(joinpath("CreateProblemTests", "CreateProblemTests.jl"))
+include(joinpath("EquationsTests", "EquationsTests.jl"))
 
 include("MatrixCreationTests.jl")
-include("EquationsTests.jl")
+include( "TurbParamsTests.jl")
 
 
-function test_solve(backend)
-  @testset "Test Solve Problem $(backend)" begin
-    backend() do distribute
-      EquationsTests.main(distribute)
-      MatrixCreationTests.main(distribute)
-    end
-  end
-end
+
+
+
 
 function tests_common(backend)
   backend() do distribute
@@ -32,13 +30,22 @@ function tests_common(backend)
       redirect_stdout(devnull)
     end
   end
+  
+  mcase = create_simulation_test(TaylorGreen, 2)
+  params = SegregatedVMSSolver.setup_case(mcase,distribute)
+  uh = interpolate_everywhere(VectorValue(0.0,0.0), params[:U])
+  ph = interpolate_everywhere(0.0, params[:P](0.0))
+
+  CreateProblemTests.main(distribute)
+  EquationsTests.main(uh, params, mcase)
+  MatrixCreationTests.main(uh,ph, params, mcase)
+  TurbParametersTests.main(distribute)
+end #end do distribute
+
 end
 
-  CreateProblemTests.test_create_problem(backend)
-  test_solve(backend)
-end
 
-
+tests_common(with_debug)
 
 
 

@@ -1,7 +1,10 @@
 # Taylor Green Vortex
 ![TGx](../assets/TGx.png)
 
-It solves the 2D Taylor Green Vortex case. It is the only case where analtical solution are available:
+It solves the Taylor Green Vortex case. 
+
+
+For the 2D case there is an analytical solution for velocity and pressure:
 
 
 ``u_x= U_{a}-V_{s} \cos \bigg (\frac{\pi}{D}(x-U_{a} t)\bigg ) \sin \bigg (\frac{\pi}{D}(y-V_{a} t)\bigg ) e^{-\frac{2 v \pi^{2}}{D^{2}} t}``
@@ -35,6 +38,7 @@ Re = 1000
 D = 2
 rank_partition = (2,2)
 
+backend = with_debug
 
 sprob = StabilizedProblem(VMS(1))
 timep = TimeParameters(t0=t0,dt=dt,tF=tF)
@@ -50,8 +54,16 @@ We create a mesh of 32x32 elements
 meshp= MeshParameters(rank_partition,D;N=32,L=0.5)
 simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
+bc_tgv = Periodic(meshp,physicalp ) 
+mcase = TaylorGreen(bc_tgv, meshp,simparams,sprob)
 
-mcase = TaylorGreen(meshp,simparams,sprob)
+SegregatedVMSSolver.solve(mcase,backend)
+```
 
-SegregatedVMSSolver.solve(mcase,with_debug)
+It is also possible to use natural boundary conditions:
+
+```julia
+bc_tgv = Natural(meshp,physicalp) 
+mcase = TaylorGreen(bc_tgv, meshp,simparams,sprob)
+SegregatedVMSSolver.solve(mcase,backend)
 ```

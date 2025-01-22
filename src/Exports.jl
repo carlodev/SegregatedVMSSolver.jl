@@ -10,7 +10,13 @@ end
 @publish ParametersDef VMS
 @publish ParametersDef SUPG
 
+
 @publish ParametersDef SimulationParameters
+@publish ParametersDef TaylorGreenParameters
+@publish ParametersDef Periodic
+@publish ParametersDef Natural
+@publish ParametersDef TaylorGreen
+
 @publish ParametersDef Airfoil
 @publish ParametersDef WindTunnel
 @publish ParametersDef Cylinder
@@ -20,10 +26,11 @@ end
 
 @publish ParametersDef TimeParameters
 @publish ParametersDef PhysicalParameters
+@publish ParametersDef TurbulenceParameters
 @publish ParametersDef SolverParameters
 @publish ParametersDef MeshParameters
 @publish ParametersDef CartesianMeshParams
 @publish ParametersDef GmshMeshParams
 @publish ParametersDef ExportParameters
-@publish ParametersDef RestartParameters
+@publish ParametersDef InitialParameters
 

@@ -9,8 +9,8 @@ using PartitionedArrays
 using Gridap.CellData
 using Gridap.Arrays
 using Gridap.CellData
+using Gridap.Fields
 using GridapDistributed: Algebra
-
 using SegregatedVMSSolver.ParametersDef
 
 export segregated_equations

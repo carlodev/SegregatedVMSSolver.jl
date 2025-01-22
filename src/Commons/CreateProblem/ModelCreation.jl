@@ -1,6 +1,9 @@
 function create_model(parts, simcase::VelocityBoundaryCase)
     mesh = simcase.meshp
+    turbulencep = simcase.simulationp.turbulencep
     model = create_model(parts, mesh.meshinfo, mesh.D, mesh.rank_partition)
+    add_SEM_tag!(model, turbulencep)
+    
     print_model(model,simcase)
     return model
 end
@@ -68,15 +71,45 @@ function create_model(parts, meshinfo::CartesianMeshParams, D::Int64, rank_parti
 end
 
 
-function create_model(parts, simcase::TaylorGreen)
+function create_model(parts, simcase::TaylorGreen{Periodic})
+    mesh = simcase.meshp
+    @unpack rank_partition,D, meshinfo = mesh
+
+    domain,partition = create_model(meshinfo, mesh.D)
+
+    model =CartesianDiscreteModel(parts,rank_partition, domain, partition;isperiodic=simcase.bc_type.bc )
+    if D == 2
+        model = add_centre_tag!(model, Point(0.0, 0.0)) #(0.0, 0.0) is the centre coordinate
+    end
+
+    
+    print_model(model,simcase)
+    return model 
+end
+
+
+
+
+
+function create_model(parts, simcase::TaylorGreen{Natural})
     mesh = simcase.meshp
     rank_partition = mesh.rank_partition
+    D = mesh.D
+    L = mesh.meshinfo.L
+    domain,partition = create_model(mesh.meshinfo, D)
 
-    domain,partition = create_model(mesh.meshinfo, mesh.D)
-
-    model =CartesianDiscreteModel(parts,rank_partition, domain, partition;isperiodic=(true, true) )
-    model = add_centre_tag!(model, Point(0.0, 0.0)) #(0.0, 0.0) is the centre coordinate
+    model =CartesianDiscreteModel(parts,rank_partition, domain, partition)
     
+
+    labels = get_face_labeling(model)
+
+    if D == 2
+        add_tag_from_tags!(labels, "external", collect(1:8))
+
+    elseif D == 3
+        add_tag_from_tags!(labels, "external", collect(1:26))
+    end
+
     print_model(model,simcase)
     return model 
 end
