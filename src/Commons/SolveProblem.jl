@@ -97,6 +97,8 @@ uh_tn_updt = FEFunction(Utn, vec_um)
 for (ntime,tn) in enumerate(time_step)
 
       m = 0
+     
+      @info "inner iteration $m | outer iteration $ntime"
 
       if mod(ntime,matrix_freq_update)==0
 
@@ -141,8 +143,7 @@ for (ntime,tn) in enumerate(time_step)
      
         Δpm1 = GridapDistributed.change_ghost(Δpm1, Mat_Aup)
 
-        println("Update Δa")
-        @time Δa .= Δa_star - θ .* Mat_inv_ML .* (Mat_Aup * Δpm1)
+       Δa .= Δa_star - θ .* Mat_inv_ML .* (Mat_Aup * Δpm1)
 
         vec_um .+=  dt * Δa
         vec_pm .+= Δpm1
@@ -219,8 +220,7 @@ function solve_velocity!(ns1, matrices, vectors, dt::Float64, θ::Float64)
   vec_pm = GridapDistributed.change_ghost(vec_pm, Mat_Aup)
   vec_am = GridapDistributed.change_ghost(vec_am, Mat_ML)
 
-  println("allocate b1")
-  @time b1 .= -Mat_Auu * vec_um - Mat_Aup * vec_pm - Mat_ML * vec_am +
+  b1 .= -Mat_Auu * vec_um - Mat_Aup * vec_pm - Mat_ML * vec_am +
     Mat_Auu * dt * vec_am + (1 - θ) * Mat_Aup * vec_sum_pm + Vec_Au
     println("solving velocity")
   @time solve!(Δa_star,ns1,b1)
@@ -237,12 +237,10 @@ function solve_pressure!(ns2, matrices, vectors, dt::Float64, θ::Float64)
   vec_am = GridapDistributed.change_ghost(vec_am, Mat_Tpu)
   Δa_star = GridapDistributed.change_ghost(Δa_star, Mat_Tpu)
 
-  println("allocate b2")
 
   #-Vec_A because changing sign in the continuity equations
-  @time b2 .= Mat_Tpu * Δa_star + Mat_Apu * (vec_um + dt * Δa_star) + Mat_App * vec_pm + Mat_Tpu * vec_am - Vec_Ap
+  b2 .= Mat_Tpu * Δa_star + Mat_Apu * (vec_um + dt * Δa_star) + Mat_App * vec_pm + Mat_Tpu * vec_am - Vec_Ap
   println("solving pressure")
-
   @time solve!(Δpm1,ns2,b2)
 
 end
