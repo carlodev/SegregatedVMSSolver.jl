@@ -31,7 +31,7 @@ Balancing between simplicity for novice users and flexibility for advanced users
 
 
 # Statement of need
-`SegregatedVMSSolver.jl` is a comprehensive Julia package designed for conducting high-fidelity simulations of complex flow phenomena whithin the incompressible regime, leveraging VMS and SUPG method. VMS has been originally introduced by [@Hughes:2000]. The linearization adopted has been proposed in the SUPG method by [@Banyai:2016].
+`SegregatedVMSSolver.jl` is a comprehensive Julia package designed for conducting high-fidelity simulations of complex flow phenomena whithin the incompressible regime, leveraging VMS and SUPG method. VMS has been originally introduced in [@Hughes:2000]. The linearization adopted has been proposed in the SUPG method in [@Banyai:2016].
 
 The package relies on `Gridap.jl`[@Verdugo:2022],[@Badia:2020] package to implement the mathematical model of FEM. Complementing this core functionality, `GridapDistributed.jl`[@BadiaD:2022] and [`PartitionedArrays.jl`](https://github.com/fverdugo/PartitionedArrays.jl) allow to use multi-core CPU desktop computers to HPC clusters. The [`GridapPETSc.jl`](https://github.com/gridap/GridapPETSc.jl) package is used to solve the final linear system. 
 
@@ -71,7 +71,7 @@ While these packages vary in scope and functionality, they collectively highligh
 
 ![Friction coefficient on the suction side of the sd7003 airfoil, time averaged and span averaged, Reynolds 60 000, angle of attack 4°,\label{fig:cfsd7003}](images/VMS7003s.pdf){ width=50%  }
 
-Figure \ref{fig:cfsd7003} shows the comparison of the time averaged results obtained using the LS-VMS, compared with the results obtained by Calderer et al. [@Calderer:2013] and Galbraith [@Galbraith:2008].
+Figure \ref{fig:cfsd7003} shows the comparison of the time averaged results obtained using the LS-VMS, compared with the results obtained in [@Calderer:2013] and in [@Galbraith:2008].
 
 # Package Features
 - Support 2-dimensional and 3-dimensional geometries
