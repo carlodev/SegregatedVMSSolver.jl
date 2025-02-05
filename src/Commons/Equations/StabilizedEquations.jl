@@ -64,7 +64,7 @@ function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::Simulation
       TmRm = Tm .*Rm_adv
 
       Tuu_vms_cross(u, v) = -0.5 * ∫( ((∇(v))⊙outer(TmRm, Tm⊙ u)) + ((∇(v)) ⊙outer(Tm⊙ u, TmRm)) )dΩ
-      Auu_vms_cross(u, v) = -0.5* ∫((∇(v)⊙outer(TmRm, Tm⊙ (cconv ∘ (u_adv, ∇(u))))) -(∇(v)⊙outer(Tm⊙ (cconv ∘ (u_adv, ∇(u))), TmRm)) )dΩ
+      Auu_vms_cross(u, v) = -0.5* ∫((∇(v)⊙outer(TmRm, Tm⊙ (cconv ∘ (u_adv, ∇(u))))) +(∇(v)⊙outer(Tm⊙ (cconv ∘ (u_adv, ∇(u))), TmRm)) )dΩ
       Aup_vms_cross(p, v) = -0.5* ∫((∇(v)⊙outer(TmRm, Tm⊙ ∇(p))) +(∇(v)⊙outer(Tm⊙ ∇(p), TmRm)) )dΩ
     end
 
