@@ -51,10 +51,7 @@ function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::Simulation
     Tc = continuity_stabilization(u_adv, stab_coeff, simcase)
     
 
-      if vms_cross_activation
-        @unpack Rm_adv = params
-      end
-
+      
     ### VMS EXTRA TERMS
     Auu_vms1(u, v) =  ∫(u_adv ⋅ (∇(v))'*Tm⊙ (cconv ∘ (u_adv, ∇(u)) ) )dΩ + 
     ∫( skewcoeff .* u_adv ⋅ (∇(v))'*Tm⊙ (u_adv ⋅ (∇ ⋅ u)) )dΩ
@@ -62,22 +59,28 @@ function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::Simulation
     Aup_vms1(p, v) =  ∫( u_adv ⋅ (∇(v))'*Tm⊙ (∇(p)) )dΩ 
 
     ### VMS CROSS TERMS
-    TmRm = Tm .*Rm_adv
+    if vms_cross_activation
+      @unpack Rm_adv = params
+      TmRm = Tm .*Rm_adv
 
-    Tuu_vms_cross(u, v) = -0.5 * ∫( ((∇(v))⊙outer(TmRm, Tm⊙ u)) + ((∇(v)) ⊙outer(Tm⊙ u, TmRm)) )dΩ
-    Auu_vms_cross(u, v) = -0.5* ∫((∇(v)⊙outer(TmRm, Tm⊙ (cconv ∘ (u_adv, ∇(u))))) -(∇(v)⊙outer(Tm⊙ (cconv ∘ (u_adv, ∇(u))), TmRm)) )dΩ
-    Aup_vms_cross(p, v) = -0.5* ∫((∇(v)⊙outer(TmRm, Tm⊙ ∇(p))) +(∇(v)⊙outer(Tm⊙ ∇(p), TmRm)) )dΩ
+      Tuu_vms_cross(u, v) = -0.5 * ∫( ((∇(v))⊙outer(TmRm, Tm⊙ u)) + ((∇(v)) ⊙outer(Tm⊙ u, TmRm)) )dΩ
+      Auu_vms_cross(u, v) = -0.5* ∫((∇(v)⊙outer(TmRm, Tm⊙ (cconv ∘ (u_adv, ∇(u))))) -(∇(v)⊙outer(Tm⊙ (cconv ∘ (u_adv, ∇(u))), TmRm)) )dΩ
+      Aup_vms_cross(p, v) = -0.5* ∫((∇(v)⊙outer(TmRm, Tm⊙ ∇(p))) +(∇(v)⊙outer(Tm⊙ ∇(p), TmRm)) )dΩ
+    end
+
+
+
 
     
     
 
     #### SUPG+GALERKIN TERMS
-    Tuu_G_SUPG(u, v) = ∫((v + Tm * (cconv ∘ (u_adv, ∇(v)))) ⊙ u)dΩ + Tuu_vms1(u, v) + Tuu_vms_cross(u, v) 
+    Tuu_G_SUPG(u, v) = ∫((v + Tm * (cconv ∘ (u_adv, ∇(v)))) ⊙ u)dΩ
 
     Auu_G_SUPG(u, v) = ∫(ν * ∇(v) ⊙ ∇(u) + (cconv ∘ (u_adv, ∇(u))) ⋅ v + (Tm * (cconv ∘ (u_adv, ∇(v)))) ⊙ (cconv ∘ (u_adv, ∇(u)) ))dΩ+ 
         ∫((Tc * (∇ ⋅ v)) ⊙ (∇ ⋅ u) + skewcoeff .* u_adv ⋅ (v + Tm * (cconv ∘ (u_adv, ∇(v)))) ⋅ (∇ ⋅ u))dΩ
 
-    Aup_G_SUPG(p, v) = ∫( v⋅(∇(p) ) + (Tm * (cconv ∘ (u_adv, ∇(v)))) ⊙ ∇(p))dΩ + Aup_vms1(p, v) + Aup_vms_cross(p,v)
+    Aup_G_SUPG(p, v) = ∫( v⋅(∇(p) ) + (Tm * (cconv ∘ (u_adv, ∇(v)))) ⊙ ∇(p))dΩ
 
     @create_equation(Tuu, vms_activation, vms_cross_activation, Tuu_G_SUPG, Tuu_vms1, Tuu_vms_cross)
     @create_equation(Auu, vms_activation, vms_cross_activation, Auu_G_SUPG, Auu_vms1, Auu_vms_cross)
