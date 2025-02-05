@@ -11,6 +11,7 @@ using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
 using SegregatedVMSSolver.CreateProblem
 using SegregatedVMSSolver.MatrixCreation
+using SegregatedVMSSolver.Equations
 using SegregatedVMSSolver.VectorsOperations
 using SegregatedVMSSolver.ExportUtility
 using SegregatedVMSSolver.Interfaces
@@ -23,7 +24,7 @@ function initialize_solve(simcase::SimulationCase,params::Dict{Symbol,Any})
   @unpack trials,tests = params
   U,P = trials
   
-  @sunpack t0,dt,save_sim_dir = simcase
+  @sunpack t0,dt,save_sim_dir,ν = simcase
 
 
   Ut0 = U(t0)
@@ -36,6 +37,8 @@ function initialize_solve(simcase::SimulationCase,params::Dict{Symbol,Any})
 
 
   uh0, ph0 = create_initial_conditions(simcase,params)
+  Rm_adv = Rm_adv_update(uh0,uh0,ph0,ν,dt, Ut0, simcase.sprob.method)
+  merge!(params, Dict(:Rm_adv => Rm_adv))
 
   @info "Initial Conditions Created"
 
@@ -67,18 +70,18 @@ function solve_case(params::Dict{Symbol,Any},simcase::SimulationCase)
   @unpack trials,tests = params
   U,P = trials
   
-  @unpack trials,tests = params
-  
+
 @sunpack t0,dt,tF =  simcase.simulationp.timep
+@sunpack ν =  simcase.simulationp.physicalp
+
 @sunpack petsc_options,matrix_freq_update,M,a_err_threshold,θ,Number_Skip_Expansion = simcase.simulationp.solverp
 time_step = collect(t0+dt:dt:tF)
+matrices, vectors, (uh_avg,ph_avg) = initialize_solve(simcase,params)
+@unpack Utn, Utn1, Ptn, Ptn1 = params
 
-init_values = initialize_solve(simcase,params)
 
 
 @unpack Utn, Utn1, Ptn, Ptn1 = params
-
-matrices, vectors, (uh_avg,ph_avg) =  init_values
 
 
 GridapPETSc.with(args=split(petsc_options)) do
@@ -93,6 +96,9 @@ ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
 ns2 = create_PETSc_setup(Mat_S,pres_kspsetup)
 
 uh_tn_updt = FEFunction(Utn, vec_um)
+uh_tn_1 = FEFunction(Utn, vec_um)
+
+
 
 for (ntime,tn) in enumerate(time_step)
 
@@ -173,7 +179,7 @@ for (ntime,tn) in enumerate(time_step)
 
   println("solution time at time $tn")
   println(time_solve)
-    @time GridapPETSc.GridapPETSc.gridap_petsc_gc()
+  @time GridapPETSc.GridapPETSc.gridap_petsc_gc()
 
 update_ũ_vector!(ũ_vector,vec_um)
 
@@ -197,9 +203,14 @@ end
 uh_tn = FEFunction(Utn, vec_um)
 ph_tn = FEFunction(Ptn, vec_pm)
 
+params[:Rm_adv] = Rm_adv_update(uh_tn,uh_tn_1,ph_tn,ν,dt, Utn1,simcase.sprob.method)
+
+uh_tn_1 = uh_tn
+
+
+
 uh_avg = update_time_average(uh_tn, uh_avg, Utn, tn, ntime, time_step, simcase.simulationp.timep)
 ph_avg = update_time_average(ph_tn, ph_avg, Ptn, tn, ntime, time_step, simcase.simulationp.timep)
-
 
 
 writesolution(params, simcase, ntime, tn, (uh_tn,ph_tn,uh_tn_updt,uh_avg,ph_avg))
@@ -246,4 +257,6 @@ function solve_pressure!(ns2, matrices, vectors, dt::Float64, θ::Float64)
 end
 
 
+
+ 
 end #end module 

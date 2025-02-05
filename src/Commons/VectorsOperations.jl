@@ -85,16 +85,6 @@ function set_zeros!(fields::MPIArray)
 end
 
 
-# function Base.println(d::Dict)
-#   for k in keys(d)
-#     if k !== :restart_df
-#     kval = d[k]
-#     println("$k = $kval")
-#     end
-#   end
-# end
-
-
 function update_time_average(field_tn, field_avg, U, tn::Float64, time_step_idx::Int64, time_step::Vector{Float64}, timep::TimeParameters)
 
   if timep.time_average
@@ -139,5 +129,7 @@ function update_avg_dofs(field_tn, field_avg, U, n_step::Int64)
 
   return field_avg
 end
+
+
 
 end #end module

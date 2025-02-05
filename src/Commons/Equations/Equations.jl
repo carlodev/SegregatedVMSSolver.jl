@@ -14,7 +14,8 @@ using GridapDistributed: Algebra
 using SegregatedVMSSolver.ParametersDef
 
 export segregated_equations
-
+export VMS_activation
+export Rm_adv_update
 
 include("StabilizationParameters.jl")
 include("StabilizationOperations.jl")

@@ -33,11 +33,16 @@ end
 
 @with_kw struct VMS <: StabilizationMethod
     order::Int64 = 1
+    cross_terms::Bool=false
 end
 
 @with_kw struct SUPG <: StabilizationMethod
     order::Int64 = 1
 end
+
+VMS(order::Int64) = VMS(order=order, cross_terms=false)
+
+
 
 function StabilizedProblem(method::VMS)
     StabilizedProblem(method, TensorFormulation(), false)
