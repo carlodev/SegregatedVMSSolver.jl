@@ -10,7 +10,7 @@ using MPI
 
 t0 = 0.0
 dt = 0.01
-tF = 2.5
+tF = dt*2 #2.5
 vortex_diameter = 1.0
 N = 16
 Re = 1600
