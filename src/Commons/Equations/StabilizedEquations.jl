@@ -53,8 +53,7 @@ function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::Simulation
 
       
     ### VMS EXTRA TERMS
-    Auu_vms1(u, v) =  ∫(u_adv ⋅ (∇(v))'*Tm⊙ (cconv ∘ (u_adv, ∇(u)) ) )dΩ + 
-    ∫( skewcoeff .* u_adv ⋅ (∇(v))'*Tm⊙ (u_adv ⋅ (∇ ⋅ u)) )dΩ
+    Auu_vms1(u, v) =  ∫(u_adv ⋅ (∇(v))'*Tm⊙ (cconv ∘ (u_adv, ∇(u)) ) + skewcoeff .* u_adv ⋅ (∇(v))'*Tm⊙ (u_adv ⋅ (∇ ⋅ u)) )dΩ
     Tuu_vms1(u, v) =  ∫( u_adv ⋅ (∇(v))'*Tm⊙u )dΩ # VMS1
     Aup_vms1(p, v) =  ∫( u_adv ⋅ (∇(v))'*Tm⊙ (∇(p)) )dΩ 
 
@@ -77,8 +76,8 @@ function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::Simulation
     #### SUPG+GALERKIN TERMS
     Tuu_G_SUPG(u, v) = ∫((v + Tm * (cconv ∘ (u_adv, ∇(v)))) ⊙ u)dΩ
 
-    Auu_G_SUPG(u, v) = ∫(ν * ∇(v) ⊙ ∇(u) + (cconv ∘ (u_adv, ∇(u))) ⋅ v + (Tm * (cconv ∘ (u_adv, ∇(v)))) ⊙ (cconv ∘ (u_adv, ∇(u)) ))dΩ+ 
-        ∫((Tc * (∇ ⋅ v)) ⊙ (∇ ⋅ u) + skewcoeff .* u_adv ⋅ (v + Tm * (cconv ∘ (u_adv, ∇(v)))) ⋅ (∇ ⋅ u))dΩ
+    Auu_G_SUPG(u, v) = ∫((ν * ∇(v) ⊙ ∇(u) + (cconv ∘ (u_adv, ∇(u))) ⋅ v + (Tm * (cconv ∘ (u_adv, ∇(v)))) ⊙ (cconv ∘ (u_adv, ∇(u)) ))+
+    ((Tc * (∇ ⋅ v)) ⊙ (∇ ⋅ u) + skewcoeff .* u_adv ⋅ (v + Tm * (cconv ∘ (u_adv, ∇(v)))) ⋅ (∇ ⋅ u)))dΩ
 
     Aup_G_SUPG(p, v) = ∫( v⋅(∇(p) ) + (Tm * (cconv ∘ (u_adv, ∇(v)))) ⊙ ∇(p))dΩ
 
