@@ -49,12 +49,12 @@ A suite of benchmark cases is implemented to ensure reliability and applicabilit
 This comprehensive implementation ensures that the package can address a variety of fluid dynamics problems, while its focus on 2D and 3D airfoil analysis fills a gap in the current Julia ecosystem for low-Reynolds-number aerodynamic studies.
 
 
-It has a suite of tools for post-processing the results like performing time and spanwise averaging, obtaining. It is possible to control the simulation in real-time, enabling/disabling the creation of output files at each time-step. The user can load own airfoil meshes also usign the package [`AirfoilGmsh.jl`](https://github.com/carlodev/AirfoilGmsh.jl). Additionally, the package provides tools for initializing boundary layers in 2D simulations, enhancing its versatility and utility for researchers and practitioners in the field of fluid dynamics.
+It has a suite of tools for post-processing the results like performing time and spanwise averaging. It is possible to control the simulation in real-time, enabling/disabling the creation of output files at each time-step. The user can load own airfoil meshes also using the package [`AirfoilGmsh.jl`](https://github.com/carlodev/AirfoilGmsh.jl). Additionally, the package provides tools for initializing boundary layers in 2D simulations, enhancing its versatility and utility for researchers and practitioners in the field of fluid dynamics.
 
 The field of fluid dynamics in Julia has seen significant growth, with several software packages emerging to address various computational challenges. This reflects the growing interest and engagement of the Julia community in this domain. A comprehensive list of packages can be found on [Julia Packages - Fluid Dynamics](https://juliapackages.com/c/fluid-dynamics). Among the most notable are:
 
 - **[Trixi.jl](https://github.com/trixi-framework/Trixi.jl)**: A framework for numerical simulation of hyperbolic PDEs, particularly suited for high-order methods and adaptive mesh refinement.
-- **[WaterLily.jl](https://github.com/WaterLily-jl/WaterLily.jl/tree/master)**: A tool focused on simulating fluid flows using a Lattice Boltzmann method, aimed at educational and research applications.
+- **[WaterLily.jl](https://github.com/WaterLily-jl/WaterLily.jl/tree/master)**: A CPU/GPU finite-volume method that uses an immersed-boundary method
 - **[Oceananigans.jl](https://github.com/CliMA/Oceananigans.jl)**: A GPU-accelerated model for simulating incompressible fluid dynamics, widely used in geophysical and oceanographic studies.
 
 While these packages vary in scope and functionality, they collectively highlight the flexibility and performance benefits of Julia in computational fluid dynamics. However, the ecosystem is still maturing compared to more established environments like Python or MATLAB. This paper contributes to this evolving field by introducing a new package tailored for Large Eddy Simulations.
