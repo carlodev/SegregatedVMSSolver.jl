@@ -31,8 +31,8 @@ timep = TimeParameters(t0=t0, dt=dt, tF=tF)
 
 physicalp = PhysicalParameters(Re=Re, c=vortex_diameter)
 solverp = SolverParameters(matrix_freq_update=1, Number_Skip_Expansion=10e6, M=40,petsc_options=sol_options)
-exportp = ExportParameters(printinitial=true, printmodel=true)
-
+exportp = ExportParameters(printinitial=true, printmodel=true, 
+vtu_export = ["uh","ph"], extra_export=["KineticEnergy", "Enstrophy"])
 
 meshp = MeshParameters(rank_partition, D; N=N, L=pi * vortex_diameter)
 

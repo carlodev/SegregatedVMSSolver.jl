@@ -107,8 +107,6 @@ function Periodic(mp::MeshParameters, fp::PhysicalParameters, params::TaylorGree
     @unpack Vs, Ua, Va = params
     @unpack ν,c = fp
 
-    # @assert D == 2 "TGV Periodic 3D not supported yet"
-
     bc = ntuple(i -> true, D)
 
     if D == 2
@@ -153,6 +151,8 @@ MyStructurePrint = Union{SimulationCase,StabilizedProblem,SimulationParameters,
     UserParameters,MeshInfo,StabilizationMethod,StabilizationFormulation}
 
 
+
+    
 function printstructure(s::MyStructurePrint)
     fnames = fieldnames(typeof(s))
     for fn in fnames
