@@ -1,51 +1,45 @@
 module MatrixCreationTests
 
 using Test
-using SegregatedVMSSolver
-using LinearAlgebra
+using SegregatedVMSSolver.ParametersDef
+using LinearAlgebra, Parameters
 using PartitionedArrays, SparseArrays
 using Gridap, GridapDistributed
-using Gridap:FESpaces
+using Gridap: FESpaces
 
 using SegregatedVMSSolver.MatrixCreation
 
-
-function test_matrix(rank_partition,distribute,D)
-    ν = 0.001
-    order = 1
+using SegregatedVMSSolver.MatrixCreation: allocate_all_matrices_vectors
 
 
-parts  = distribute(LinearIndices((prod(rank_partition),)))
-domain = (D==2) ? (0,1,0,1) : (0,1,0,1,0,1)
-mesh_partition =  (D==2) ?  (4,4) : (4,4,4)
-model = CartesianDiscreteModel(parts,rank_partition,domain,mesh_partition)
-Ω = Triangulation(model)
-dΩ = Measure(Ω,2*order)
+function main(u_adv, p0, params, simcase)
 
-vz((x,y)) = (D==2) ? VectorValue(1.0,0.0) : VectorValue(1.0,0.0,0.0)
-va((x,y) )= (D==2) ? VectorValue(1.0,2.0) : VectorValue(1.0,2.0,3.0)
+    @testset "Matrix Creation Tests" begin
+        @unpack trials, tests = params
+        U, P = trials
 
-reffe =  ReferenceFE(lagrangian,VectorValue{D,Float64},order)
-V = TestFESpace(model,reffe,dirichlet_tags="boundary")
-U = TrialFESpace(vz,V)
+        @sunpack t0, dt, save_sim_dir = simcase
 
-rhs(v) = 0.0
-Au(u, v) = ∫(ν * ∇(v) ⊙ ∇(u) )dΩ 
-MAu = get_matrix(AffineFEOperator(Au,rhs,U,V))
-@test typeof(MAu) <: PSparseMatrix
 
-Mat_inv = SegregatedVMSSolver.MatrixCreation.allocate_Mat_inv_ML(MAu)
-SegregatedVMSSolver.MatrixCreation.inv_lump_vel_mass!(Mat_inv, MAu)
+        Ut0 = U(t0)
+        Pt0 = P(t0)
 
-@test typeof(Mat_inv)<:PVector
+        Ut0_1 = U(t0 + dt)
+        Pt0_1 = P(t0 + dt)
+
+        merge!(params, Dict(:Utn => Ut0, :Ptn => Pt0, :Utn1 => Ut0_1, :Ptn1 => Pt0_1))
+
+
+        matrices = initialize_matrices(u_adv, params, simcase)
+        matrices = allocate_all_matrices_vectors(u_adv, params, simcase)
+        update_all_matrices_vectors!(matrices, u_adv, params, simcase)
+        vec = initialize_vectors(matrices, u_adv, p0)
+
+        @test typeof(matrices) <: Tuple
+        @test typeof(vec) <: Tuple
+    end
 
 end
 
-function main(distribute)
-for D in [2,3]
-    rank_partition = (D==2) ?  (2,2) : (2,2,1)
-        test_matrix(rank_partition,distribute,D)   
-end
-end
 
 end

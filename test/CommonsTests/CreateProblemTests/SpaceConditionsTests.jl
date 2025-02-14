@@ -29,7 +29,7 @@ function test_spaceconditions(rank_partition, distribute, D)
     
         fespaces = creation_fe_spaces(simcase, model, boundary_conditions)
         @test typeof(fespaces)<:Tuple
-        @test length(fespaces) == 6
+        @test length(fespaces) == 4
     end
 
 end

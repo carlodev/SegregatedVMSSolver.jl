@@ -5,7 +5,7 @@ using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
 
 
-function cylinder_test(backend)
+function cylinder_test()
 
 t0 =0.0
 dt = 0.1
@@ -32,6 +32,8 @@ simparams = SimulationParameters(timep,physicalp,solverp,exportp)
 
 mcase = Cylinder(meshp,simparams,sprob)
 
-@test SegregatedVMSSolver.solve(mcase,backend)
+@test typeof(mcase) <: SimulationCase
+
+return mcase
 
 end

@@ -2,6 +2,7 @@ module SolverOptions
 using Gridap
 using GridapDistributed
 using GridapPETSc
+using GridapPETSc.PETSC
 
 using Gridap.Algebra
 using MPI
@@ -58,10 +59,18 @@ function create_PETSc_setup(M::AbstractMatrix,ksp_setup::Function)
       ss = symbolic_setup(solver, M)
       ns = numerical_setup(ss, M)
       # @check_error_code GridapPETSc.PETSC.KSPView(ns.ksp[],C_NULL)
-
       return ns
 end
 
+function Algebra.numerical_setup!(ns::PETScLinearSolverNS,A::AbstractMatrix)
+  ns.A = A
+  println("convert")
+  @time ns.B = convert(PETScMatrix,A)
+  @check_error_code PETSC.KSPSetOperators(ns.ksp[],ns.B.mat[],ns.B.mat[])
+  
+  # @time @check_error_code PETSC.KSPSetUp(ns.ksp[])
+  ns
+end
 
 function Algebra.solve!(x::PETScVector,ns::PETScLinearSolverNS,b::AbstractVector)
 

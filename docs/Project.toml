@@ -5,5 +5,5 @@ DocumenterTools = "35a29f4d-8980-5a13-9543-d66fff28ecb8"
 SegregatedVMSSolver = "90220dfc-fac3-4908-b895-51c1a1f4cb85"
 
 [compat]
-Documenter = "0.27.23"
-DocumenterCitations = "1.0.0"
+Documenter = "1.8.0"
+DocumenterCitations = "1.3.5"

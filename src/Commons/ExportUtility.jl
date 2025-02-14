@@ -368,6 +368,7 @@ end
 function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime::Int64, tn::Float64, fields::Tuple)
     benchmark = simcase.simulationp.exportp.benchmark
     log_dir = simcase.simulationp.exportp.log_dir
+    nsub = simcase.sprob.method.order
 
     if !benchmark
         if (mod(ntime, 100) == 0 || print_on_request(log_dir))
@@ -375,7 +376,7 @@ function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime:
             case = typeof(simcase)
             save_path = joinpath(save_sim_dir, "$(case)_$(tn)_.vtu")
             @unpack Ω = params
-            writesolution(simcase, Ω, save_path, tn, fields)
+            writesolution(simcase, Ω, nsub, save_path, tn, fields)
         end
         compute_error(params, simcase, tn, fields)
     end
@@ -383,23 +384,24 @@ function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime:
 end
 
 
-function writesolution(simcase::TaylorGreen{Periodic}, Ω, save_path, tn::Float64, fields::Tuple)
+function writesolution(simcase::TaylorGreen{Periodic}, Ω, nsub::Int64, save_path, tn::Float64, fields::Tuple)
     u_analytic = simcase.bc_type.a_solution[:velocity]
     p_analytic = simcase.bc_type.a_solution[:pressure]
     uh, ph = fields
-    writevtk(Ω, save_path, cellfields=["uh" => uh, "uh_analytic" => u_analytic(tn), "ph" => ph, "ph_analytic" => p_analytic(tn)])
+
+    writevtk(Ω, save_path, nsubcells=nsub, cellfields=["uh" => uh, "uh_analytic" => u_analytic(tn), "ph" => ph, "ph_analytic" => p_analytic(tn)])
 end
 
 
-function writesolution(simcase::TaylorGreen{Natural}, Ω, save_path, tn::Float64, fields::Tuple)
+function writesolution(simcase::TaylorGreen{Natural}, Ω, nsub::Int64, save_path, tn::Float64, fields::Tuple)
     uh, ph = fields
-    writevtk(Ω, save_path, cellfields=["uh" => uh, "ph" => ph])
+    writevtk(Ω, save_path, nsubcells=nsub, cellfields=["uh" => uh, "ph" => ph])
 end
 
 
-function writesolution(simcase::VelocityBoundaryCase, Ω, save_path, tn, fields::Tuple)
+function writesolution(simcase::VelocityBoundaryCase, Ω, nsub::Int64, save_path, tn, fields::Tuple)
     uh_tn, ph_tn, uh_tn_updt, uh_avg, ph_avg = fields
-    @time writevtk(Ω, save_path, cellfields=["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
+    writevtk(Ω, save_path, nsubcells=nsub, cellfields=["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
         "uh_avg" => uh_avg, "ph_avg" => ph_avg])
 end
 
@@ -410,6 +412,8 @@ end
 It computes the velocity and pressure L2 error for the Taylor-Green case 
 """
 function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Periodic}, tn::Float64, fields::Tuple)
+    @sunpack D = simcase
+    if D == 2
     u_analytic = simcase.bc_type.a_solution[:velocity](tn)
     p_analytic = simcase.bc_type.a_solution[:pressure](tn)
     uh, ph = fields
@@ -422,12 +426,10 @@ function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Periodic},
     l2eu = sqrt(sum(∫(eu ⋅ eu) * dΩ))
     l2ep = sqrt(sum(∫(ep * ep) * dΩ))
     println("L2 velocity error = $l2eu")
-    println("L2 prssure error = $l2ep")
-end
-
-function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Natural}, tn::Float64, fields::Tuple)
-    uh, _ = fields
-    @unpack dΩ = params
+    println("L2 pressure error = $l2ep")
+    elseif D == 3 
+        uh, _ = fields
+    @unpack dΩ,parts = params
 
     wh = ∇×uh
     ### Compute Kinetic Energy
@@ -442,11 +444,22 @@ function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Natural}, 
     file_path = "TGV_output.csv"
 
     # Open the file in append mode, create it if it doesn't exist, write a line, and close it
-    open(file_path, "a") do file
-        writedlm(file, [[tn, Ek, Enstrophy]], ',')
+
+    map( parts) do part
+        if part == 1
+            open(file_path, "a") do file
+                writedlm(file, [[tn, Ek, Enstrophy]], ',')
+            end
+        end
+
     end
 
+    end
 
+end
+
+function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Natural}, tn::Float64, fields::Tuple)
+    
 end
 
 

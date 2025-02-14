@@ -12,10 +12,8 @@ Re = 500e3
 chord = 1.0
 walltag = ["airfoil","wake"]
 
-df_start = get_initial_conditions(mesh_file, u_in, Re, walltag; D=D, chord=chord)
+df_start = get_initial_conditions(mesh_file, u_in, Re, walltag; D=D, chord=chord, p=4)
 @test typeof(df_start) <: DataFrame
 
-rm("Inital_Condition.vtu"; force=true, recursive=true)
-rm("BoundaryLayerInit.csv"; force=true, recursive=true)
 
 end #end module

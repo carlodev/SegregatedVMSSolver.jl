@@ -10,7 +10,13 @@ end
 @publish ParametersDef VMS
 @publish ParametersDef SUPG
 
+
 @publish ParametersDef SimulationParameters
+@publish ParametersDef TaylorGreenParameters
+@publish ParametersDef Periodic
+@publish ParametersDef Natural
+@publish ParametersDef TaylorGreen
+
 @publish ParametersDef Airfoil
 @publish ParametersDef WindTunnel
 @publish ParametersDef Cylinder
