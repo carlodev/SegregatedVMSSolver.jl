@@ -381,6 +381,7 @@ function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime:
         compute_enstrophy_ek(simcase, params,fields,tn)
 
     end
+    compute_error(simcase, params,   tn, fields)
 
 end
 
@@ -408,7 +409,6 @@ function writesolution(simcase, params::Dict{Symbol,Any}, nsub::Int64, save_path
     end
    
     writesolution(simcase, tn, fields_names,cell_fields)
-    compute_error(simcase, params,   tn, fields)
 
     writevtk(Ω, save_path, nsubcells=nsub, cellfields=cell_fields)
 end
