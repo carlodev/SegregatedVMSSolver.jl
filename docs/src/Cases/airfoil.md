@@ -125,4 +125,5 @@ yflip!()
 plot!(xlabel="x/c", ylabel="Cp", legend=:top)
 ```
 
+The pressure distribution results are compared with the experiments reported in [Ladson](@cite)
 ![NACA0012_CP](../assets/NACA0012_A10_Cp.png)

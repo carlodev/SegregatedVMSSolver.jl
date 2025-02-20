@@ -16,7 +16,7 @@ The package solves the incompressible Navier-Stokes equations in the Finite Elem
 
 The methods belong to the Large Eddy Simulation (LES) family. The package can solve the `Taylor Green Vortices`, `Lid Driven Cavity Flow` (only 2D), `Cylinder vortex shedding` and and general `Airfoils` (2D and 3D). 
 
-It works fully in parallel (tested up to 80-CORES). It is specialized for the resolution of flow over airfoils, testing the capability of detecting the Laminar Separation Bubble. It is equipped with some utility `modules` for reading the output files and creating proper initial conditions.
+It works fully in parallel. It is specialized for the resolution of flow over airfoils, testing the capability of detecting the Laminar Separation Bubble. It is equipped with some utility `modules` for reading the output files and creating proper initial conditions.
 
 ## Installation
 The package is registered, so you can install it as:
@@ -57,6 +57,20 @@ For creating mesh and physical boundary conditions is suggested to install the f
 
 | ![](docs/figs/Cyl3D.gif)  [Cylinder Vortex Shedding](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/Cases/cylinder/)  | ![](docs/figs/DU89.gif) [Airfoil](https://carlodev.github.io/SegregatedVMSSolver.jl/dev/Cases/airfoil/)   | 
 |:-------------:|:-------------:|
+
+
+## Parallelization
+For parallelization is used `MPI`, and to solve the sparse and distribute numerical systems we use `PETSc`.
+The benchmark case is the 2D taylor Green, the time reported here are intended for each time-step. The order of the elements for this simulation is always 2, and the CFL constant at 0.32.
+
+### Strong Parallelization
+Strong scalability evaluates how efficiently a parallel code reduces execution time when the problem size remains fixed, but the number of processing units increases. There is a total of `400` elements on each side, leading to `160000` elements and `1920000` dofs in total.
+![MPI-strong](images/STRONG_TGV.png){ width=50%  }
+
+
+### Weak Parallelization
+Weak scalability measures how well a parallel code maintains performance when the problem size is kept constant per processor, and the number of processors increases. On each processor there are `50x50` elements, the number of dofs is kept constant at ``\approx`` `30K dfos/procs`.
+![MPI-weak](images/WEAK_TGV.png){ width=50%  }
 
 
 
