@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - refactor-matrix-assemble
+      - JossPaper
     tags: ['*']
 jobs:
   REPLTests:
