@@ -4,145 +4,102 @@ on:
     branches:
       - master
     tags: ['*']
+
 jobs:
   REPLTestsCommons:
     name: Sequential-Commons
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - '1.11.1'
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@latest
         with:
-          version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
+          version: '1.11.1'
+          arch: x64
       - uses: actions/cache@v4
-        env:
-          cache-name: cache-artifacts
         with:
           path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
+          key: ubuntu-test-cache-${{ hashFiles('**/Project.toml') }}
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v2
+      - uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: sequential-commons
-          files: lcov.info
+          name: coverage-sequential-commons
+          path: lcov.info
 
   REPLTestsCases:
     name: Sequential-Cases
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - '1.11.1'
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@latest
         with:
-          version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
+          version: '1.11.1'
+          arch: x64
       - uses: actions/cache@v4
-        env:
-          cache-name: cache-artifacts
         with:
           path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
+          key: ubuntu-test-cache-${{ hashFiles('**/Project.toml') }}
       - uses: julia-actions/julia-buildpkg@v1
-      - run: julia --project=. -e "include(joinpath(\"test\", \"sequential\", \"runtests.jl\"))"
+      - run: julia --project=. -e "include(joinpath('test', 'sequential', 'runtests.jl'))"
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v2
+      - uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: sequential-cases
-          files: lcov.info
+          name: coverage-sequential-cases
+          path: lcov.info
 
   UtilsTests:
     name: Sequential-Utils
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - '1.11.1'
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@latest
         with:
-          version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
+          version: '1.11.1'
+          arch: x64
       - uses: actions/cache@v4
-        env:
-          cache-name: cache-artifacts
         with:
           path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
+          key: ubuntu-test-cache-${{ hashFiles('**/Project.toml') }}
       - uses: julia-actions/julia-buildpkg@v1
-      - run: julia --project=. -e "include(joinpath(\"test\", \"UtilsTests\", \"runtests.jl\"))"
+      - run: julia --project=. -e "include(joinpath('test', 'UtilsTests', 'runtests.jl'))"
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v2
+      - uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: sequential-utils
-          files: lcov.info
+          name: coverage-sequential-utils
+          path: lcov.info
 
   MPITests:
     name: SegregatedVMSSolver-MPI
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - '1.11.1'
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@latest
         with:
-          version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
+          version: '1.11.1'
+          arch: x64
       - uses: actions/cache@v4
-        env:
-          cache-name: cache-artifacts
         with:
           path: ~/.julia/artifacts
-          key: ${{ runner.os }}-mpi-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-mpi-test-${{ env.cache-name }}-
-            ${{ runner.os }}-mpi-test-
-            ${{ runner.os }}-
+          key: ubuntu-mpi-test-cache-${{ hashFiles('**/Project.toml') }}
       - uses: julia-actions/julia-buildpkg@v1
-      - run: julia --project=. -e "include(joinpath(\"test\", \"mpi\", \"runtests.jl\"))"
+      - run: julia --project=. -e "include(joinpath('test', 'mpi', 'runtests.jl'))"
+
+  mergeCoverage:
+    name: Merge Coverage & Upload
+    runs-on: ubuntu-latest
+    needs: [REPLTestsCommons, REPLTestsCases, UtilsTests]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          path: coverage_reports
+      - run: |
+          julia --project=. -e '
+            using Coverage
+            files = readdir("coverage_reports"; join=true)
+            LCOV.convert_and_merge(files, "merged.info")'
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: merged.info
