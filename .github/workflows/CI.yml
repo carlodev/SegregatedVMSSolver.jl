@@ -94,6 +94,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: coverage_reports
+      - run: julia --project=. -e 'import Pkg; Pkg.add("Coverage")'  # Install Coverage.jl
       - run: |
           julia --project=. -e '
             using Coverage
