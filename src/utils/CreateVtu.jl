@@ -3,7 +3,7 @@ module CreateVtu
 using FileIO
 export create_vtu_file
 
-function create_vtu_file(results_folder::String)
+function create_vtu_file(results_folder::String; step=1)
   ff = cd(readdir, results_folder)
 
 
@@ -30,7 +30,7 @@ function create_vtu_file(results_folder::String)
   fname = ff_split[1][1] * ".pvd"
   io = open(fname , "w")
   println(io, initial_string)
-  for i in idx_sort
+  for i in idx_sort[1:step:end]
       println(io, "<DataSet timestep=\"$(time_step[i])\" part=\"0\" file=\"Results_vtu\\$(ff_file[i])\"/>")
   end
   println(io, end_string)
@@ -39,6 +39,7 @@ function create_vtu_file(results_folder::String)
   return fname
 
 end
+
 
 
 end

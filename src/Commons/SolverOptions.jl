@@ -59,7 +59,6 @@ function create_PETSc_setup(M::AbstractMatrix,ksp_setup::Function)
       ss = symbolic_setup(solver, M)
       ns = numerical_setup(ss, M)
       # @check_error_code GridapPETSc.PETSC.KSPView(ns.ksp[],C_NULL)
-
       return ns
 end
 
