@@ -13,7 +13,7 @@ using SegregatedVMSSolver.SolverOptions
 
 t0 =0.0
 dt = 0.1
-tF = 3.0
+tF = 30.0
 t_endramp=2.0
 
 Re = 1000
@@ -21,7 +21,7 @@ D = 2
 rank_partition = (2,2)
 
 
-sprob = StabilizedProblem(method=VMS(), coeff_method=ScalarFormulation())
+sprob = StabilizedProblem(method=VMS(2), coeff_method=ScalarFormulation())
 timep = TimeParameters(t0=t0,dt=dt,tF=tF, t_endramp=t_endramp)
 
 physicalp = PhysicalParameters(Re=Re)
@@ -38,3 +38,7 @@ mcase = LidDriven(meshp,simparams,sprob)
 SegregatedVMSSolver.solve(mcase,with_debug)
 
 ```
+
+## Results
+The reference values are from [botella_peyret1998](@cite)
+![LD2D](../assets/LS-VMS-LD-1000.png){ width=50%  }

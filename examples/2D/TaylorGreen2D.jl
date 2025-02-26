@@ -31,15 +31,15 @@ timep = TimeParameters(t0=t0, dt=dt, tF=tF)
 
 physicalp = PhysicalParameters(Re=Re, c=vortex_diameter)
 solverp = SolverParameters(matrix_freq_update=1, Number_Skip_Expansion=10e6, M=40,
-    petsc_options=solver_options)
-exportp = ExportParameters(printinitial=true, printmodel=true)
+petsc_options=solver_options)
+exportp = ExportParameters(printinitial=true, printmodel=true, 
+vtu_export = ["uh","ph","uh_analytic", "ph_analytic"], extra_export=["VelocityError","PressureError"])
+
+
 
 
 meshp = MeshParameters(rank_partition, D; N=N, L=0.5 * vortex_diameter)
-
-
 simparams = SimulationParameters(timep, physicalp, solverp, exportp)
-
 bc_tgv = Periodic(meshp, physicalp)
 
 
@@ -49,19 +49,11 @@ mcase = TaylorGreen(bc_tgv, meshp, simparams, sprob)
 
 
 # Create folder and file
-mkdir("Log")
-open("Log/PrintSim.txt", "w") do file
-end
+# mkdir("Log")
+# open("Log/PrintSim.txt", "w") do file
+# end
 
 
 
 SegregatedVMSSolver.solve(mcase, backend)
-
-
-
-
-
-
-
-
 

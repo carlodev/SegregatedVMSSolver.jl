@@ -1,4 +1,4 @@
-# Taylor Green Vortex
+# Taylor Green Vortex 2D
 ![TGx](../assets/TGx.png)
 
 It solves the Taylor Green Vortex case. 
@@ -15,7 +15,7 @@ For the 2D case there is an analytical solution for velocity and pressure:
 
 ``\omega=\frac{2 V_{s} \pi}{D} \cos \bigg (\frac{\pi}{D}(x-U_{a} t)\bigg ) \cos \bigg (\frac{\pi}{D}(y-V_{a} t)\bigg ) e^{-\frac{4 \nu \pi^{2}}{D^{2}} t}``
 
-Because of an analytical solution it is used as a benchamark case for verifing mesh convergence, CFL stability and processor scalability. The domain is a squqare of `2Dx2D` with periodic boundaries over the 4 sides. The initial solution is retrived from the analytical solution. The pressure is fixed in the centre of the domain equal to the analytical solution. 
+Because of an analytical solution it is used as a benchmark case for verifying mesh convergence, CFL stability and processor scalability. The domain is a square of `2Dx2D` with periodic boundaries over the 4 sides. The initial solution is obtained from the analytical solution. The pressure is fixed in the centre of the domain equal to the analytical solution. 
 The parameters set by the user are overwritten by the following standard values:
 - ``Vs = 1\;m/s`` swirling velocity
 - ``Ua = 0.2\;m/s`` translational velocity in $x$ direction
@@ -45,8 +45,11 @@ timep = TimeParameters(t0=t0,dt=dt,tF=tF)
 
 physicalp = PhysicalParameters(Re=Re)
 solverp = SolverParameters()
-exportp = ExportParameters(printinitial=false,printmodel=false)
+exportp = ExportParameters(printinitial=true, printmodel=true, 
+vtu_export = ["uh","ph","uh_analytic", "ph_analytic"], extra_export=["VelocityError","PressureError"])
+
 ```
+at each time-step, a new line on a `.csv` file will be written with: timestep-VelocityError-PressureError in L2 norm. You can use this file to analyze the error decreasing with mesh/order - refinement.
 
 We create a mesh of 32x32 elements
 
@@ -67,3 +70,7 @@ bc_tgv = Natural(meshp,physicalp)
 mcase = TaylorGreen(bc_tgv, meshp,simparams,sprob)
 SegregatedVMSSolver.solve(mcase,backend)
 ```
+
+
+
+

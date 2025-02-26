@@ -56,6 +56,6 @@ function print_initial_conditions(fields, simcase::SimulationCase,params::Dict{S
       save_path = joinpath("Initial_Conditions","InitialCondition_$(case)_.vtu")
       
       
-      writesolution(simcase, Ω, order, save_path,0.0, fields)
+      writesolution(simcase, params, order, save_path,0.0, fields,fields)
     end
 end

@@ -202,7 +202,7 @@ ph_avg = update_time_average(ph_tn, ph_avg, Ptn, tn, ntime, time_step, simcase.s
 
 
 
-writesolution(params, simcase, ntime, tn, (uh_tn,ph_tn,uh_tn_updt,uh_avg,ph_avg))
+writesolution(params, simcase, ntime, tn, (uh_tn,ph_tn), (uh_avg,ph_avg))
 
 export_fields(params,simcase, tn, uh_tn, ph_tn)
 
