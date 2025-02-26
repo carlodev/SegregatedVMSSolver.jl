@@ -96,7 +96,8 @@ jobs:
           path: coverage_reports
       - run: mkdir -p coverage
       - run: julia --project=. -e 'import Pkg; Pkg.add("Coverage")'  # Install Coverage.jl
-      - run: julia --project=. -e ' using Coverage;files = filter(f -> endswith(f, \".info\"), readdir(\"coverage_reports\", join=true));println(\"Found files\", files); coverages = [LCOV.parse(read(f, String)) for f in files]; println(\"Parsed coverage objects\", coverages); merged_cov = merge_coverage_counts(coverages...); LCOV.write(\"coverage/lcov.info\", merged_cov);'
+      - run: julia --project=. -e 'using Coverage; files = filter(f -> endswith(f, ".info"), readdir("coverage_reports", join=true)); println("Found files", files); coverages = [LCOV.parse(read(f, String)) for f in files]; println("Parsed coverage objects", coverages); merged_cov = merge_coverage_counts(coverages...); LCOV.write("coverage/lcov.info", merged_cov);'
+
       - uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
