@@ -65,12 +65,12 @@ The benchmark case is the 2D taylor Green, the time reported here are intended f
 
 ### Strong Parallelization
 Strong scalability evaluates how efficiently a parallel code reduces execution time when the problem size remains fixed, but the number of processing units increases. There is a total of `400` elements on each side, leading to `160000` elements and `1920000` dofs in total.
-![MPI-strong](images/STRONG_TGV.png){ width=50%  }
+![MPI-strong](docs/figs/STRONG_TGV.png)
 
 
 ### Weak Parallelization
-Weak scalability measures how well a parallel code maintains performance when the problem size is kept constant per processor, and the number of processors increases. On each processor there are `50x50` elements, the number of dofs is kept constant at ``\approx`` `30K dfos/procs`.
-![MPI-weak](images/WEAK_TGV.png){ width=50%  }
+Weak scalability measures how well a parallel code maintains performance when the problem size is kept constant per processor, and the number of processors increases. On each processor there are `50x50` elements, the number of dofs is kept constant at `30K dfos/procs`.
+![MPI-weak](docs/figs/WEAK_TGV.png)
 
 
 
