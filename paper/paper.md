@@ -93,16 +93,16 @@ In this section is possible to appreciate the weak and strong scalability of the
 
 For parallelization is used `MPI`, and to solve the sparse and distribute numerical systems we use `PETSc`
 
-### Strong Parallelization
+### Strong Scalability
 Strong scalability evaluates how efficiently a parallel code reduces execution time when the problem size remains fixed, but the number of processing units increases. There is a total of `400` elements on each side, leading to `160K` elements and `1.92M` dofs in total.
 
-![MPI-strong](images/STRONG_TGV.png){ width=50%  }
+![Strong Scalability](images/STRONG_TGV.png){ width=50%  }
 
 
-### Weak Parallelization
+### Weak Scalability
 Weak scalability measures how well a parallel code maintains performance when the problem size is kept constant per processor, and the number of processors increases. On each processor there are `50x50` elements, the number of dofs is kept constant at `30K dfos/procs`.
 
-![MPI-weak](images/WEAK_TGV.png){ width=50%  }
+![Weak Scalability](images/WEAK_TGV.png){ width=50%  }
 
 
 # Acknowledgements
