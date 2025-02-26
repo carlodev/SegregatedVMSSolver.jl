@@ -22,7 +22,7 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage-sequential-commons
           path: lcov.info
@@ -43,7 +43,7 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - run: julia --project=. -e "include(joinpath(\"test\", \"sequential\", \"runtests.jl\"))"
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage-sequential-cases
           path: lcov.info
@@ -64,7 +64,7 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - run: julia --project=. -e "include(joinpath(\"test\", \"UtilsTests\", \"runtests.jl\"))"
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage-sequential-utils
           path: lcov.info
