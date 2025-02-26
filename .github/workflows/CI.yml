@@ -36,13 +36,10 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - name: Upload coverage to Codecov
-        if: ${{ env.GITHUB_ACTIONS == 'true' }}
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - uses: codecov/codecov-action@v2
         with:
           flags: sequential-commons
+          files: lcov.info
 
   REPLTestsCases:
     name: Sequential-Cases
@@ -75,13 +72,10 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - run: julia --project=. -e "include(joinpath(\"test\", \"sequential\", \"runtests.jl\"))"
       - uses: julia-actions/julia-processcoverage@v1
-      - name: Upload coverage to Codecov
-        if: ${{ env.GITHUB_ACTIONS == 'true' }}
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - uses: codecov/codecov-action@v2
         with:
-          flags: sequential-commons
+          flags: sequential-cases
+          files: lcov.info
 
   UtilsTests:
     name: Sequential-Utils
@@ -114,13 +108,10 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - run: julia --project=. -e "include(joinpath(\"test\", \"UtilsTests\", \"runtests.jl\"))"
       - uses: julia-actions/julia-processcoverage@v1
-      - name: Upload coverage to Codecov
-        if: ${{ env.GITHUB_ACTIONS == 'true' }}
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - uses: codecov/codecov-action@v2
         with:
           flags: sequential-utils
+          files: lcov.info
 
   MPITests:
     name: SegregatedVMSSolver-MPI
