@@ -25,7 +25,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-sequential-commons
-          path: lcov.info
+          path: ./coverage-sequential-commons.info
 
   REPLTestsCases:
     name: Sequential-Cases
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-sequential-cases
-          path: lcov.info
+          path: ./coverage-sequential-cases.info
 
   UtilsTests:
     name: Sequential-Utils
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-sequential-utils
-          path: lcov.info
+          path: ./coverage-sequential-utils.info
 
   MPITests:
     name: SegregatedVMSSolver-MPI
@@ -94,11 +94,19 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: coverage_reports
-      - run: mkdir -p coverage
-      - run: julia --project=. -e 'import Pkg; Pkg.add("Coverage")'  # Install Coverage.jl
-      - run: julia --project=. -e 'using Coverage; files = filter(f -> endswith(f, ".info"), readdir("coverage_reports", join=true, recursive=true)); println("Found files", files); coverages = [LCOV.parse(read(f, String)) for f in files]; println("Parsed coverage objects", coverages); merged_cov = merge_coverage_counts(coverages...); LCOV.writefile("coverage/lcov.info", merged_cov);'
-
-      - uses: codecov/codecov-action@v2
+      - run: |
+          using Pkg
+          Pkg.activate(temp=true)
+          Pkg.add("Coverage")
+          using Coverage
+          coverage = LCOV.readfolder(".")
+          for cov in coverage
+            cov.filename = replace(cov.filename, "\\" => "/")
+          end
+          coverage = merge_coverage_counts(coverage)
+          @show covered_lines, total_lines = get_summary(coverage)
+          LCOV.writefile("./lcov.info", coverage)
+      - uses: coverallsapp/github-action@master
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: merged.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./lcov.info
