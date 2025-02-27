@@ -25,7 +25,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-sequential-commons
-          path: ./coverage-sequential-commons.info
+          path: ./lcov.info
 
   REPLTestsCases:
     name: Sequential-Cases
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-sequential-cases
-          path: ./coverage-sequential-cases.info
+          path: ./lcov.info
 
   UtilsTests:
     name: Sequential-Utils
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-sequential-utils
-          path: ./coverage-sequential-utils.info
+          path: ./lcov.info
 
   MPITests:
     name: SegregatedVMSSolver-MPI
@@ -100,6 +100,7 @@ jobs:
           Pkg.add("Coverage");
           using Coverage;
           coverage = LCOV.readfolder(".");
+          println("coverage");
           for cov in coverage
             cov.filename = replace(cov.filename, "\\" => "/")
           end;
