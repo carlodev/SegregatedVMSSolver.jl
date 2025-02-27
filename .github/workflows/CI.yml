@@ -41,7 +41,7 @@ jobs:
           path: ~/.julia/artifacts
           key: ubuntu-test-cache-${{ hashFiles('**/Project.toml') }}
       - uses: julia-actions/julia-buildpkg@v1
-      - run: julia --project=. -e "include(joinpath(\"test\", \"sequential\", \"runtests.jl\"))"
+      - run: julia --code-coverage --project=. -e "include(joinpath(\"test\", \"sequential\", \"runtests.jl\"))"
       - uses: julia-actions/julia-processcoverage@v1
       - uses: actions/upload-artifact@v4
         with:
@@ -62,7 +62,7 @@ jobs:
           path: ~/.julia/artifacts
           key: ubuntu-test-cache-${{ hashFiles('**/Project.toml') }}
       - uses: julia-actions/julia-buildpkg@v1
-      - run: julia --project=. -e "include(joinpath(\"test\", \"UtilsTests\", \"runtests.jl\"))"
+      - run: julia --code-coverage --project=. -e "include(joinpath(\"test\", \"UtilsTests\", \"runtests.jl\"))"
       - uses: julia-actions/julia-processcoverage@v1
       - uses: actions/upload-artifact@v4
         with:
@@ -100,7 +100,7 @@ jobs:
           Pkg.add("Coverage");
           using Coverage;
           coverage = LCOV.readfolder(".");
-          println("coverage");
+          println(coverage);
           for cov in coverage
             cov.filename = replace(cov.filename, "\\" => "/")
           end;
