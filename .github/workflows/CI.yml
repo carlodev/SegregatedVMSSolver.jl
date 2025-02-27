@@ -94,18 +94,18 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: coverage_reports
-      - run: |
-          using Pkg
-          Pkg.activate(temp=true)
-          Pkg.add("Coverage")
-          using Coverage
-          coverage = LCOV.readfolder(".")
+      - run: julia --project=. -e '
+          using Pkg;
+          Pkg.activate(temp=true);
+          Pkg.add("Coverage");
+          using Coverage;
+          coverage = LCOV.readfolder(".");
           for cov in coverage
             cov.filename = replace(cov.filename, "\\" => "/")
-          end
-          coverage = merge_coverage_counts(coverage)
+          end;
+          coverage = merge_coverage_counts(coverage);
           @show covered_lines, total_lines = get_summary(coverage)
-          LCOV.writefile("./lcov.info", coverage)
+          LCOV.writefile("./lcov.info", coverage);'
       - uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
