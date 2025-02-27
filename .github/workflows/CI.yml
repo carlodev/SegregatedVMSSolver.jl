@@ -3,42 +3,115 @@ on:
   push:
     branches:
       - master
-      - SEM-coupling
     tags: ['*']
+
 jobs:
-  VMSTests:
-    name: VMS Tests
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - '1.8.2'
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
+  REPLTestsCommons:
+    name: Sequential-Commons
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@latest
         with:
-          version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
-      - uses: actions/cache@v1
-        env:
-          cache-name: cache-artifacts
+          version: '1.11.1'
+          arch: x64
+      - uses: actions/cache@v4
         with:
           path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
+          key: ubuntu-test-cache-${{ hashFiles('**/Project.toml') }}
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - uses: actions/upload-artifact@v4
         with:
-          threshold:  70%
+          name: coverage-sequential-commons
+          path: ./lcov.info
+
+  REPLTestsCases:
+    name: Sequential-Cases
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: '1.11.1'
+          arch: x64
+      - uses: actions/cache@v4
+        with:
+          path: ~/.julia/artifacts
+          key: ubuntu-test-cache-${{ hashFiles('**/Project.toml') }}
+      - uses: julia-actions/julia-buildpkg@v1
+      - run: julia --code-coverage --project=. -e "include(joinpath(\"test\", \"sequential\", \"runcases.jl\"))"
+      - uses: julia-actions/julia-processcoverage@v1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-sequential-cases
+          path: ./lcov.info
+
+  UtilsTests:
+    name: Sequential-Utils
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: '1.11.1'
+          arch: x64
+      - uses: actions/cache@v4
+        with:
+          path: ~/.julia/artifacts
+          key: ubuntu-test-cache-${{ hashFiles('**/Project.toml') }}
+      - uses: julia-actions/julia-buildpkg@v1
+      - run: julia --code-coverage --project=. -e "include(joinpath(\"test\", \"UtilsTests\", \"runtests.jl\"))"
+      - uses: julia-actions/julia-processcoverage@v1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-sequential-utils
+          path: ./lcov.info
+
+  MPITests:
+    name: SegregatedVMSSolver-MPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: '1.11.1'
+          arch: x64
+      - uses: actions/cache@v4
+        with:
+          path: ~/.julia/artifacts
+          key: ubuntu-mpi-test-cache-${{ hashFiles('**/Project.toml') }}
+      - uses: julia-actions/julia-buildpkg@v1
+      - run: julia --project=. -e "include(joinpath(\"test\", \"mpi\", \"runtests.jl\"))"
+
+  mergeCoverage:
+    name: Merge Coverage & Upload
+    runs-on: ubuntu-latest
+    needs: [REPLTestsCommons, REPLTestsCases, UtilsTests]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v4
+        with:
+          path: coverage_reports
+      - run: julia --project=. -e '
+          using Pkg;
+          Pkg.activate(temp=true);
+          Pkg.add("Coverage");
+          using Coverage;
+          coverage = LCOV.readfolder(".");
+          for cov in coverage
+            cov.filename = replace(cov.filename, "\\" => "/")
+          end;
+          coverage = merge_coverage_counts(coverage);
+          @show covered_lines, total_lines = get_summary(coverage)
+          LCOV.writefile("./lcov.info", coverage);'
+      - uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./lcov.info
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: codecov-lcov
+          files: lcov.info

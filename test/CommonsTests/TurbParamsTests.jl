@@ -9,10 +9,10 @@ using SyntheticEddyMethod
 
 using SegregatedVMSSolver.ParametersDef
 
-# function main(distribute)
+function main(distribute)
     TI = 0.001    
     D = 3
-    meshfile = joinpath(@__DIR__, "..", "models", "sd7003s_3D_simple.msh")
+    meshfile = joinpath(@__DIR__, "..","..", "models", "sd7003s_3D_simple.msh")
     rank_partition=(2,2,1)
 
     #VirtualBox creation
@@ -43,7 +43,7 @@ using SegregatedVMSSolver.ParametersDef
     Vboxinfo.σ
     
     for ep in eval_point
-        @time compute_fluctuation(ep, tt, (TurbulenceInlet,Eddies, u_in_mag, Vboxinfo, Re_stress,D))
+        compute_fluctuation(ep, tt, (TurbulenceInlet,Eddies, 1.0, Vboxinfo, Re_stress,D,1.0))
     end
     
     
@@ -51,13 +51,7 @@ using SegregatedVMSSolver.ParametersDef
     
     
     
-    
-    
-    
-    
-    # end
-
 end
 
 
-end
+end #end module
