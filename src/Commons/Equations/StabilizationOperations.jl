@@ -45,7 +45,7 @@ function momentum_stabilization(uu, stab_coeff::TensorStabilization,simcase::Sim
         τ₂ = uu_new ⋅ G ⋅ uu_new
         return (τ₁ .+ τ₂ .+ τ₃) .^ (-1 / 2)
     end
-
+ 
     return τm ∘ (uu, G, GG)
 
 

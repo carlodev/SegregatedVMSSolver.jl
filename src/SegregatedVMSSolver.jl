@@ -17,6 +17,7 @@ include(joinpath("Commons","MatrixCreation.jl"))
 
 
 include(joinpath("Commons","SolveProblem.jl"))
+include(joinpath("Commons","SolveNlin.jl"))
 
 include("Main.jl")
 

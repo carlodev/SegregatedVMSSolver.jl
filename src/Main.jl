@@ -2,6 +2,7 @@ using MPI
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.CreateProblem
 using SegregatedVMSSolver.SolveProblem
+using SegregatedVMSSolver.SolveNlin
 using PartitionedArrays, Gridap, GridapDistributed
 
 function solve(simcase::SimulationCase,backend::Function)
@@ -20,7 +21,12 @@ function solve(simcase::SimulationCase,backend::Function)
 
         printstructure(simcase)
         params = setup_case(simcase,distribute)
-        solve_case(params,simcase)
+        if simcase.simulationp.solverp.linear
+            solve_case(params,simcase)
+        else
+            solve_nlin(simcase,params)
+        end
+
     end
 
 return true

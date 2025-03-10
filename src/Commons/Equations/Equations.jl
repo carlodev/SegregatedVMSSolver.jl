@@ -14,11 +14,12 @@ using GridapDistributed: Algebra
 using SegregatedVMSSolver.ParametersDef
 
 export segregated_equations
-
+export coupled_equations
 
 include("StabilizationParameters.jl")
 include("StabilizationOperations.jl")
 include("StabilizedEquations.jl")
+include("CoupledEquations.jl")
 
 
 end

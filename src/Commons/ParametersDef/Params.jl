@@ -81,6 +81,7 @@ end
     a_err_threshold::Int64=200 ### threshold to be satisfied:: norm(accelation_initial)/norm(acceleration_final) > a_err_threshold
     M::Int64=20 ## maximum number of internal iterations
     Number_Skip_Expansion::Int64=100 #number of initial time steps where is not used the Taylor-Expansion to compute the velocity field at the next time step, but simply the velcity field at the previous one.
+    linear::Bool = true
 end
 
 

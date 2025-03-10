@@ -62,5 +62,4 @@ function is_VMS(method::SUPG)
   return 0
 end
 
-    
 
