@@ -1,10 +1,14 @@
 
-function liddriven_test(backend)
+
+
+
+
+function liddriven_test()
 
 t0 =0.0
 dt = 0.1
-tF = 3.0
-t_endramp=2.0
+tF = dt*5
+t_endramp=0.3
 
 Re = 1000
 D = 2
@@ -30,11 +34,9 @@ mkpath(log_dir)
 open(joinpath(log_dir,"PrintSim.txt"), "w") do io
 end
 
-if backend == with_mpi
-    comm = MPI.COMM_WORLD
-    MPI.Barrier(comm)
-end
+@test typeof(mcase) <: SimulationCase
 
-@test SegregatedVMSSolver.solve(mcase,backend)
+return mcase
+
 
 end

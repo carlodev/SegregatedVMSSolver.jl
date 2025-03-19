@@ -107,11 +107,15 @@ function Periodic(mp::MeshParameters, fp::PhysicalParameters, params::TaylorGree
     @unpack Vs, Ua, Va = params
     @unpack ν,c = fp
 
-    @assert D == 2 "TGV Periodic 3D not supported yet"
-
     bc = ntuple(i -> true, D)
 
-    velocity, pressure, _ = analytical_solution(c*0.5, Vs, Ua, Va, ν)
+    if D == 2
+        velocity, pressure, _ = analytical_solution(c*0.5, Vs, Ua, Va, ν)
+    elseif D ==3
+        @unpack L = mp.meshinfo
+        velocity, pressure  = TGV_initial(Vs, D, c)
+    end
+
     a_solution = Dict(:velocity => velocity, :pressure => pressure)
     return Periodic(params, bc, a_solution )
 end
@@ -129,7 +133,7 @@ function Natural(mp::MeshParameters, fp::PhysicalParameters, params::TaylorGreen
     
     bc = ntuple(i -> false, D)
 
-    velocity, pressure  = TGV_initial(Vs, D, L)
+    velocity, pressure  = TGV_Natural_initial(Vs, D, L)
     a_solution = Dict(:velocity => velocity, :pressure => pressure)
 
     return Natural(params, bc, a_solution)
@@ -147,6 +151,8 @@ MyStructurePrint = Union{SimulationCase,StabilizedProblem,SimulationParameters,
     UserParameters,MeshInfo,StabilizationMethod,StabilizationFormulation}
 
 
+
+    
 function printstructure(s::MyStructurePrint)
     fnames = fieldnames(typeof(s))
     for fn in fnames

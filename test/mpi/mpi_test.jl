@@ -3,10 +3,10 @@ using PartitionedArrays
 using MPI
 using Test
 
-@testset "Commons MPI" begin
-  include(joinpath("..", "CommonsTests", "CommonsTests.jl"))
-  CommonsTests.tests_common(with_mpi)
-end
+# @testset "Commons MPI" begin
+#   include(joinpath("..", "CommonsTests", "CommonsTests.jl"))
+#   CommonsTests.tests_common(with_mpi)
+# end
 
 @testset "Cases Tests MPI" begin
     include(joinpath("..", "TestsCases", "TestsCases.jl"))

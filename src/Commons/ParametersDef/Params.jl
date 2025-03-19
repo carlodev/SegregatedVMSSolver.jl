@@ -122,6 +122,9 @@ function MeshParameters(rank_partition::Union{Int64,Tuple}, D::Int64, filename::
 end
 
 
+const ALLOWED_EXTRA_EXPORTS = ["KineticEnergy", "Enstrophy", "VelocityError", "PressureError"]
+const ALLOWED_VTU_EXPORTS = ["uh", "ph", "uh_analytic", "ph_analytic","uh_avg", "ph_avg"]
+
 @with_kw struct ExportParameters <: UserParameters
     printmodel::Bool=true
     printinitial::Bool=true
@@ -132,6 +135,12 @@ end
     fieldexport::Vector{Vector{String}}=[[""]]
     export_field::Bool = (isempty(name_tags[1])) ? false : true
     @assert length(name_tags) == length(fieldexport)
+    vtu_export::Vector{String} = ["uh","ph"]
+        
+    extra_export::Vector{String} = String[]  
+    @assert all(x -> x in ALLOWED_EXTRA_EXPORTS, extra_export) "Invalid value in extra_export. Allowed values:$ALLOWED_EXTRA_EXPORTS"
+
+
 end
 
 
