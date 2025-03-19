@@ -2,21 +2,6 @@
 
 In this section is explained how to visualize the results and use the integrated post processing api for studying airfoils. All the results are saved in the folder `/Results`. 
 
-## Using Paraview
-[ParaView](https://www.paraview.org/) which allows to graphically visualize the results and open `.vtu` and `.pvtu` files. There are a lot of embedded and advanced tools.
-
-You can create a Paraview files collecting in sequence all the  `.vtu` to visualize them in temporal sequence. Use the provided api specifing the folder where your `.vtu` are stored.
-´´´julia
-using SegregatedVMSSolver.CreateVtu
-
-create_vtu_file("Results_vtu/")
-´´´
-
-!!! info "numeric info" 
-    Creating `Log/PrintSim.txt` allows to monitor the current state of the simulation creating `.pvtu` files.
-    It is suggested to use it at the beginning of the simulation to check the convergence of the simulation and the boundary conditions.
-    It may consume a lot of storage space saving all time steps for 3D simulations. 
-
 ## Using Integrated API
 A specific module `ReadAirfoilResults` has been develop. While running an `Airfoil` simulation the code automatically saves the results - for pressure and velocity normal gradient - just for the nodes that are part of the `airfoil` boundary. 
 
