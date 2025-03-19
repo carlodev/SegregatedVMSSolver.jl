@@ -25,15 +25,15 @@ rank_partition = (2,2)
 
 
 
-solver_options =  options = "-snes_type newtonls -snes_linesearch_type basic -snes_linesearch_damping 1.0 -snes_rtol 1.0e-8 -snes_atol 0 -snes_monitor  -snes_max_it 20 \
--pc_type asm -ksp_type fgmres -ksp_converged_reason -ksp_max_it 50 -ksp_rtol 1e-8 -ksp_atol 0.0"
+solver_options =  "-snes_type newtonls -snes_linesearch_type basic -snes_linesearch_damping 1.0 -snes_rtol 1.0e-8 -snes_atol 0 -snes_monitor  -snes_max_it 20 \
+-pc_type gamg -ksp_type gmres -ksp_converged_reason -ksp_max_it 50 -ksp_rtol 1e-8 -ksp_atol 0.0"
 
 sprob = StabilizedProblem(VMS(1))
 timep = TimeParameters(t0=t0, dt=dt, tF=tF)
 
 physicalp = PhysicalParameters(Re=Re, c=vortex_diameter)
 solverp = SolverParameters(matrix_freq_update=1, Number_Skip_Expansion=10e6, M=40,
-petsc_options=solver_options, linear=false, θ=1.0)
+petsc_options=solver_options, linear=true, θ=1.0)
 exportp = ExportParameters(printinitial=false, printmodel=false, 
 vtu_export = ["uh","ph","uh_analytic", "ph_analytic"], extra_export=["VelocityError","PressureError"])
 
