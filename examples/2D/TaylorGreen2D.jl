@@ -57,3 +57,5 @@ mcase = TaylorGreen(bc_tgv, meshp, simparams, sprob)
 
 SegregatedVMSSolver.solve(mcase, backend)
 
+#mpiexecjl -n 4 julia --project=. examples/2D/TaylorGreen2D.jl
+

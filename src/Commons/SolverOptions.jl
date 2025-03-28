@@ -87,4 +87,22 @@ end
 
 
 
+#GridapSolvers Interface
+function 
+
+end
+
+P = JacobiLinearSolver()
+verbose = i_am_main(parts)
+
+# GMRES with left and right preconditioner
+gmres = LinearSolvers.GMRESSolver(40;Pr=P,Pl=P,rtol=1.e-8,verbose=verbose)
+
+A, b = get_matrix(op), get_vector(op);
+ns = numerical_setup(symbolic_setup(gmres,A),A)
+
+x = allocate_in_domain(A); fill!(x,0.0)
+solve!(x,ns,b)
+
+
 end

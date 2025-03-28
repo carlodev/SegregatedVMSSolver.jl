@@ -178,7 +178,7 @@ function update_matrix_vector!(A::AbstractMatrix, b::AbstractVector, a::Function
 
   data = collect_cell_matrix_and_vector(U, V, mat_contribs, 0.0, uhd)
 
-  assembler = SparseMatrixAssembler(U, V)
+  assembler = SparseMatrixAssembler(U, V, FullyAssembledRows())
   assemble_matrix_and_vector!(A, b, assembler, data)
 
 end
