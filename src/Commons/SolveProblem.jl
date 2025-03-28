@@ -1,11 +1,16 @@
 module SolveProblem
 using Gridap
 using GridapDistributed
+using GridapDistributed.Algebra
+
 using GridapPETSc
 using SparseArrays
 using PartitionedArrays
 using Parameters
 using Gridap.FESpaces
+using GridapSolvers
+using GridapSolvers.LinearSolvers
+using IterativeSolvers
 
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
@@ -64,7 +69,7 @@ end
 It solves iteratively the velocity and pressure system.
 """
 function solve_case(params::Dict{Symbol,Any},simcase::SimulationCase)
-  @unpack trials,tests = params
+  @unpack trials,tests,parts = params
   U,P = trials
   
   @unpack trials,tests = params
@@ -81,7 +86,6 @@ init_values = initialize_solve(simcase,params)
 matrices, vectors, (uh_avg,ph_avg) =  init_values
 
 
-GridapPETSc.with(args=split(petsc_options)) do
 
 
 Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
@@ -89,8 +93,9 @@ Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App,
 
 vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector = vectors
 
-ns1 = create_PETSc_setup(Mat_ML,vel_kspsetup)
-ns2 = create_PETSc_setup(Mat_S,pres_kspsetup)
+
+ns1 = create_ns_setup(Mat_ML,parts)
+ns2 = create_ns_setup(Mat_S,parts)
 
 uh_tn_updt = FEFunction(Utn, vec_um)
 
@@ -128,14 +133,18 @@ for (ntime,tn) in enumerate(time_step)
         err_norm_Δa0 = 1
         err_norm_Δp0 = 1
 
-        
+     
+
+        Δpm1 =  allocate_in_domain(Mat_S)
+        Δa_star = allocate_in_domain(Mat_ML)
+
       while (m<= M) && (err_norm_Δa0<a_err_threshold)
 
-        Δpm1 .=  pazeros(Mat_S)
-        Δa_star .= pazeros(Mat_ML)
+        fill!(Δpm1,0.0)
+        fill!(Δa_star,0.0)
 
         vectors = (vec_pm,vec_um,vec_am,vec_sum_pm,Δa_star,Δpm1,Δa,b1,b2,ũ_vector)
-
+println("pazeros")
         solve_velocity!(ns1,matrices,vectors,dt,θ)
 
         solve_pressure!(ns2,matrices,vectors,dt,θ)
@@ -173,7 +182,6 @@ for (ntime,tn) in enumerate(time_step)
 
   println("solution time at time $tn")
   println(time_solve)
-    @time GridapPETSc.GridapPETSc.gridap_petsc_gc()
 
 update_ũ_vector!(ũ_vector,vec_um)
 
@@ -207,7 +215,6 @@ writesolution(params, simcase, ntime, tn, (uh_tn,ph_tn), (uh_avg,ph_avg))
 export_fields(params,simcase, tn, uh_tn, ph_tn)
 
   end #end for
-end #end GridapPETSc
 
 end #end solve_case
 

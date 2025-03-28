@@ -3,12 +3,15 @@ using Gridap
 using GridapDistributed
 using GridapPETSc
 using GridapPETSc.PETSC
+using GridapSolvers
+using GridapSolvers.LinearSolvers
+using PartitionedArrays: i_am_main
 
 using Gridap.Algebra
 using MPI
 import GridapPETSc:PETScLinearSolverNS
 
-
+export create_ns_setup
 export vel_kspsetup
 export pres_kspsetup
 export petsc_options_default
@@ -88,21 +91,28 @@ end
 
 
 #GridapSolvers Interface
-function 
-
+function create_ns_p_setup(A,parts)
+  P = JacobiLinearSolver()
+  verbose = i_am_main(parts)
+  gmres = LinearSolvers.GMRESSolver(40;Pr=P,Pl=P,rtol=1.e-8,verbose=verbose)
+  ns = numerical_setup(symbolic_setup(gmres,A),A)
+  return ns
+end
+function create_ns_u_setup(A,parts)
+  P = JacobiLinearSolver()
+  verbose = i_am_main(parts)
+  gmres = LinearSolvers.GMRESSolver(40;Pr=P,Pl=P,rtol=1.e-8,verbose=verbose)
+  ns = numerical_setup(symbolic_setup(gmres,A),A)
+  return ns
 end
 
-P = JacobiLinearSolver()
-verbose = i_am_main(parts)
-
-# GMRES with left and right preconditioner
-gmres = LinearSolvers.GMRESSolver(40;Pr=P,Pl=P,rtol=1.e-8,verbose=verbose)
-
-A, b = get_matrix(op), get_vector(op);
-ns = numerical_setup(symbolic_setup(gmres,A),A)
-
-x = allocate_in_domain(A); fill!(x,0.0)
-solve!(x,ns,b)
+function create_ns_p_setup(A,parts)
+  P = JacobiLinearSolver()
+  verbose = i_am_main(parts)
+  gmres = LinearSolvers.GMRESSolver(40;Pr=P,Pl=P,rtol=1.e-8,verbose=verbose)
+  ns = numerical_setup(symbolic_setup(gmres,A),A)
+  return ns
+end
 
 
 end
