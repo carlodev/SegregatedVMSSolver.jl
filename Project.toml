@@ -1,7 +1,7 @@
 name = "SegregatedVMSSolver"
 uuid = "90220dfc-fac3-4908-b895-51c1a1f4cb85"
 authors = ["Carlo Brunelli"]
-version = "3.0.0"
+version = "3.0.1"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
