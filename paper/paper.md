@@ -65,7 +65,7 @@ While these packages vary in scope and functionality, they collectively highligh
 # Results
 
 ## Taylor Green 2D
-2D Taylor-Green vortex case is used as benchmark case to assess the error analysis of the code. The domain is a square of size: [-0.5,0.5]x[-0.5,0.5], at Reynolds number 1600. The CFL is constant for each simulation, CFL=0.32. The time-step is computed as $dt = \dfrac{CFL}{ order \cdot N}$.
+2D Taylor-Green vortex case is used as benchmark case to assess the error analysis of the code. The domain is a square of size: [-0.5,0.5]x[-0.5,0.5], at Reynolds number 1600. The CFL is constant for each simulation, CFL=0.32. The time-step is computed as $dt = \frac{CFL}{ order \cdot N}$.
 
 ![TGV2D-verr](images/verr.png){ width=50%  }
 ![TGV2D-perr](images/perr.png){ width=50%  }
