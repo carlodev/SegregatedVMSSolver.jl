@@ -45,9 +45,9 @@ It also has a suite of tools for post-processing the results like performing tim
 
 The field of fluid dynamics in Julia has seen significant growth, with several software packages emerging to address various computational challenges. This reflects the growing interest and engagement of the Julia community in this domain. A comprehensive list of packages can be found on [Julia Packages - Fluid Dynamics](https://juliapackages.com/c/fluid-dynamics). Among the most notable and well documented are:
 
-- **`Trixi.jl` [@Trixi:2025]**: A framework for numerical simulation of hyperbolic PDEs, particularly suited for high-order methods and adaptive mesh refinement.
-- **`WaterLily.jl` [WaterLily:2024]**: A CPU/GPU finite-volume solver that uses an immersed-boundary method
-- **`Oceananigans.jl` [@Oceananigans:2020]**: A GPU-accelerated model for simulating incompressible fluid dynamics, widely used in geophysical and oceanographic studies.
+- **`Trixi.jl`** [@Trixi:2025]: A framework for numerical simulation of hyperbolic PDEs, particularly suited for high-order methods and adaptive mesh refinement.
+- **`WaterLily.jl`** [@WaterLily:2024]: A CPU/GPU finite-volume solver that uses an immersed-boundary method
+- **`Oceananigans.jl`** [@Oceananigans:2020]: A GPU-accelerated model for simulating incompressible fluid dynamics, widely used in geophysical and oceanographic studies.
 
 While these packages vary in scope and functionality, they collectively highlight the flexibility and performance benefits of Julia in computational fluid dynamics. However, the ecosystem is still maturing compared to more established environments like Python or MATLAB. This paper contributes to this evolving field by introducing a new package tailored for Large Eddy Simulations.
 
