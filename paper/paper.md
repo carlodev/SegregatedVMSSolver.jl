@@ -29,12 +29,13 @@ However, for more advanced users who may desire greater control over the simulat
 
 
 # Statement of need
-`SegregatedVMSSolver.jl` is a comprehensive Julia package designed for conducting high-fidelity simulations of complex flow phenomena within the incompressible regime, leveraging the VMS and SUPG method. VMS has been originally introduced in [@Hughes:2000]. The linearization adopted has been proposed in the SUPG method in [@Banyai:2016]. 
-The package relies on `Gridap.jl`[@Verdugo:2022],[@Badia:2020] package to implement the mathematical model of FEM. Complementing this core functionality, `GridapDistributed.jl`[@BadiaD:2022] and [`PartitionedArrays.jl`](https://github.com/fverdugo/PartitionedArrays.jl) allow the use of multi-core CPUs desktop computers to HPC clusters. The [`GridapPETSc.jl`](https://github.com/gridap/GridapPETSc.jl) package is used to solve the final linear system. 
+`SegregatedVMSSolver.jl` is a comprehensive Julia package designed for conducting high-fidelity simulations of complex flow phenomena within the incompressible regime, leveraging the VMS and SUPG method. VMS has been originally introduced by @Hughes:2000. The linearization adopted has been proposed in the SUPG method by @Banyai:2016. 
+The package relies on the `Gridap.jl` package [@Verdugo:2022; @Badia:2020] to implement the mathematical model of FEM. Complementing this core functionality, `GridapDistributed.jl` [@BadiaD:2022] and [`PartitionedArrays.jl`](https://github.com/fverdugo/PartitionedArrays.jl) allow the use of multi-core CPUs desktop computers to HPC clusters. The [`GridapPETSc.jl`](https://github.com/gridap/GridapPETSc.jl) package is used to solve the final linear system. 
 It solves a Linearized and Segregated version of VMS (LS-VMS) and SUPG. It is based on an iterative predictor-corrector scheme and it avoids the resolution of a non-linear problem. It uses the $\theta$ method to solve the time-marching problem. 
 
 This package focuses on solving fluid dynamics problems, with a particular emphasis on the study of 2D and 3D airfoil aerodynamics at low Reynolds numbers (tested up to 500,000). The primary objective is to provide researchers and engineers with a versatile tool for analyzing aerodynamic features in this regime. 
 A suite of benchmark cases is implemented to ensure reliability and applicability across a range of scenarios. These include:
+
 - **Taylor-Green vortices**: Simulated in both 2D and 3D.
 - **Lid-driven cavity**: Solvable in 2D; the 3D version is not currently supported.
 - **Vortex shedding over a cylinder**: Available in both 2D and 3D.
@@ -52,7 +53,7 @@ While these packages vary in scope and functionality, they collectively highligh
 
 
 # Package Features
-- It supports 2-dimensional and 3-dimensional geometries
+- It supports two-dimensional and three-dimensional geometries
 - It solved a time-dependent problem
 - It can run in parallel using MPI
 - Velocity ramping
@@ -65,18 +66,23 @@ While these packages vary in scope and functionality, they collectively highligh
 # Results
 
 ## Taylor Green 2D
-2D Taylor-Green vortex case is used as benchmark case to assess the error analysis of the code. The domain is a square of size: [-0.5,0.5]x[-0.5,0.5], at Reynolds number 1600. The CFL is constant for each simulation, CFL=0.32. The time-step is computed as $dt = \frac{CFL}{ order \cdot N}$.
+2D Taylor-Green vortex case is used as benchmark case to assess the error analysis of the code. The domain is a square of size: $[-0.5,0.5] \times [-0.5,0.5]$, at Reynolds number 1600. 
+The CFL is constant for each simulation at 0.32. 
+The time-step size is computed as $\Delta t = \frac{\text{CFL}}{ \text{order} \times N}$.
 
 ![TGV2D-verr](images/verr.png){ width=50%  }
 ![TGV2D-perr](images/perr.png){ width=50%  }
 
 ## Lid-Driven Cavity Flow 2D
-The 2D lid-driven cavity flow is another well-known test case. The domain is a square of size: [-0.5,0.5]x[-0.5,0.5], at Reynolds number 1000. The time-step `dt=0.02`, number of elements for each side `N=50`, `order=2`. The reference values are from [@botella_peyret:1998]. The plot reports the velocity in `x` direction along the vertical plane `x=0.0`.
+The 2D lid-driven cavity flow is another well-known test case. The domain is a square of size: $[-0.5,0.5] \times [-0.5,0.5]$, at Reynolds number 1000. The time-step size is 0.02, number of elements for each side (`N`) is 50, and order is 2. 
+The reference values are from @botella_peyret:1998. 
+The plot reports the velocity in $x$ direction along the vertical plane $x = 0$.
 
 ![Lid Driven Cavity Flow Reynolds 1000](images/LS-VMS-LD-1000.png){ width=50%  }
 
 ## Taylor Green 3D
-The flow is initialized in a cubic domain with periodic boundary conditions imposed on all sides. The domain extends from $-\pi$ to $\pi$ in each spatial direction (`x`, `y`, `z`). The reference is the DNS solution.
+The flow is initialized in a cubic domain with periodic boundary conditions imposed on all sides. The domain extends from $-\pi$ to $\pi$ in each spatial direction $(x, y, z)$. 
+The reference is the DNS solution.
 
 ![TGV3D](images/TGV_64_Q1.png){ width=32%  }
 ![TGV3D](images/TGV_32_Q2.png){ width=32%  }
@@ -84,7 +90,7 @@ The flow is initialized in a cubic domain with periodic boundary conditions impo
 
 
 ## Parallelization
-In this section is possible to appreciate the weak and strong scalability of the implementation of the code. The benchmark case is the 2D Taylor-Green, the time reported here is intended for each time-step. The order of the elements for this simulation is always 2, and the CFL constant at 0.32
+In this section is possible to appreciate the weak and strong scalability of the implementation of the code. The benchmark case is the 2D Taylor-Green, the time reported here is intended for each time-step. The order of the elements for this simulation is always 2, and the CFL constant at 0.32.
 
 |           | Preconditioner   | Linear Solver   |
 |-----------|------------------|-----------------|
@@ -94,13 +100,13 @@ In this section is possible to appreciate the weak and strong scalability of the
 `MPI` is used for parallelization, and to solve the sparse and distribute numerical systems we use `PETSc`.
 
 ### Strong Scalability
-Strong scalability evaluates how efficiently a parallel code reduces execution time when the problem size remains fixed, but the number of processing units increases. There is a total of `400` elements on each side, leading to `160K` elements and `1.92M` dofs in total.
+Strong scalability evaluates how efficiently a parallel code reduces execution time when the problem size remains fixed, but the number of processing units increases. There is a total of 400 elements on each side, leading to 160,000 elements and $1.92 \times 10^6$ degrees of freedom in total.
 
 ![Strong Scalability](images/STRONG_TGV.png){ width=50%  }
 
 
 ### Weak Scalability
-Weak scalability measures how well a parallel code maintains performance when the problem size is kept constant per processor, and the number of processors increases. On each processor there are `50x50` elements, the number of dofs is kept constant at `30K dofs/procs`.
+Weak scalability measures how well a parallel code maintains performance when the problem size is kept constant per processor, and the number of processors increases. On each processor there are 50$\times$50 elements, the number of degrees of freedom is kept constant at 30,000 per processor.
 
 ![Weak Scalability](images/WEAK_TGV.png){ width=50%  }
 
