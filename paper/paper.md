@@ -30,7 +30,7 @@ However, for more advanced users who may desire greater control over the simulat
 
 # Statement of need
 `SegregatedVMSSolver.jl` is a comprehensive Julia package designed for conducting high-fidelity simulations of complex flow phenomena within the incompressible regime, leveraging the VMS and SUPG method. VMS has been originally introduced by @Hughes:2000. The linearization adopted has been proposed in the SUPG method by @Banyai:2016. 
-The package relies on the `Gridap.jl` package [@Verdugo:2022; @Badia:2020] to implement the mathematical model of FEM. Complementing this core functionality, `GridapDistributed.jl` [@BadiaD:2022] and [`PartitionedArrays.jl`](https://github.com/fverdugo/PartitionedArrays.jl) allow the use of multi-core CPUs desktop computers to HPC clusters. The [`GridapPETSc.jl`](https://github.com/gridap/GridapPETSc.jl) package is used to solve the final linear system. 
+The package relies on the `Gridap.jl` package [@Verdugo:2022; @Badia:2020] to implement the mathematical model of FEM. Complementing this core functionality, `GridapDistributed.jl` [@BadiaD:2022] and `PartitionedArrays.jl` [@Verdugo:2025] allow the use of multi-core CPUs desktop computers to HPC clusters. The [`GridapPETSc.jl`](https://github.com/gridap/GridapPETSc.jl) package is used to solve the final linear system. 
 It solves a Linearized and Segregated version of VMS (LS-VMS) and SUPG. It is based on an iterative predictor-corrector scheme and it avoids the resolution of a non-linear problem. It uses the $\theta$ method to solve the time-marching problem. 
 
 This package focuses on solving fluid dynamics problems, with a particular emphasis on the study of 2D and 3D airfoil aerodynamics at low Reynolds numbers (tested up to 500,000). The primary objective is to provide researchers and engineers with a versatile tool for analyzing aerodynamic features in this regime. 
@@ -45,9 +45,9 @@ It also has a suite of tools for post-processing the results like performing tim
 
 The field of fluid dynamics in Julia has seen significant growth, with several software packages emerging to address various computational challenges. This reflects the growing interest and engagement of the Julia community in this domain. A comprehensive list of packages can be found on [Julia Packages - Fluid Dynamics](https://juliapackages.com/c/fluid-dynamics). Among the most notable and well documented are:
 
-- **[Trixi.jl](https://github.com/trixi-framework/Trixi.jl)**: A framework for numerical simulation of hyperbolic PDEs, particularly suited for high-order methods and adaptive mesh refinement.
-- **[WaterLily.jl](https://github.com/WaterLily-jl/WaterLily.jl/tree/master)**: A CPU/GPU finite-volume solver that uses an immersed-boundary method
-- **[Oceananigans.jl](https://github.com/CliMA/Oceananigans.jl)**: A GPU-accelerated model for simulating incompressible fluid dynamics, widely used in geophysical and oceanographic studies.
+- **`Trixi.jl` [@Trixi:2025]**: A framework for numerical simulation of hyperbolic PDEs, particularly suited for high-order methods and adaptive mesh refinement.
+- **`WaterLily.jl` [WaterLily:2024]**: A CPU/GPU finite-volume solver that uses an immersed-boundary method
+- **`Oceananigans.jl` [@Oceananigans:2020]**: A GPU-accelerated model for simulating incompressible fluid dynamics, widely used in geophysical and oceanographic studies.
 
 While these packages vary in scope and functionality, they collectively highlight the flexibility and performance benefits of Julia in computational fluid dynamics. However, the ecosystem is still maturing compared to more established environments like Python or MATLAB. This paper contributes to this evolving field by introducing a new package tailored for Large Eddy Simulations.
 
