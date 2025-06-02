@@ -41,7 +41,7 @@ A suite of benchmark cases is implemented to ensure reliability and applicabilit
 - **Vortex shedding over a cylinder**: Available in both 2D and 3D.
 - **Airfoil aerodynamics**: Extensive support for both 2D and 3D simulations.
 
-It also has a suite of tools for post-processing the results like performing time and spanwise averaging. It is possible to control the simulation in real-time, enabling/disabling the creation of output files at each time-step. The user can load their own airfoil meshes also using the package `AirfoilGmsh.jl` [@BrunelliGmsh] . Additionally, the package provides tools for initializing boundary layers in 2D simulations, enhancing its versatility and utility for researchers and practitioners in the field of fluid dynamics.
+It also has a suite of tools for post-processing the results like performing time and spanwise averaging. It is possible to control the simulation in real-time, enabling/disabling the creation of output files at each time-step. Additionally, the package provides tools for initializing boundary layers in 2D simulations, enhancing its versatility and utility for researchers and practitioners in the field of fluid dynamics.
 
 The field of fluid dynamics in Julia has seen significant growth, with several software packages emerging to address various computational challenges. This reflects the growing interest and engagement of the Julia community in this domain. A comprehensive list of packages can be found on [Julia Packages - Fluid Dynamics](https://juliapackages.com/c/fluid-dynamics). Among the most notable and well documented are:
 
