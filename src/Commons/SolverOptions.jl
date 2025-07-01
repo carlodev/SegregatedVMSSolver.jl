@@ -3,6 +3,7 @@ using Gridap
 using GridapDistributed
 using GridapPETSc
 using GridapPETSc.PETSC
+using PartitionedArrays
 
 using Gridap.Algebra
 using MPI
@@ -49,6 +50,12 @@ function petsc_options_airfoil()
         -pres_ksp_type cg -pres_pc_type gamg -pres_ksp_rtol 1.e-2 -pres_ksp_converged_reason -ksp_atol 0.0"
 end
 
+# Wrap the VMS NumericalSetup to allow specialized methods that omit
+# garbage collection at every time step.
+struct VMSPETScNS{T} <: NumericalSetup
+  ns::PETScLinearSolverNS{T}
+end
+
 """
     create_PETSc_setup(M::AbstractMatrix,ksp_setup::Function)
 
@@ -59,32 +66,45 @@ function create_PETSc_setup(M::AbstractMatrix,ksp_setup::Function)
       ss = symbolic_setup(solver, M)
       ns = numerical_setup(ss, M)
       # @check_error_code GridapPETSc.PETSC.KSPView(ns.ksp[],C_NULL)
-      return ns
+      return VMSPETScNS(ns)
 end
 
-function Algebra.numerical_setup!(ns::PETScLinearSolverNS,A::AbstractMatrix)
+function Algebra.numerical_setup!(vmsns::VMSPETScNS, A::AbstractMatrix)
+  ns = vmsns.ns
   ns.A = A
   println("convert")
   @time ns.B = convert(PETScMatrix,A)
   @check_error_code PETSC.KSPSetOperators(ns.ksp[],ns.B.mat[],ns.B.mat[])
   
   # @time @check_error_code PETSC.KSPSetUp(ns.ksp[])
-  ns
+  return ns
 end
 
-function Algebra.solve!(x::PETScVector,ns::PETScLinearSolverNS,b::AbstractVector)
+# Copy of the Gridap function, needed to pass the custom VMSPETScNS
+function Algebra.solve!(x::PartitionedArrays.PVector,vmsns::VMSPETScNS,b::PartitionedArrays.PVector)
+  ns = vmsns.ns
+  X = similar(b,(axes(ns.A)[2],))
+  B = similar(b,(axes(ns.A)[2],))
+  copy!(X,x)
+  copy!(B,b)
+  Y = convert(PETScVector,X)
+  solve!(Y,vmsns,B)
+  copy!(x,Y)
+  x
+end
 
+function Algebra.solve!(x::PETScVector,vmsns::VMSPETScNS,b::AbstractVector)
   # if MPI.Initialized()
   #   if petsc_gc && (x.comm != MPI.COMM_SELF)
   #     # gridap_petsc_gc() # Do garbage collection of PETSc objects
   #   end
   # end
 
+  ns = vmsns.ns
+
   B = convert(PETScVector,b)
   solve!(x,ns,B)
-  x
+  return x
 end
-
-
 
 end
