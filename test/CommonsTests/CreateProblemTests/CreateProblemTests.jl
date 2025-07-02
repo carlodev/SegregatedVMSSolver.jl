@@ -15,18 +15,18 @@ include("SpaceConditionsTests.jl")
 include("InitialConditionsTests.jl")
 
 
-function test_create_problem(backend)
-    @testset "Create Problem $(backend)" begin
-        backend() do distribute
+function main(distribute)
+    @testset "Create Problem" begin
             AddNewTagsTests.main(distribute)
             RestartTests.main(distribute)
             ModelCreationTests.main(distribute)
             BoundaryConditionsTests.main(distribute)
             SpaceConditionsTests.main(distribute)
-            InitialConditionsTests.main(distribute)
-        end
+            InitialConditionsTests.main(distribute)     
     end
 end
+
+
 
 
 end ## end module

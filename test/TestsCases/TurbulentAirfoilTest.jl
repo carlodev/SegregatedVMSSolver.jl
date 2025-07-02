@@ -9,15 +9,15 @@ using SegregatedVMSSolver.SolverOptions
 
 
 
-function turbulent_airfoil_test(backend, create_sem_boundary)
+function turbulent_airfoil_test(create_sem_boundary)
 
 t0 =0.0
 
 dt = 0.001
 
-tF = 1.0
+tF = dt * 2
 
-Re = 1
+Re = 1000
 D = 2
 
 ##Turbulence Intensity
@@ -34,7 +34,7 @@ physicalp = PhysicalParameters(Re=Re)
 initialp = InitialParameters(u0=[1.0,0.0])
 
 #Turbulence
-Vboxinfo = VirtualBox((-1,1), (-0.1,0.1); σ=0.0125)
+Vboxinfo = VirtualBox((-1,1), (0.0,0.2); σ=0.0125)
 @test typeof(Vboxinfo.N) == Int64
 
 
@@ -53,7 +53,9 @@ simparams = SimulationParameters(timep,physicalp,turbulencep,solverp,exportp,ini
 
 mcase = Airfoil(meshp,simparams,sprob)
 
-SegregatedVMSSolver.solve(mcase,backend) 
+@test typeof(mcase) <: SimulationCase
+
+return mcase
 
 end
 

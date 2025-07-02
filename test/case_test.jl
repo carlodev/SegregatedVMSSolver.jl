@@ -21,8 +21,14 @@ function create_simulation_test(case, D; meshfile="", rank_partition=(2,2))
       end    
       
       simparams = SimulationParameters(timep,physicalp,solverp,exportp)
-        
-      new_case = case(meshp,simparams,sprob)
+      if case == TaylorGreen
+            bc_tgv = Periodic(meshp,physicalp ) 
+
+            new_case = case(bc_tgv, meshp,simparams,sprob)
+      else
+            new_case = case(meshp,simparams,sprob)
+      end
+
       return new_case
 
 end

@@ -24,7 +24,8 @@ function create_initial_conditions(simcase::VelocityBoundaryCase, params::Dict{S
         uh0 = interpolate(uh_0, Ut0)
         ph0 = interpolate(ph_0, Pt0)
     end
-
+    
+    
     print_initial_conditions((uh0,ph0,uh0,uh0,ph0), simcase,params)
 
     return uh0,ph0
@@ -49,10 +50,12 @@ function print_initial_conditions(fields, simcase::SimulationCase,params::Dict{S
     if simcase.simulationp.exportp.printinitial
       case = typeof(simcase)
       @unpack Ω = params
+      @sunpack order = simcase
       dir = "Initial_Conditions"
       mkpath(dir)
       save_path = joinpath("Initial_Conditions","InitialCondition_$(case)_.vtu")
       
-      writesolution(simcase, Ω, save_path,0.0, fields)
+      
+      writesolution(simcase, params, order, save_path,0.0, fields,fields)
     end
 end

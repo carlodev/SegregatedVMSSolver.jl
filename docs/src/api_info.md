@@ -87,11 +87,21 @@ Modules   = [SolveProblem]
 ```
 
 ```@meta
-CurrentModule = SegregatedVMSSolver.ReadAirfoilResults
+CurrentModule = SegregatedVMSSolver.Interfaces
 ```
+# Interfaces
+
+```@autodocs
+Modules = [ Interfaces,]
+```
+
+
 
 # Utils
 
+```@meta
+CurrentModule = SegregatedVMSSolver.ReadAirfoilResults
+```
 ## SegregatedVMSSolver.ReadAirfoilResults
 
 ```@autodocs

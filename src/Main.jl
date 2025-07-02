@@ -19,7 +19,8 @@ function solve(simcase::SimulationCase,backend::Function)
         end
 
         printstructure(simcase)
-        run_case(simcase,distribute)
+        params = setup_case(simcase,distribute)
+        solve_case(params,simcase)
     end
 
 return true
@@ -27,7 +28,7 @@ return true
 end
 
 
-function run_case(simcase::SimulationCase,distribute)
+function setup_case(simcase::SimulationCase,distribute)
     params = Dict{Symbol,Any}()
     @sunpack rank_partition,order = simcase
 
@@ -39,22 +40,20 @@ function run_case(simcase::SimulationCase,distribute)
     boundary_conditions = create_boundary_conditions(simcase) 
     @info "boundary conditions created"
 
-    V, U, P, Q, Y, X = creation_fe_spaces(simcase, model, boundary_conditions)
+    V, U, P, Q = creation_fe_spaces(simcase, model, boundary_conditions)
+
     @info "FE Spaces Created"
 
     trials = [U, P]
     tests = [V, Q]
     
-    degree = 4*order
+    degree = 2*order
     Ω = Triangulation(model)
     dΩ = Measure(Ω, degree)
 
     
     new_dict = Dict(:parts=>parts, :model=>model,
-    :U => U,
-    :P => P,
-    :X => X,
-    :Y => Y,
+    :U=>U,:V=>V,:P=>P,:Q=>Q,
     :Ω => Ω,
     :dΩ => dΩ,
     :degree => degree,
@@ -62,7 +61,7 @@ function run_case(simcase::SimulationCase,distribute)
     :tests => tests)
     merge!(params, new_dict)
     
-    solve_case(params,simcase)
+    return params
 
 
 end

@@ -365,96 +365,196 @@ function print_on_request(log_dir::String)
 end
 
 
-function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime::Int64, tn::Float64, fields::Tuple)
+function writesolution(params::Dict{Symbol,Any}, simcase::SimulationCase, ntime::Int64, tn::Float64, fields::Tuple, avg_fields::Tuple)
     benchmark = simcase.simulationp.exportp.benchmark
     log_dir = simcase.simulationp.exportp.log_dir
+    nsub = simcase.sprob.method.order
 
     if !benchmark
         if (mod(ntime, 100) == 0 || print_on_request(log_dir))
             save_sim_dir = simcase.simulationp.exportp.save_sim_dir
             case = typeof(simcase)
             save_path = joinpath(save_sim_dir, "$(case)_$(tn)_.vtu")
-            @unpack Ω = params
-            writesolution(simcase, Ω, save_path, tn, fields)
+        
+            writesolution(simcase, params, nsub, save_path, tn, fields,avg_fields)
         end
-        compute_error(params, simcase, tn, fields)
+        compute_enstrophy_ek(simcase, params,fields,tn)
+
+    end
+    compute_error(simcase, params,   tn, fields)
+
+end
+
+
+function writesolution(simcase, params::Dict{Symbol,Any}, nsub::Int64, save_path::String, tn::Float64, fields::Tuple, avg_fields::Tuple)
+    uh, ph = fields
+    uh_avg, ph_avg =avg_fields
+    fields_names = simcase.simulationp.exportp.vtu_export
+    @unpack Ω = params
+
+    ALLOWED_EXPORTS = ["uh", "ph", "uh_avg", "ph_avg"]
+    selected_exports = intersect(fields_names,ALLOWED_EXPORTS)
+    cell_fields = Dict{String,Any}()
+    if "uh" in selected_exports
+        merge!(cell_fields,Dict("uh"=>uh))
+    end
+    if "ph" in selected_exports
+        merge!(cell_fields,Dict("ph"=>ph))
+    end
+    if "uh_avg" in selected_exports
+        merge!(cell_fields,Dict("uh_avg"=>uh_avg))
+    end
+    if "ph_avg" in selected_exports
+        merge!(cell_fields,Dict("ph_avg"=>ph_avg))
+    end
+   
+    writesolution(simcase, tn, fields_names,cell_fields)
+
+    writevtk(Ω, save_path, nsubcells=nsub, cellfields=cell_fields)
+end
+
+function writesolution(simcase, tn::Float64, fields_names, cell_fields::Dict{String,Any})
+end
+
+function writesolution(simcase::TaylorGreen{Periodic}, tn::Float64, fields_names, cell_fields::Dict{String,Any})
+    @sunpack D = simcase
+
+    if D == 2
+        ALLOWED_EXPORTS = ["uh_analytic", "ph_analytic"]
+            uh_analytic = simcase.bc_type.a_solution[:velocity](tn) # Compute analytic velocity at tn
+            ph_analytic = simcase.bc_type.a_solution[:pressure](tn) # Compute analytic pressure at tn
+            selected_exports = intersect(fields_names,ALLOWED_EXPORTS)
+
+
+            if "uh_analytic" in selected_exports
+                merge!(cell_fields,Dict("uh_analytic"=>uh_analytic))
+        
+            end
+            if "ph_analytic" in selected_exports
+                merge!(cell_fields,Dict("ph_analytic"=>ph_analytic))
+            end
+
+
     end
 
 end
 
 
-function writesolution(simcase::TaylorGreen{Periodic}, Ω, save_path, tn::Float64, fields::Tuple)
-    u_analytic = simcase.bc_type.a_solution[:velocity]
-    p_analytic = simcase.bc_type.a_solution[:pressure]
-    uh, ph = fields
-    writevtk(Ω, save_path, cellfields=["uh" => uh, "uh_analytic" => u_analytic(tn), "ph" => ph, "ph_analytic" => p_analytic(tn)])
-end
-
-
-function writesolution(simcase::TaylorGreen{Natural}, Ω, save_path, tn::Float64, fields::Tuple)
-    uh, ph = fields
-    writevtk(Ω, save_path, cellfields=["uh" => uh, "ph" => ph])
-end
-
-
-function writesolution(simcase::VelocityBoundaryCase, Ω, save_path, tn, fields::Tuple)
-    uh_tn, ph_tn, uh_tn_updt, uh_avg, ph_avg = fields
-    @time writevtk(Ω, save_path, cellfields=["uh" => uh_tn, "uh_updt" => uh_tn_updt, "ph" => ph_tn,
-        "uh_avg" => uh_avg, "ph_avg" => ph_avg])
-end
-
-
 """
-    compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen, tn::Float64, fields::Tuple)
+    compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Periodic},  tn::Float64, fields::Tuple)
 
-It computes the velocity and pressure L2 error for the Taylor-Green case 
+Compute L2 error norm for velocity and pressure for TGV2D case. https://doi.org/10.1016/j.enganabound.2020.12.018
 """
-function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Periodic}, tn::Float64, fields::Tuple)
-    u_analytic = simcase.bc_type.a_solution[:velocity](tn)
-    p_analytic = simcase.bc_type.a_solution[:pressure](tn)
+function compute_error(simcase::TaylorGreen{Periodic}, params::Dict{Symbol,Any},   tn::Float64, fields::Tuple)
     uh, ph = fields
-    @unpack dΩ = params
-    #error velocity and pressure
-    eu = u_analytic - uh
-    ep = p_analytic - ph
+
+    uh_analytic = simcase.bc_type.a_solution[:velocity](tn) # Compute analytic velocity at tn
+    ph_analytic = simcase.bc_type.a_solution[:pressure](tn) # Compute analytic pressure at tn
+
+    @unpack dΩ,parts = params
+    eu = uh_analytic - uh    #error velocity 
+    ep = ph_analytic - ph #error pressure
 
     #L2 norm error velocity and pressure
-    l2eu = sqrt(sum(∫(eu ⋅ eu) * dΩ))
-    l2ep = sqrt(sum(∫(ep * ep) * dΩ))
-    println("L2 velocity error = $l2eu")
-    println("L2 prssure error = $l2ep")
+    l2eu = sqrt(sum(∫(eu ⋅ eu) * dΩ)) ./sqrt(sum(∫(uh ⋅ uh) * dΩ))
+    l2ep = sqrt(sum(∫(ep * ep) * dΩ)) ./ sqrt(sum(∫(ph ⋅ ph) * dΩ))
+
+    ALLOWED_EXPORTS = ["VelocityError", "PressureError"]
+    selected_exports = intersect(ALLOWED_EXPORTS, simcase.simulationp.exportp.extra_export)
+
+    # Construct data array dynamically
+    data = [tn]
+    headers = ["time"]
+    if "VelocityError" in selected_exports
+        push!(data, l2eu)
+        push!(headers, "VelocityError")
+    end
+    if "PressureError" in selected_exports
+        push!(data, l2ep)
+        push!(headers, "PressureError")
+
+    end
+
+    write_to_csv("TGV_ERRRORS.csv", data, headers, parts)
+    
 end
 
-function compute_error(params::Dict{Symbol,Any}, simcase::TaylorGreen{Natural}, tn::Float64, fields::Tuple)
+function compute_error(simcase, params,   tn, fields)
+    
+end
+
+"""
+    compute_enstrophy_ek(simcase, params::Dict{Symbol,Any}, fields::Tuple)
+
+Compute enstrophy and Kinetic Energy - not normalized with volume.
+"""
+function compute_enstrophy_ek(simcase, params::Dict{Symbol,Any}, fields::Tuple, tn::Float64)
     uh, _ = fields
-    @unpack dΩ = params
+    @unpack dΩ,parts = params
 
     wh = ∇×uh
+
     ### Compute Kinetic Energy
     Ek = 0.5 .* sum(∫(uh ⋅ uh) * dΩ) #not normalized with the volume
-    println("Ek = $Ek")
+
     ### Compute Dissipation or Enstrophy https://en.wikipedia.org/wiki/Enstrophy
     Enstrophy = sum(∫(wh ⋅ wh) * dΩ) #not normalized with the volume
 
-    println("Enstrophy = $Enstrophy")
+    
 
-    # Define the file path
-    file_path = "TGV_output.csv"
+    ALLOWED_EXPORTS = ["Enstrophy", "KineticEnergy"]
+    selected_exports = intersect(ALLOWED_EXPORTS, simcase.simulationp.exportp.extra_export)
 
-    # Open the file in append mode, create it if it doesn't exist, write a line, and close it
-    open(file_path, "a") do file
-        writedlm(file, [[tn, Ek, Enstrophy]], ',')
+
+    # Construct data array dynamically
+    data = [tn]
+    headers = ["time"]
+    if "Enstrophy" in selected_exports
+        push!(data, Enstrophy)
+        push!(headers, "Enstrophy")
+
+    end
+    if "KineticEnergy" in selected_exports
+        push!(data, Ek)
+        push!(headers, "KineticEnergy")
+
     end
 
+    write_to_csv("Enstrophy_EK.csv", data, headers, parts)
 
 end
 
 
 
+"""
+    write_to_csv(file_path::String, data::Vector{Vector{Any}}, parts)
 
+Write Results on CSV file
+"""
+function write_to_csv(file_path::String, data::Vector{Float64}, headers::Vector{String}, parts)
+    if length(data) > 1 #if length(data) ==1 only would be time exported
+    map( parts) do part
+        if part == 1
+            
+            file_exists = isfile(file_path)
 
-function compute_error(params::Dict{Symbol,Any}, simcase, tn::Float64, fields::Tuple)
+            open(file_path, "a") do file
+                # Write headers if the file does not exist
+                if !file_exists
+                    writedlm(file, [headers], ',')
+                end
+            end
+
+            open(file_path, "a") do file
+                writedlm(file, [data], ',')
+            end
+        end
+    end
+end
 
 end
+
+
+
 
 end # end module
