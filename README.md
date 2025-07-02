@@ -8,6 +8,7 @@
 [![codecov](https://codecov.io/gh/carlodev/SegregatedVMSSolver.jl/graph/badge.svg?token=GSJB5o6A0m)](https://codecov.io/gh/carlodev/SegregatedVMSSolver.jl)
 
 **Citation**
+
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.07564/status.svg)](https://joss.theoj.org/papers/10.21105/joss.07564)
 
 *SegregatedVMSSolver.jl for solving incompressible Navier-Stokes using stabilized Finite Element Method, in specific Streamline-Upwind Petrov-Galerkin (SUPG) and Variational MultiScale method (VMS)*
