@@ -7,6 +7,8 @@
 [![Build Status](https://github.com/carlodev/SegregatedVMSSolver.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/carlodev/SegregatedVMSSolver.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![codecov](https://codecov.io/gh/carlodev/SegregatedVMSSolver.jl/graph/badge.svg?token=GSJB5o6A0m)](https://codecov.io/gh/carlodev/SegregatedVMSSolver.jl)
 
+
+
 *SegregatedVMSSolver.jl for solving incompressible Navier-Stokes using stabilized Finite Element Method, in specific Streamline-Upwind Petrov-Galerkin (SUPG) and Variational MultiScale method (VMS)*
 
 ![Julia flow](docs/figs/DU89.gif)
