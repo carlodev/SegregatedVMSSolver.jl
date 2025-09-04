@@ -116,16 +116,16 @@ function allocate_all_matrices_vectors(u_adv, params, simcase)
   @unpack Utn1, Ptn1, tests = params
   V, Q = tests
 
-  Mat_Tuu, _ = assemble_matrix_and_vector(Tuu, rhs, Utn1, V)
-  Mat_Tpu, _ = assemble_matrix_and_vector(Tpu, rhs, Utn1, Q)
+  Mat_Tuu = allocate_matrix(Tuu, rhs, Utn1, V)
+  Mat_Tpu = allocate_matrix(Tpu, rhs, Utn1, Q)
 
-  Mat_Auu, Vec_Auu = assemble_matrix_and_vector(Auu, rhs, Utn1, V)
-  Mat_Aup, Vec_Aup = assemble_matrix_and_vector(Aup, rhs, Ptn1, V)
-  Mat_Apu, Vec_Apu = assemble_matrix_and_vector(Apu, rhs, Utn1, Q)
-  Mat_App, Vec_App = assemble_matrix_and_vector(App, rhs, Ptn1, Q)
+  Mat_Auu, Vec_Auu = allocate_matrix_and_vector(Auu, rhs, Utn1, V)
+  Mat_Aup, Vec_Aup = allocate_matrix_and_vector(Aup, rhs, Ptn1, V)
+  Mat_Apu, Vec_Apu = allocate_matrix_and_vector(Apu, rhs, Utn1, Q)
+  Mat_App, Vec_App = allocate_matrix_and_vector(App, rhs, Ptn1, Q)
 
-  Mat_ML, _ = assemble_matrix_and_vector(ML, rhs, Utn1, V)
-  Mat_S, _ = assemble_matrix_and_vector(S, rhs, Ptn1, Q)
+  Mat_ML= allocate_matrix(ML, rhs, Utn1, V)
+  Mat_S = allocate_matrix(S, rhs, Ptn1, Q)
 
   Mat_inv_ML = allocate_Mat_inv_ML(Mat_ML)
   Vec_Ap = Vec_Apu + Vec_App
@@ -133,6 +133,21 @@ function allocate_all_matrices_vectors(u_adv, params, simcase)
 
   return Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, Mat_ML, Mat_inv_ML, Mat_S, Vec_Auu, Vec_Aup, Vec_Apu, Vec_App, Vec_Au, Vec_Ap
 end
+
+
+function allocate_matrix(a::Function,rhs::Function,U,V )
+    feop1 = AffineFEOperator(a,rhs,U,V)
+    Mat = get_matrix(feop1)
+  return Mat
+end
+
+function allocate_matrix_and_vector(a::Function,rhs::Function,U,V )
+    feop1 = AffineFEOperator(a,rhs,U,V)
+    Mat = get_matrix(feop1)
+    Vec = get_vector(feop1)
+    return Mat, Vec
+end
+
 
 function update_all_matrices_vectors!(matrices::Tuple, u_adv, params, simcase)
 
@@ -144,16 +159,22 @@ function update_all_matrices_vectors!(matrices::Tuple, u_adv, params, simcase)
   Tuu, Tpu, Auu, Aup, Apu, App, ML, S, rhs = segregated_equations(u_adv, params, simcase)
 
 
-  assemble_matrix!(Tuu,Mat_Tuu,Utn1, V)
-  assemble_matrix!(Tpu, Mat_Tpu, Utn1, Q)
+  update_matrix!(Tuu,Mat_Tuu,Utn1, V)
+  update_matrix!(Tpu, Mat_Tpu, Utn1, Q)
 
-  assemble_matrix_and_vector!(Auu,rhs,Mat_Auu,Vec_Auu,Utn1,V)
-  assemble_matrix_and_vector!(Aup,rhs,Mat_Aup,Vec_Auu,Ptn1,V)
-  assemble_matrix_and_vector!(Apu,rhs,Mat_Apu,Vec_Apu,Utn1,Q)
-  assemble_matrix_and_vector!(App,rhs,Mat_App,Vec_App,Ptn1,Q)
+  # update_matrix_vector!(Auu,Mat_Auu,Vec_Auu,Utn1,V)
+  # update_matrix_vector!(Aup,Mat_Aup,Vec_Aup,Ptn1,V)
+  # update_matrix_vector!(Apu,Mat_Apu,Vec_Apu,Utn1,Q)
+  # update_matrix_vector!(App,Mat_App,Vec_App,Ptn1,Q)
 
-  assemble_matrix!(ML,Mat_ML,Utn1, V)
-  assemble_matrix!(S,Mat_S,Ptn1, Q)
+
+
+  println("norm Vec_App = $(norm(Vec_App))")
+  update_matrix_vector!(App,Mat_App,Vec_App,Ptn1,Q)
+  println("norm Vec_App = $(norm(Vec_App))")
+
+  update_matrix!(ML,Mat_ML,Utn1, V)
+  update_matrix!(S,Mat_S,Ptn1, Q)
 
 
   Mat_inv_ML = allocate_Mat_inv_ML(Mat_ML)
@@ -165,27 +186,28 @@ function update_all_matrices_vectors!(matrices::Tuple, u_adv, params, simcase)
 end
 
 
-# function update_matrix_vector!(A::AbstractMatrix, b::AbstractVector, a::Function, U, V)
-#   dv = get_fe_basis(V)
-#   du = get_trial_fe_basis(U)
+function update_matrix_vector!( a::Function, A::AbstractMatrix, b::AbstractVector, U, V)
+  dv = get_fe_basis(V)
+  du = get_trial_fe_basis(U)
 
-#   mat_contribs = a(du, dv)
-#   uhd = zero(U)
-#   data = collect_cell_matrix_and_vector(U, V, mat_contribs, 0.0, uhd)
-#   assembler = SparseMatrixAssembler(U, V)
-#   assemble_matrix_and_vector!(A, b, assembler, data)
-# end
+  mat_contribs = a(du, dv)
 
-# function update_matrix!(A::AbstractMatrix, a::Function, U, V)
-#   dv = get_fe_basis(V)
-#   du = get_trial_fe_basis(U)
+  uhd = zero(U)
+  data = collect_cell_matrix_and_vector(U, V, mat_contribs, 0.0, uhd)
+  assembler = SparseMatrixAssembler(U, V)
+  assemble_matrix_and_vector!(A, b, assembler, data)
+end
 
-#   mat_contribs = a(du, dv)
-#   data = collect_cell_matrix(U, V, mat_contribs)
+function update_matrix!(a::Function, A::AbstractMatrix, U, V)
+  dv = get_fe_basis(V)
+  du = get_trial_fe_basis(U)
 
-#   assembler = SparseMatrixAssembler(U, V)
-#   assemble_matrix!(A, assembler, data)
-# end
+  mat_contribs = a(du, dv)
+  data = collect_cell_matrix(U, V, mat_contribs)
+
+  assembler = SparseMatrixAssembler(U, V)
+  assemble_matrix!(A, assembler, data)
+end
 
 
 end
