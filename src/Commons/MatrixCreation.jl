@@ -162,16 +162,11 @@ function update_all_matrices_vectors!(matrices::Tuple, u_adv, params, simcase)
   update_matrix!(Tuu,Mat_Tuu,Utn1, V)
   update_matrix!(Tpu, Mat_Tpu, Utn1, Q)
 
-  # update_matrix_vector!(Auu,Mat_Auu,Vec_Auu,Utn1,V)
-  # update_matrix_vector!(Aup,Mat_Aup,Vec_Aup,Ptn1,V)
-  # update_matrix_vector!(Apu,Mat_Apu,Vec_Apu,Utn1,Q)
-  # update_matrix_vector!(App,Mat_App,Vec_App,Ptn1,Q)
-
-
-
-  println("norm Vec_App = $(norm(Vec_App))")
+  update_matrix_vector!(Auu,Mat_Auu,Vec_Auu,Utn1,V)
+  update_matrix_vector!(Aup,Mat_Aup,Vec_Aup,Ptn1,V)
+  update_matrix_vector!(Apu,Mat_Apu,Vec_Apu,Utn1,Q)
   update_matrix_vector!(App,Mat_App,Vec_App,Ptn1,Q)
-  println("norm Vec_App = $(norm(Vec_App))")
+
 
   update_matrix!(ML,Mat_ML,Utn1, V)
   update_matrix!(S,Mat_S,Ptn1, Q)
