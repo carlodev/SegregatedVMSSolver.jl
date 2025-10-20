@@ -457,7 +457,7 @@ function compute_error(simcase::TaylorGreen{Periodic}, params::Dict{Symbol,Any},
 
     #L2 norm error velocity and pressure
     l2eu = sqrt(sum(∫(eu ⋅ eu) * dΩ)) ./sqrt(sum(∫(uh_analytic ⋅ uh_analytic) * dΩ))
-    l2ep = sqrt(sum(∫(ep * ep) * dΩ)) ./ sqrt(sum(∫(uh_analytic ⋅ uh_analytic) * dΩ))
+    l2ep = sqrt(sum(∫(ep * ep) * dΩ)) ./ sqrt(sum(∫(ph_analytic ⋅ ph_analytic) * dΩ))
 
     ALLOWED_EXPORTS = ["VelocityError", "PressureError"]
     selected_exports = intersect(ALLOWED_EXPORTS, simcase.simulationp.exportp.extra_export)
