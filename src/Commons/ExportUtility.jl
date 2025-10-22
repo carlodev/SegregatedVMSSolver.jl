@@ -447,7 +447,7 @@ Compute L2 error norm for velocity and pressure for TGV2D case. https://doi.org/
 """
 function compute_error(simcase::TaylorGreen{Periodic}, params::Dict{Symbol,Any},   tn::Float64, fields::Tuple)
     uh, ph = fields
-    @unpack U,P = params 
+    @unpack U,P,V,Q = params 
     uh_analytic = simcase.bc_type.a_solution[:velocity](tn) # Compute analytic velocity at tn
     ph_analytic = simcase.bc_type.a_solution[:pressure](tn) # Compute analytic pressure at tn
 
@@ -458,7 +458,12 @@ function compute_error(simcase::TaylorGreen{Periodic}, params::Dict{Symbol,Any},
     eu = uh_analytic - uh    #error velocity 
     ep = ph_analytic - ph #error pressure
 
+    # m_eu = maximum(norm(eu))
+    m_eu = maximum(norm.(get_free_dof_values((interpolate(eu, V(tn))))))
+    m_ep = maximum(abs.(get_free_dof_values((interpolate(ep, Q(tn))))))
 
+    println(m_eu)
+    println(m_ep)
 
 
     #L2 norm error velocity and pressure
@@ -476,21 +481,28 @@ function compute_error(simcase::TaylorGreen{Periodic}, params::Dict{Symbol,Any},
     # Construct data array dynamically
     data_rel = [tn]
     data_abs = [tn]
+    data_max = [tn]
+
     headers = ["time"]
     if "VelocityError" in selected_exports
         push!(data_rel, l2eu_rel)
         push!(data_abs, l2eu_abs)
+        push!(data_max, m_eu)
+
         push!(headers, "VelocityError")
     end
     if "PressureError" in selected_exports
         push!(data_rel, l2ep_rel)
         push!(data_abs, l2ep_abs)
+        push!(data_max, m_ep)
         push!(headers, "PressureError")
 
     end
 
     write_to_csv("TGV_L2_relative_ERRRORS.csv", data_rel, headers, parts)
     write_to_csv("TGV_L2_absolute_ERRRORS.csv", data_abs, headers, parts)
+    write_to_csv("TGV_max_absolute_ERRRORS.csv", data_max, headers, parts)
+
     
 end
 
