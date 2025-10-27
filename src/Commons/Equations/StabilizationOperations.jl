@@ -29,22 +29,25 @@ function momentum_stabilization(uu, stab_coeff::TensorStabilization,simcase::Sim
     @unpack G,GG,gg = stab_coeff
     @unpack sprob = simcase
     @unpack Ci = sprob.coeff_method
-    
+    @unpack r = sprob.coeff_method
+
     @sunpack ν, dt = simcase
 
     function τm(uun, G, GG)
-        τ₁ = Ci[1] * (2 / dt)^2 #Here, you can increse the 2 if CFL high
-        τ₃ = Ci[2] * (ν^2 * GG)
+        τ₁ = Ci[1] * (2 / dt)^r #Here, you can increse the 2 if CFL high
+        τ₃ = Ci[2] * (ν^r * (GG)^r/2 )
 
         uu_new = VectorValue(val_u.(uun)...)
 
         if iszero(norm(uu_new))
-            return (τ₁ .+ τ₃) .^ (-1 / 2)
+            return (τ₁ .+ τ₃) .^ (-1 / r)
         end
 
         τ₂ = uu_new ⋅ G ⋅ uu_new
-        return (τ₁ .+ τ₂ .+ τ₃) .^ (-1 / 2)
+        return (τ₁ .+ τ₂ .+ τ₃) .^ (-1 / r)
     end
+
+
 
     return τm ∘ (uu, G, GG)
 
@@ -60,8 +63,12 @@ Bazilevs, Y., Calo, V. M., Cottrell, J. A., Hughes, T. J. R., Reali, A., & Scova
 """
 function continuity_stabilization(uu, stab_coeff::TensorStabilization,simcase::SimulationCase)
      @unpack   gg = stab_coeff
-    return 1 / (momentum_stabilization(uu,stab_coeff,simcase) ⋅ gg)
-
+     @sunpack τm_comp = simcase
+     if τm_comp > 0
+        return (uu ⋅ uu) * momentum_stabilization(uu, stab_coeff, simcase) #More SUPG-style
+    elseif τm_comp <0 
+        return 1 / (momentum_stabilization(uu,stab_coeff,simcase) ⋅ gg) #Standard VMS
+    end
 
 end
 
