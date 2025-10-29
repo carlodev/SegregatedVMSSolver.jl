@@ -62,12 +62,8 @@ Bazilevs, Y., Calo, V. M., Cottrell, J. A., Hughes, T. J. R., Reali, A., & Scova
 """
 function continuity_stabilization(uu, stab_coeff::TensorStabilization,simcase::SimulationCase)
      @unpack   gg = stab_coeff
-     @sunpack τm_comp = simcase
-     if τm_comp > 0
-        return (uu ⋅ uu) * momentum_stabilization(uu, stab_coeff, simcase) #More SUPG-style
-    elseif τm_comp <0 
-        return 1 / (momentum_stabilization(uu,stab_coeff,simcase) ⋅ gg) #Standard VMS
-    end
+
+     return 1 / (momentum_stabilization(uu,stab_coeff,simcase) ⋅ gg) #Standard VMS
 
 end
 
