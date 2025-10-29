@@ -99,7 +99,7 @@ end
 
 function initialize_matrices(u_adv, params, simcase)
   @info "allocation matrix and vectors"
-  @time matrices = allocate_all_matrices_vectors(u_adv, params, simcase)
+  matrices = allocate_all_matrices_vectors(u_adv, params, simcase)
   @info "matrix and vectors allocated"
 
   @info "updating matrix and vectors"

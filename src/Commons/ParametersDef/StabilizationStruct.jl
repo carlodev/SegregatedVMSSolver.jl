@@ -27,12 +27,7 @@ end
 
 @with_kw struct TensorFormulation <: StabilizationFormulation
     r::Int64 = 2 
-    Ci::Vector{Real} = [4,36]
-    τm_comp::Real = -1 #Standard VMS; τm_comp = 1 SUPG standard
-    @assert length(Ci) == 2 "Ci length must be 2"
-    @assert (Ci[1]>=0 && Ci[2]>=0) "Ci values must be non-negative"
-    @assert τm_comp==1 ||  τm_comp==-1 " τm values +1 or -1 in TensorFormulation"
-
+    Ci::Vector{Int64} = [4,36]
 end
 
 

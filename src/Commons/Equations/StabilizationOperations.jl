@@ -29,22 +29,21 @@ function momentum_stabilization(uu, stab_coeff::TensorStabilization,simcase::Sim
     @unpack G,GG,gg = stab_coeff
     @unpack sprob = simcase
     @unpack Ci = sprob.coeff_method
-    @unpack r = sprob.coeff_method
 
     @sunpack ν, dt = simcase
 
     function τm(uun, G, GG)
-        τ₁ = Ci[1] * (2 / dt)^r #Here, you can increse the 2 if CFL high
-        τ₃ = Ci[2] * (ν^r * (GG)^r/2 )
+        τ₁ = Ci[1] * (2 / dt)^2 
+        τ₃ = Ci[2] * (ν^2 * GG )
 
         uu_new = VectorValue(val_u.(uun)...)
 
         if iszero(norm(uu_new))
-            return (τ₁ .+ τ₃) .^ (-1 / r)
+            return (τ₁ .+ τ₃) .^ (-1 / 2)
         end
 
         τ₂ = uu_new ⋅ G ⋅ uu_new
-        return (τ₁ .+ τ₂ .+ τ₃) .^ (-1 / r)
+        return (τ₁ .+ τ₂ .+ τ₃) .^ (-1 / 2)
     end
 
 
