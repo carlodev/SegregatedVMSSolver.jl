@@ -14,6 +14,7 @@ using SegregatedVMSSolver.MatrixCreation
 using SegregatedVMSSolver.VectorsOperations
 using SegregatedVMSSolver.ExportUtility
 using SegregatedVMSSolver.Interfaces
+using SegregatedVMSSolver.Projection
 
 export solve_case
 
@@ -203,6 +204,8 @@ ph_avg = update_time_average(ph_tn, ph_avg, Ptn, tn, ntime, time_step, simcase.s
 
 
 writesolution(params, simcase, ntime, tn, (uh_tn,ph_tn), (uh_avg,ph_avg))
+
+compute_VMS2_error(uh_tn, simcase,params, tn)
 
 export_fields(params,simcase, tn, uh_tn, ph_tn)
 

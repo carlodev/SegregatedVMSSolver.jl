@@ -32,7 +32,7 @@ end
 end
 
 
-@with_kw struct VMS <: StabilizationMethod
+@with_kw mutable struct VMS <: StabilizationMethod
     order::Int64 = 1
 end
 
