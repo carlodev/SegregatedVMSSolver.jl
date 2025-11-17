@@ -9,6 +9,7 @@ using SegregatedVMSSolver
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.Interfaces
 using SegregatedVMSSolver.CreateProblem
+using SegregatedVMSSolver.ExportUtility: write_to_csv
 
 
 export compute_VMS2_error
@@ -19,18 +20,18 @@ export compute_VMS2_error
 
 function compute_VMS2_error(uh_fine, simcase::SimulationCase,params::Dict{Symbol,Any}, tn::Real)
     @unpack U, dΩ, degree,parts = params
-
+    @sunpack D = simcase
     ubar, uprime = project_solution(uh_fine, simcase, params, tn)
-    compute_stresses(ubar, uprime, dΩ) 
-
+    norm_cross, norm_re, eps_cross, eps_re = compute_stresses(ubar, uprime, dΩ) 
+    write_apriori_analysis(tn, D, norm_cross, norm_re, eps_cross, eps_re, parts)
 end
 
-function create_coarse_spaces(params,simcase)
+function create_coarse_spaces(params,simcase,order::Int64)
     compute_Uc = true
-    haskey(params , Uc) ? compute_Uc = false : compute_Uc = true
+    haskey(params , :Uc) ? compute_Uc = false : compute_Uc = true
     if compute_Uc
-        @sunpack  model = params
-        simcase_coarse = deepcapy(simcase)
+        @unpack  model = params
+        simcase_coarse = deepcopy(simcase)
         # simcase_coarse.meshp.meshinfo.N .= ones(Int64, D) .* Int(ceil(N[1] / 2))
         simcase_coarse.sprob.method.order = order -1
         boundary_conditions = create_boundary_conditions(simcase) 
@@ -54,7 +55,7 @@ function project_solution(uh_fine, simcase::TaylorGreen{Periodic}, params::Dict{
 
     @assert order >1
 
-    Vc, Uc =   create_coarse_spaces(params,simcase)
+    Vc, Uc =   create_coarse_spaces(params,simcase,order)
 
     #L2 projection of uh_fine solution on lower order dimensional space (same mesh)
     # Build weak form
@@ -74,9 +75,7 @@ end
 
 function compute_stresses(ubar, uprime, dΩ) # dΩ is of the coarse mesh
     tau_cross = ubar ⊗ uprime + uprime ⊗ ubar
-    println("tau_cross")
     tau_re    = uprime ⊗ uprime
-    println("tau_re")
 
     norm_cross = sum(∫( tau_cross⊙tau_cross )dΩ) #basically we compute the tensor product to compute the norm
     norm_re    = sum(∫( tau_re⊙tau_re )dΩ)
@@ -88,9 +87,22 @@ function compute_stresses(ubar, uprime, dΩ) # dΩ is of the coarse mesh
 
     eps_cross = sum(∫( -(tau_cross ⊙ grad_ubar) )dΩ)
     eps_re    = sum(∫( -(tau_re⊙ grad_ubar) )dΩ)
+    println("eps_cross = $(eps_cross)")
+    println("eps_re = $(eps_re)")
 
-        println("eps_cross = $(eps_cross)")
-        println("eps_re = $(eps_re)")
+    return norm_cross, norm_re, eps_cross, eps_re
+end
+
+
+function write_apriori_analysis(tn, D, norm_cross, norm_re, eps_cross, eps_re, parts)
+
+    # Construct data array dynamically
+    data_out = [tn, norm_cross, norm_re, eps_cross, eps_re]
+
+
+    headers = ["time", "norm_cross", "norm_re", "eps_cross", "eps_re"]
+
+    write_to_csv("TGV_$(D)D_apriori.csv", data_out, headers, parts)
 
 end
 
