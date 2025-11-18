@@ -24,14 +24,16 @@ rank_partition = (2,2)
 
 
 
-solver_options = petsc_options(; vel_ksp="gmres", vel_pc="gamg", pres_ksp="cg", pres_pc="gamg")
+
+solver_options =  "-snes_type newtonls -snes_linesearch_type basic -snes_linesearch_damping 1.0 -snes_rtol 1.0e-8 -snes_atol 0 -snes_monitor  -snes_max_it 20 \
+-pc_type asm -sub_pc_type lu -ksp_type gmres -ksp_converged_reason -ksp_max_it 150 -ksp_rtol 1e-8 -ksp_atol 0.0"
 
 sprob = StabilizedProblem(VMS(3))
 timep = TimeParameters(t0=t0, dt=dt, tF=tF)
 
 physicalp = PhysicalParameters(Re=Re, c=vortex_diameter)
 solverp = SolverParameters(matrix_freq_update=1, Number_Skip_Expansion=10e6, M=40,
-petsc_options=solver_options)
+petsc_options=solver_options, linear=false, θ=1.0)
 exportp = ExportParameters(printinitial=true, printmodel=true, 
 vtu_export = ["uh","ph","uh_analytic", "ph_analytic"], extra_export=["VelocityError","PressureError"])
 

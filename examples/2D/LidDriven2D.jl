@@ -30,7 +30,7 @@ timep = TimeParameters(t0=t0, dt=dt, tF=tF, t_endramp=t_endramp)
 
 physicalp = PhysicalParameters(Re=Re, c=1.0)
 solverp = SolverParameters(matrix_freq_update=1, Number_Skip_Expansion=10e6, M=40,
-    petsc_options=solver_options)
+    petsc_options=solver_options, linear=false)
 exportp = ExportParameters(printinitial=true, printmodel=true)
 
 
