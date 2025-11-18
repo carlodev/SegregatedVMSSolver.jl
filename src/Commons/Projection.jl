@@ -23,7 +23,7 @@ function compute_VMS2_error(uh_fine, simcase::SimulationCase,params::Dict{Symbol
     @sunpack D = simcase
     ubar, uprime = project_solution(uh_fine, simcase, params, tn)
     norm_cross, norm_re, eps_cross, eps_re = compute_stresses(ubar, uprime, dΩ) 
-    write_apriori_analysis(tn, D, norm_cross, norm_re, eps_cross, eps_re, parts)
+    D== 2 ? write_apriori_analysis(tn, D, norm_cross, norm_re, eps_cross, eps_re, parts) : nothing
     compute_re_tensor(uh_fine, dΩ, D, tn, parts)
 end
 
