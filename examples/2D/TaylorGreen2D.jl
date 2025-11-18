@@ -40,8 +40,8 @@ vtu_export = ["uh","ph","uh_analytic", "ph_analytic"], extra_export=["VelocityEr
 
 meshp = MeshParameters(rank_partition, D; N=N, L=0.5 * vortex_diameter)
 simparams = SimulationParameters(timep, physicalp, solverp, exportp)
-bc_tgv = Periodic(meshp, physicalp)
-
+  params_tvg = TaylorGreenParameters(Vs=1.0, Ua=0.0, Va = 0.0)
+        bc_tgv = Periodic(meshp,physicalp,params_tvg ) 
 
 
 mcase = TaylorGreen(bc_tgv, meshp, simparams, sprob)

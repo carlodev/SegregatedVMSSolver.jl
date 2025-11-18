@@ -24,6 +24,7 @@ function compute_VMS2_error(uh_fine, simcase::SimulationCase,params::Dict{Symbol
     ubar, uprime = project_solution(uh_fine, simcase, params, tn)
     norm_cross, norm_re, eps_cross, eps_re = compute_stresses(ubar, uprime, dΩ) 
     write_apriori_analysis(tn, D, norm_cross, norm_re, eps_cross, eps_re, parts)
+    compute_re_tensor(uh_fine, dΩ, D, tn, parts)
 end
 
 function create_coarse_spaces(params,simcase,order::Int64)
@@ -106,5 +107,35 @@ function write_apriori_analysis(tn, D, norm_cross, norm_re, eps_cross, eps_re, p
 
 end
 
+
+function compute_re_tensor(uh, dΩ, D, tn, parts)
+    if D == 2
+        ux = uh ⋅ VectorValue(1.0,0.0)
+        uy = uh ⋅ VectorValue(0.0,1.0)
+        R11 = sum(∫( (ux⊙ux) )dΩ) 
+        R22 = sum(∫( (uy⊙ uy) )dΩ) 
+        R12 = sum(∫( (ux⊙ uy) )dΩ) 
+        data_out = [tn, R11, R22, R12]
+        headers = ["time", "R11", "R22", "R12"]
+
+    elseif D == 3
+        ux = uh ⋅ VectorValue(1.0,0.0,0.0)
+        uy = uh ⋅ VectorValue(0.0,1.0,0.0)
+        uy = uh ⋅ VectorValue(0.0,0.0,1.0)
+
+        R11 = sum(∫( (ux⊙ux) )dΩ) 
+        R22 = sum(∫( (uy⊙ uy) )dΩ)
+        R33 = sum(∫( (uz⊙ uz) )dΩ) 
+        R12 = sum(∫( (ux⊙ uy) )dΩ) 
+        R13 = sum(∫( (ux⊙ uz) )dΩ) 
+        R23 = sum(∫( (uy⊙ uz) )dΩ) 
+        
+        data_out = [tn, R11, R22, R33, R12, R13, R23 ]
+        headers = ["time", "R11", "R22", "R33", "R12", "R13", "R23"]
+    end
+
+        write_to_csv("TGV_$(D)D_ReStress.csv", data_out, headers, parts)
+
+end
 
 end
