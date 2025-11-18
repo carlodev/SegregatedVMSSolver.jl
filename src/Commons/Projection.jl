@@ -124,7 +124,7 @@ function compute_re_tensor(uh, dΩ, D, tn, parts)
     elseif D == 3
         ux = uh ⋅ VectorValue(1.0,0.0,0.0)
         uy = uh ⋅ VectorValue(0.0,1.0,0.0)
-        uy = uh ⋅ VectorValue(0.0,0.0,1.0)
+        uz = uh ⋅ VectorValue(0.0,0.0,1.0)
 
         R11 = sum(∫( (ux⊙ux) )dΩ) 
         R22 = sum(∫( (uy⊙ uy) )dΩ)
