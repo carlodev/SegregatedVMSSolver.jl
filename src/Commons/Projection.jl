@@ -18,7 +18,7 @@ export compute_VMS2_error
 ###PROJECTION
 
 
-function compute_VMS2_error(uh_fine, simcase::SimulationCase,params::Dict{Symbol,Any}, tn::Real)
+function compute_VMS2_error(uh_fine, simcase::TaylorGreen{Periodic},params::Dict{Symbol,Any}, tn::Real)
     @unpack U, dΩ, degree,parts = params
     @sunpack D = simcase
     if D == 2
@@ -48,9 +48,11 @@ function create_coarse_spaces(params,simcase,order::Int64)
     return Vc, Uc
 end
 
-function project_solution(uh_fine, simcase::SimulationCase, params::Dict{Symbol,Any}, tn::Real)
+
+function compute_VMS2_error(uh_fine, simcase::SimulationCase,params::Dict{Symbol,Any}, tn::Real)
 return true
 end
+
 
 function project_solution(uh_fine, simcase::TaylorGreen{Periodic}, params::Dict{Symbol,Any}, tn::Real)
     @assert tn>=0.0
