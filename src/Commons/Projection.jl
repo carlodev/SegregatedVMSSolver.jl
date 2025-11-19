@@ -41,7 +41,7 @@ function create_coarse_spaces(params,simcase,order::Int64)
         @unpack  model = params
         simcase_coarse = deepcopy(simcase)
         # simcase_coarse.meshp.meshinfo.N .= ones(Int64, D) .* Int(ceil(N[1] / 2))
-        simcase_coarse.sprob.method.order = 2
+        simcase_coarse.sprob.method.order = order
         boundary_conditions = create_boundary_conditions(simcase) 
         Vc, Uc, _, _ = creation_fe_spaces(simcase_coarse, model, boundary_conditions)
         merge!(params,Dict(:Uc=>Uc, :Vc=>Vc))
@@ -62,12 +62,12 @@ end
 
 function project_solution(uh_fine, simcase::TaylorGreen{Periodic}, params::Dict{Symbol,Any}, tn::Real)
     @assert tn>=0.0
-    @sunpack D,N, order = simcase
+    @sunpack D,N, order, projection_order = simcase
     @unpack U,V,P,Q, Ω, degree,parts, dΩ = params
 
-    @assert order >2
+    @assert order >1
 
-    Vc, Uc =   create_coarse_spaces(params,simcase,order)
+    Vc, Uc =   create_coarse_spaces(params,simcase,projection_order)
 
     
     #L2 projection of uh_fine solution on lower order dimensional space (same mesh)
