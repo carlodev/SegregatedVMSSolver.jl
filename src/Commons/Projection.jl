@@ -1,5 +1,7 @@
 module Projection
 using Gridap
+using GridapPETSc
+
 using GridapDistributed
 using CSV, DelimitedFiles
 using DataFrames
@@ -7,8 +9,10 @@ using Parameters
 using PartitionedArrays
 using SegregatedVMSSolver
 using SegregatedVMSSolver.ParametersDef
+using SegregatedVMSSolver.SolverOptions
 using SegregatedVMSSolver.Interfaces
 using SegregatedVMSSolver.CreateProblem
+using SegregatedVMSSolver.MatrixCreation
 using SegregatedVMSSolver.ExportUtility: write_to_csv
 
 
@@ -20,8 +24,8 @@ export compute_VMS2_error
 
 function compute_VMS2_error(uh_fine, simcase::TaylorGreen{Periodic},params::Dict{Symbol,Any}, tn::Real)
     @unpack U, dΩ, degree,parts = params
-    @sunpack D = simcase
-    if D == 2
+    @sunpack D, projection_timesteps = simcase
+    if D == 2 && !isempty(    intersect(projection_timesteps, tn))
     ubar, uprime = project_solution(uh_fine, simcase, params, tn)
     norm_cross, norm_re, eps_cross, eps_re = compute_stresses(ubar, uprime, dΩ) 
     write_apriori_analysis(tn, D, norm_cross, norm_re, eps_cross, eps_re, parts)
@@ -37,10 +41,12 @@ function create_coarse_spaces(params,simcase,order::Int64)
         @unpack  model = params
         simcase_coarse = deepcopy(simcase)
         # simcase_coarse.meshp.meshinfo.N .= ones(Int64, D) .* Int(ceil(N[1] / 2))
-        simcase_coarse.sprob.method.order = order -1
+        simcase_coarse.sprob.method.order = 1
         boundary_conditions = create_boundary_conditions(simcase) 
         Vc, Uc, _, _ = creation_fe_spaces(simcase_coarse, model, boundary_conditions)
         merge!(params,Dict(:Uc=>Uc, :Vc=>Vc))
+        mkpath("Projections")
+
     end
 
     @unpack Vc, Uc = params
@@ -63,16 +69,22 @@ function project_solution(uh_fine, simcase::TaylorGreen{Periodic}, params::Dict{
 
     Vc, Uc =   create_coarse_spaces(params,simcase,order)
 
+    
     #L2 projection of uh_fine solution on lower order dimensional space (same mesh)
     # Build weak form
     a(u,v) = ∫( u ⋅ v )dΩ
     l(v)   = ∫( uh_fine ⋅ v )dΩ
 
     # Assemble and solve
-    op = AffineFEOperator(a,l,Uc(tn),Vc(tn))
-    ubar = solve(op)
+    op_proj = AffineFEOperator(a,l,Uc(tn),Vc(tn))
+    solver_proj =    PETScLinearSolver(pres_kspsetup)
 
-    println("ubar - solved")
+    ubar = solve(solver_proj,op_proj)
+    
+    @info "Projection ubar computed"
+    save_path= joinpath("Projections", "TGV_$(D)D_$(tn)_projections")
+
+    writevtk(Ω, save_path, nsubcells=order, cellfields=["uh_fine"=>uh_fine, "uh_projected"=>ubar])
 
     uprime = uh_fine - ubar
 

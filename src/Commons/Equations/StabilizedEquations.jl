@@ -50,10 +50,10 @@ function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::Simulation
 
     rhs(v) = 0.0
     
-    if typeof(simcase) <: TaylorGreen
-      writevtk(Ω, "Stab_$dt", nsubcells=order, cellfields=["tm"=>Tm, "tc"=>Tc] )
-      @info "Exporting Stabilization Parameters"
-    end
+    # if typeof(simcase) <: TaylorGreen
+    #   writevtk(Ω, "Stab_$dt", nsubcells=order, cellfields=["tm"=>Tm, "tc"=>Tc] )
+    #   @info "Exporting Stabilization Parameters"
+    # end
 
     return Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs
 

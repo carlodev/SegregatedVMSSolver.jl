@@ -138,6 +138,8 @@ const ALLOWED_VTU_EXPORTS = ["uh", "ph", "uh_analytic", "ph_analytic","uh_avg", 
     vtu_export::Vector{String} = ["uh","ph"]
         
     extra_export::Vector{String} = String[]  
+    projection_timesteps::Vector{Float64} = Float64[]
+
     @assert all(x -> x in ALLOWED_EXTRA_EXPORTS, extra_export) "Invalid value in extra_export. Allowed values:$ALLOWED_EXTRA_EXPORTS"
 
 

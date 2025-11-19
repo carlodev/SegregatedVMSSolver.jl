@@ -12,15 +12,13 @@ t0 = 0.0
 dt = 0.01
 tF = 2.5
 vortex_diameter = 1.0
-N = 16
+N = 32
 Re = 1600
 D = 2
 
 backend = with_debug
 
 rank_partition = (2,2)
-
-
 
 
 
@@ -33,7 +31,7 @@ physicalp = PhysicalParameters(Re=Re, c=vortex_diameter)
 solverp = SolverParameters(matrix_freq_update=1, Number_Skip_Expansion=10e6, M=40,
 petsc_options=solver_options)
 exportp = ExportParameters(printinitial=true, printmodel=true, 
-vtu_export = ["uh","ph","uh_analytic", "ph_analytic"], extra_export=["VelocityError","PressureError"])
+vtu_export = ["uh","ph","uh_analytic", "ph_analytic"], extra_export=["VelocityError","PressureError"], projection_timesteps=[dt, 2*dt, 10*dt, 20*dt])
 
 
 
