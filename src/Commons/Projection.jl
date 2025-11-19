@@ -25,7 +25,7 @@ export compute_VMS2_error
 function compute_VMS2_error(uh_fine, simcase::TaylorGreen{Periodic},params::Dict{Symbol,Any}, tn::Real)
     @unpack U, dΩ, degree,parts = params
     @sunpack D, projection_timesteps = simcase
-    if D == 2 && !isempty(    intersect(projection_timesteps, tn))
+    if !isempty(    intersect(projection_timesteps, tn))
     ubar, uprime = project_solution(uh_fine, simcase, params, tn)
     norm_cross, norm_re, eps_cross, eps_re = compute_stresses(ubar, uprime, dΩ) 
     write_apriori_analysis(tn, D, norm_cross, norm_re, eps_cross, eps_re, parts)
