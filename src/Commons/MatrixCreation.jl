@@ -52,7 +52,7 @@ function inv_lump_vel_mass!(Mat_inv_ML::PVector, Mat_ML::PSparseMatrix)
     j = 1
     for i in rowvals(val)
       V[i] += vals[j]
-      j + 1
+      j = j + 1
     end
     V = 1 ./ V
 
@@ -172,7 +172,7 @@ function update_all_matrices_vectors!(matrices::Tuple, u_adv, params, simcase)
   update_matrix!(S,Mat_S,Ptn1, Q)
 
 
-  Mat_inv_ML = allocate_Mat_inv_ML(Mat_ML)
+  # Mat_inv_ML = allocate_Mat_inv_ML(Mat_ML)
   inv_lump_vel_mass!(Mat_inv_ML, Mat_ML)
 
   Vec_Ap .= Vec_Apu + Vec_App
