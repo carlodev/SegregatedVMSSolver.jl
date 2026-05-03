@@ -74,11 +74,9 @@ end
 function Algebra.numerical_setup!(vmsns::VMSPETScNS,A::AbstractMatrix)
   ns = vmsns.ns
   ns.A = A
-  println("convert")
-  @time ns.B = convert(PETScMatrix,A)
-  @check_error_code PETSC.KSPSetOperators(ns.ksp[],ns.B.mat[],ns.B.mat[])
-  
-  # @time @check_error_code PETSC.KSPSetUp(ns.ksp[])
+  GridapPETSc._copy!(ns.B.mat[], ns.A)
+  #ns.B = convert(PETScMatrix,A)
+  #@check_error_code PETSC.KSPSetOperators(ns.ksp[],ns.B.mat[],ns.B.mat[])
   return ns
 end
 
