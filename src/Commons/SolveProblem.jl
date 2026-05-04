@@ -82,7 +82,7 @@ matrices, vectors, (uh_avg,ph_avg) =  init_values
 
 
 GridapPETSc.with(args=split(petsc_options)) do
-  run(`nvidia-smi`)
+  any(kw -> occursin(kw, petsc_options), ["cuda", "aijcusparse"]) && run(`nvidia-smi`)
 
 
 Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App, 
