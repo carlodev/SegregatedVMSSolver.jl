@@ -75,7 +75,6 @@ function momentum_stabilization(uu, stab_coeff::TensorStabilization, simcase::Si
 
     function τm(uun, G, GG)
         dt_eff = compute_dt_eff(dt, dt_limiter, uun, G, GG, ν)
-        println("Stabilization Using: dt = $(dt_eff), while physical dt = $dt")
 
         τ₁ = Ci[1] * (2 / dt_eff)^2
         τ₃ = Ci[2] * (ν^2 * GG)
