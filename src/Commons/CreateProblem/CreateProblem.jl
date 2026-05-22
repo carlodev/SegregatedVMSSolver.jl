@@ -11,6 +11,7 @@ using PartitionedArrays
 using CSV
 using DataFrames
 using NearestNeighbors
+using Statistics
 
 using SegregatedVMSSolver
 using SegregatedVMSSolver.ParametersDef
