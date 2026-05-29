@@ -160,7 +160,7 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
                     # Use V_.Δa as scratch storage for Aup * Δpm1 to avoid
                     # an extra allocation; then update in place.
                     mul!(V_.Δa, M_.Aup, Δpm1)
-                    @. V_.Δa = V_.Δa_star - θ * M_.inv_ML * V_.Δa
+                    V_.Δa .= V_.Δa_star - θ * M_.inv_ML .* V_.Δa
 
                     # In-place updates of velocity and pressure free dofs.
                     axpy!(dt, V_.Δa, V_.um)   # um += dt * Δa

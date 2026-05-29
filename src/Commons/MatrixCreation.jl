@@ -70,7 +70,7 @@ function initialize_vectors(matrices::Tuple, uh0, ph0)
     vec_sum_pm = pazeros(Mat_Aup)
     Δa_star    = pazeros(Mat_Apu)
     Δpm1       = pazeros(Mat_S)
-    Δa         = pazeros(Mat_Tpu)
+    Δa         = pazeros(vec_um)
 
     b1 = pazeros(Vec_Au)
     b2 = pazeros(Vec_Ap)
