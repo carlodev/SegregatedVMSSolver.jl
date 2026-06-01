@@ -187,7 +187,7 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
             end
 
             @info "solution time at t = $tn : $time_solve s"
-            @time GridapPETSc.GridapPETSc.gridap_petsc_gc()
+            #GridapPETSc.GridapPETSc.gridap_petsc_gc()
 
             update_ũ_vector!(V_.ũ_vector, V_.um)
 
