@@ -86,7 +86,7 @@ function initialize_matrices(u_adv, params, simcase)
     @info "matrices and vectors allocated"
 
     @info "filling matrices and vectors with values"
-    @time update_all_matrices_vectors!(matrices, u_adv, params, simcase)
+    update_all_matrices_vectors!(matrices, u_adv, params, simcase)
     @info "matrices and vectors updated"
 
     return matrices

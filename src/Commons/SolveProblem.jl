@@ -7,6 +7,7 @@ using PartitionedArrays
 using Parameters
 using LinearAlgebra
 using Gridap.FESpaces
+using TimerOutputs
 
 using SegregatedVMSSolver.ParametersDef
 using SegregatedVMSSolver.SolverOptions
@@ -17,6 +18,12 @@ using SegregatedVMSSolver.ExportUtility
 using SegregatedVMSSolver.Interfaces
 
 export solve_case
+export CBStepSetupStart, CBStepSetupEnd, CBSolveStart, CBSolveEnd
+
+struct CBStepSetupStart end
+struct CBStepSetupEnd end
+struct CBSolveStart end
+struct CBSolveEnd end
 
 
 # ---------------------------------------------------------------------------
@@ -99,7 +106,7 @@ end
 It solves iteratively the velocity and pressure system using the LS-VMS
 segregated scheme described in equations (27) and (30) of the paper.
 """
-function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
+function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase; callback)
     @unpack trials, tests = params
     U, P = trials
 
@@ -112,14 +119,20 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
     matrices, vectors, (uh_avg, ph_avg) = initialize_solve(simcase, params)
     @unpack Utn, Utn1, Ptn, Ptn1 = params
 
+    @info "Starting up solver"
+
     GridapPETSc.with(args = split(petsc_options)) do
         any(kw -> occursin(kw, petsc_options), ["cuda", "aijcusparse"]) && run(`nvidia-smi`)
 
         M_ = _unpack_matrices(matrices)
         V_ = _unpack_vectors(vectors)
 
-        ns1 = create_PETSc_setup(M_.ML, vel_kspsetup)
-        ns2 = create_PETSc_setup(M_.S,  pres_kspsetup)
+        to = TimerOutput()
+
+        @timeit to "PETSc setup" begin
+            @timeit to "vel" ns1 = create_PETSc_setup(M_.ML, vel_kspsetup)
+            @timeit to "pres" ns2 = create_PETSc_setup(M_.S,  pres_kspsetup)
+        end
 
         uh_tn_updt = FEFunction(Utn, V_.um)
 
@@ -128,14 +141,17 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
 
             if mod(ntime, matrix_freq_update) == 0
                 @info "updating matrices, vectors and PETSc setup"
-                @time update_all_matrices_vectors!(matrices, uh_tn_updt, params, simcase)
-                @time begin
-                    numerical_setup!(ns1, M_.ML)
-                    numerical_setup!(ns2, M_.S)
+                @timeit to "Step setup" begin
+                    cbstate = callback(CBStepSetupStart())
+                    @timeit to "matrices and vectors" update_all_matrices_vectors!(matrices, uh_tn_updt, params, simcase)
+                    @timeit to "ns vel" numerical_setup!(ns1, M_.ML)
+                    @timeit to "ns pres" numerical_setup!(ns2, M_.S)
+                    callback(CBStepSetupEnd(), cbstate)
                 end
             end
 
-            time_solve = @elapsed begin
+            @timeit to "Solution" begin
+                cbstate = callback(CBSolveStart())
                 # Reset accumulators for this time step. Use fill! to avoid
                 # allocating a new PVector just to copy zeros into it.
                 fill!(V_.am,     0.0)
@@ -151,22 +167,22 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
                     fill!(V_.Δpm1,    0.0)
                     fill!(V_.Δa_star, 0.0)
 
-                    solve_velocity!(ns1, M_, V_, dt, θ)
-                    solve_pressure!(ns2, M_, V_, dt)
+                    @timeit to "solve velocity" solve_velocity!(ns1, M_, V_, dt, θ)
+                    @timeit to "solve pressure" solve_pressure!(ns2, M_, V_, dt)
 
-                    Δpm1 = GridapDistributed.change_ghost(V_.Δpm1, M_.Aup)
+                    @timeit to "change ghost" Δpm1 = GridapDistributed.change_ghost(V_.Δpm1, M_.Aup)
 
                     # Δa = Δa* - θ * inv(ML) * (Aup * Δpm1)
                     # Use V_.Δa as scratch storage for Aup * Δpm1 to avoid
                     # an extra allocation; then update in place.
-                    mul!(V_.Δa, M_.Aup, Δpm1)
-                    V_.Δa .= V_.Δa_star - θ * M_.inv_ML .* V_.Δa
+                    @timeit to "Aup * Δpm1" mul!(V_.Δa, M_.Aup, Δpm1)
+                    @timeit to "Δa" V_.Δa .= V_.Δa_star - θ * M_.inv_ML .* V_.Δa
 
                     # In-place updates of velocity and pressure free dofs.
-                    axpy!(dt, V_.Δa, V_.um)   # um += dt * Δa
-                    V_.pm .+= Δpm1            # pm += Δpm1   (no temporary)
+                    @timeit to "um" axpy!(dt, V_.Δa, V_.um)   # um += dt * Δa
+                    @timeit to "pm" V_.pm .+= Δpm1            # pm += Δpm1   (no temporary)
 
-                    if m == 0
+                    @timeit to "copy and norm" if m == 0
                         copy!(V_.sum_pm, Δpm1)
                         copy!(V_.am,     V_.Δa)
                         norm_Δa0 = norm(V_.Δa)
@@ -184,12 +200,12 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
 
                     m += 1
                 end
+                callback(CBSolveEnd(), cbstate)
             end
 
-            @info "solution time at t = $tn : $time_solve s"
             #GridapPETSc.GridapPETSc.gridap_petsc_gc()
 
-            update_ũ_vector!(V_.ũ_vector, V_.um)
+            @timeit to "update u vector" update_ũ_vector!(V_.ũ_vector, V_.um)
 
             Utn  = Utn1
             Utn1 = U(tn + dt)
@@ -200,7 +216,7 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
 
             uh_tn_updt = FEFunction(Utn1, V_.um)
             if ntime > Number_Skip_Expansion
-                uh_tn_updt = FEFunction(Utn1, update_ũ(V_.ũ_vector))
+                @timeit to "uh_tn update" uh_tn_updt = FEFunction(Utn1, update_ũ(V_.ũ_vector))
             end
 
             uh_tn = FEFunction(Utn, V_.um)
@@ -209,9 +225,10 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
             uh_avg = update_time_average(uh_tn, uh_avg, Utn, tn, ntime, time_step, simcase.simulationp.timep)
             ph_avg = update_time_average(ph_tn, ph_avg, Ptn, tn, ntime, time_step, simcase.simulationp.timep)
 
-            writesolution(params, simcase, ntime, tn, (uh_tn, ph_tn), (uh_avg, ph_avg))
-            export_fields(params, simcase, tn, uh_tn, ph_tn)
+            @timeit to "write solution" writesolution(params, simcase, ntime, tn, (uh_tn, ph_tn), (uh_avg, ph_avg))
+            @timeit to "export fields" export_fields(params, simcase, tn, uh_tn, ph_tn)
         end
+        show(to) # show timer output
     end
 end
 
@@ -253,7 +270,7 @@ end
 function solve_velocity!(ns1, M_::NamedTuple, V_::NamedTuple, dt::Float64, θ::Float64)
     _assemble_velocity_rhs!(V_.b1, M_, V_.um, V_.pm, V_.am, V_.sum_pm, dt, θ)
     @info "solving velocity"
-    @time solve!(V_.Δa_star, ns1, V_.b1)
+    solve!(V_.Δa_star, ns1, V_.b1)
 end
 
 # Backwards-compatible signature that takes the raw tuples.
@@ -295,7 +312,7 @@ end
 function solve_pressure!(ns2, M_::NamedTuple, V_::NamedTuple, dt::Float64)
     _assemble_pressure_rhs!(V_.b2, M_, V_.um, V_.pm, V_.am, V_.Δa_star, dt)
     @info "solving pressure"
-    @time solve!(V_.Δpm1, ns2, V_.b2)
+    solve!(V_.Δpm1, ns2, V_.b2)
 end
 
 # Backwards-compatible signature. θ is accepted for API stability but unused:
