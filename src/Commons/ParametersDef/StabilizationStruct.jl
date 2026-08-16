@@ -108,7 +108,7 @@ end
 
 @with_kw struct TensorFormulation <: StabilizationFormulation
     r::Int64                  = 2
-    Ci::Vector{Real}          = [4, 36]
+    Ci::Vector{Float64}          = [4, 36]
     dt_limiter::TimestepLimiter = NoLimiter()
     @assert (Ci[1] >= 0 && Ci[2] >= 0) "Ci values must be non-negative"
 end
