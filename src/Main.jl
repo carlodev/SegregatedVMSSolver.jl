@@ -4,7 +4,7 @@ using SegregatedVMSSolver.CreateProblem
 using SegregatedVMSSolver.SolveProblem
 using PartitionedArrays, Gridap, GridapDistributed
 
-function solve(simcase::SimulationCase,backend::Function; callback::Function=(() -> nothing))
+function solve(simcase::SimulationCase,backend::Function; callback::Function=((_...) -> nothing))
     #check(simcase)
 
     backend() do distribute
