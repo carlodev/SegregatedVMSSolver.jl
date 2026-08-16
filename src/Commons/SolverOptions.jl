@@ -4,6 +4,7 @@ using GridapDistributed
 using GridapPETSc
 using GridapPETSc.PETSC
 using PartitionedArrays
+using SparseArrays
 
 using Gridap.Algebra
 using MPI
@@ -80,9 +81,15 @@ end
 function Algebra.numerical_setup!(vmsns::VMSPETScNS,A::AbstractMatrix)
   ns = vmsns.ns
   ns.A = A
-  GridapPETSc._copy!(ns.B.mat[], ns.A)
-  #ns.B = convert(PETScMatrix,A)
-  #@check_error_code PETSC.KSPSetOperators(ns.ksp[],ns.B.mat[],ns.B.mat[])
+  nnz_a = sum(map(x -> count(!iszero, nonzeros(x)), partition(ns.A)))
+  nnz_b = nnz(ns.B)
+  if nnz_a != nnz_b
+    @info "Updating PETSc Matrix"
+    ns.B = convert(PETScMatrix,A)
+    # @check_error_code PETSC.KSPSetOperators(ns.ksp[],ns.B.mat[],ns.B.mat[])
+  else
+    GridapPETSc._copy!(ns.B.mat[], ns.A)
+  end
   return ns
 end
 

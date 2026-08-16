@@ -25,7 +25,7 @@ export update_all_matrices_vectors!
 Allocate a zero PVector where the inverse of the lumped mass matrix is stored.
 """
 function allocate_Mat_inv_ML(Mat_ML::PSparseMatrix)
-    return pzeros(Mat_ML.row_partition)
+    return pzeros(partition(axes(Mat_ML,1)))
 end
 
 
@@ -36,7 +36,7 @@ Compute the row-sum (lumped) approximation of `Mat_ML`, then store its
 reciprocal in `Mat_inv_ML`. Operates locally on each rank.
 """
 function inv_lump_vel_mass!(Mat_inv_ML::PVector, Mat_ML::PSparseMatrix)
-    values = map(Mat_ML.matrix_partition) do val
+    map!(partition(Mat_inv_ML), partition(Mat_ML)) do val
         N    = maximum(rowvals(val))
         V    = zeros(N)
         vals = nonzeros(val)
@@ -48,7 +48,6 @@ function inv_lump_vel_mass!(Mat_inv_ML::PVector, Mat_ML::PSparseMatrix)
         @. V = 1 / V
         V
     end
-    Mat_inv_ML .= PVector(values, Mat_ML.row_partition)
 end
 
 
@@ -94,12 +93,12 @@ end
 
 
 function allocate_all_matrices_vectors(u_adv, params, simcase)
-    Tuu, Tpu, Auu, Aup, Apu, App, ML, S, rhs = segregated_equations(u_adv, params, simcase)
+    Tuu, Tpu, Auu, Aup, Apu, App, S, rhs = segregated_equations(u_adv, params, simcase)
+    @sunpack θ, dt = simcase
 
     @unpack Utn1, Ptn1, tests = params
     V, Q = tests
 
-    Mat_Tuu = allocate_matrix(Tuu, rhs, Utn1, V)
     Mat_Tpu = allocate_matrix(Tpu, rhs, Utn1, Q)
 
     Mat_Auu, Vec_Auu = allocate_matrix_and_vector(Auu, rhs, Utn1, V)
@@ -107,7 +106,9 @@ function allocate_all_matrices_vectors(u_adv, params, simcase)
     Mat_Apu, Vec_Apu = allocate_matrix_and_vector(Apu, rhs, Utn1, Q)
     Mat_App, Vec_App = allocate_matrix_and_vector(App, rhs, Ptn1, Q)
 
-    Mat_ML = allocate_matrix(ML, rhs, Utn1, V)
+    Mat_Tuu = copy(Mat_Auu)
+    Mat_ML = copy(Mat_Auu)
+    
     Mat_S  = allocate_matrix(S,  rhs, Ptn1, Q)
 
     Mat_inv_ML = allocate_Mat_inv_ML(Mat_ML)
@@ -143,10 +144,11 @@ function update_all_matrices_vectors!(matrices::Tuple, u_adv, params, simcase)
     Mat_ML, Mat_inv_ML, Mat_S,
     Vec_Auu, Vec_Aup, Vec_Apu, Vec_App, Vec_Au, Vec_Ap = matrices
 
+    @sunpack θ, dt = simcase
     @unpack Utn1, Ptn1, tests = params
     V, Q = tests
 
-    Tuu, Tpu, Auu, Aup, Apu, App, ML, S, _ = segregated_equations(u_adv, params, simcase)
+    Tuu, Tpu, Auu, Aup, Apu, App, S, _ = segregated_equations(u_adv, params, simcase)
 
     update_matrix!(Tuu, Mat_Tuu, Utn1, V)
     update_matrix!(Tpu, Mat_Tpu, Utn1, Q)
@@ -156,7 +158,13 @@ function update_all_matrices_vectors!(matrices::Tuple, u_adv, params, simcase)
     update_matrix_vector!(Apu, Mat_Apu, Vec_Apu, Utn1, Q)
     update_matrix_vector!(App, Mat_App, Vec_App, Ptn1, Q)
 
-    update_matrix!(ML, Mat_ML, Utn1, V)
+    map(partition(Mat_ML),partition(Mat_Tuu),partition(Mat_Auu)) do ml, tuu, auu
+        ml .= auu
+        ml .*= θ*dt
+        ml .+= tuu
+        return
+    end
+
     update_matrix!(S,  Mat_S,  Ptn1, Q)
 
     inv_lump_vel_mass!(Mat_inv_ML, Mat_ML)
