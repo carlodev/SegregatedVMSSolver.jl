@@ -1,5 +1,7 @@
 val_u(x) = x
 val_u(x::Gridap.Fields.ForwardDiff.Dual) = x.value
+val_u(x::VectorValue{2,Gridap.Fields.ForwardDiff.Dual}) = VectorValue{2,Float64}(x[1].value, x[2].value)
+val_u(x::VectorValue{3,Gridap.Fields.ForwardDiff.Dual}) = VectorValue{3,Float64}(x[1].value, x[2].value, x[3].value)
 
 # ── Effective Δt computation ───────────────────────────────────────────────────
 
@@ -14,9 +16,9 @@ function compute_dt_eff(dt::Float64, ::NoLimiter, uun, G, GG, ν::Float64)
 end
 
 function compute_dt_eff(dt::Float64, limiter::AdvectiveLimiter, uun, G, GG, ν::Float64)
-    uu_new = VectorValue(val_u.(uun)...)
-    iszero(norm(uu_new)) && return dt
-    adv = uu_new ⋅ G ⋅ uu_new
+    uun = val_u(uun)
+    iszero(norm(uun)) && return dt
+    adv = uun ⋅ G ⋅ uun
     iszero(adv) && return dt
     return max(dt, limiter.C_adv / sqrt(adv))
 end
@@ -27,9 +29,9 @@ function compute_dt_eff(dt::Float64, limiter::DiffusiveLimiter, uun, G, GG, ν::
 end
 
 function compute_dt_eff(dt::Float64, limiter::CombinedLimiter, uun, G, GG, ν::Float64)
-    uu_new  = VectorValue(val_u.(uun)...)
-    adv     = uu_new ⋅ G ⋅ uu_new
-    dt_adv  = (iszero(norm(uu_new)) || iszero(adv)) ? Inf : limiter.C_adv / sqrt(adv)
+    uun = val_u(uun)
+    adv     = uun ⋅ G ⋅ uun
+    dt_adv  = (iszero(norm(uun)) || iszero(adv)) ? Inf : limiter.C_adv / sqrt(adv)
     dt_diff = iszero(ν) ? Inf : limiter.C_diff / (ν * sqrt(GG))
     return max(dt, min(dt_adv, dt_diff))
 end
@@ -57,7 +59,6 @@ function compute_stab_coeff(simcase::SimulationCase, params::Dict{Symbol,Any})
 end
 
 # ── Momentum stabilization ─────────────────────────────────────────────────────
-
 """
     momentum_stabilization(uu, stab_coeff::TensorStabilization, simcase)
 
@@ -73,18 +74,18 @@ function momentum_stabilization(uu, stab_coeff::TensorStabilization, simcase::Si
 
     @sunpack ν, dt = simcase
 
-    function τm(uun, G, GG)
-        dt_eff = compute_dt_eff(dt, dt_limiter, uun, G, GG, ν)
+    function τm(uun, G, GG)::Float64
+        uun = val_u(uun)
+        dt_eff = compute_dt_eff(dt, dt_limiter, uun, G, GG, ν)::Float64
 
         τ₁ = Ci[1] * (2 / dt_eff)^2
         τ₃ = Ci[2] * (ν^2 * GG)
 
-        uu_new = VectorValue(val_u.(uun)...)
-        if iszero(norm(uu_new))
+        if iszero(norm(uun))
             return (τ₁ .+ τ₃) .^ (-1 / 2)
         end
 
-        τ₂ = uu_new ⋅ G ⋅ uu_new
+        τ₂ = uun ⋅ G ⋅ uun
         return (τ₁ .+ τ₂ .+ τ₃) .^ (-1 / 2)
     end
 

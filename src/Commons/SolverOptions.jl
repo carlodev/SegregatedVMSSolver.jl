@@ -4,6 +4,7 @@ using GridapDistributed
 using GridapPETSc
 using GridapPETSc.PETSC
 using PartitionedArrays
+using SparseArrays
 
 using Gridap.Algebra
 using MPI
@@ -55,7 +56,13 @@ end
 # garbage collection at every time step.
 struct VMSPETScNS{T} <: NumericalSetup
   ns::PETScLinearSolverNS{T}
+  Y::Ref{PETScVector}
+  B::Ref{PETScVector}
+  function VMSPETScNS{T}(ns::PETScLinearSolverNS{T}) where T
+    return new(ns, Ref{PETScVector}(), Ref{PETScVector}())
+  end
 end
+VMSPETScNS(ns::PETScLinearSolverNS{T}) where {T} = VMSPETScNS{T}(ns)
 
 
 """
@@ -74,11 +81,15 @@ end
 function Algebra.numerical_setup!(vmsns::VMSPETScNS,A::AbstractMatrix)
   ns = vmsns.ns
   ns.A = A
-  println("convert")
-  @time ns.B = convert(PETScMatrix,A)
-  @check_error_code PETSC.KSPSetOperators(ns.ksp[],ns.B.mat[],ns.B.mat[])
-  
-  # @time @check_error_code PETSC.KSPSetUp(ns.ksp[])
+  nnz_a = sum(map(x -> count(!iszero, nonzeros(x)), partition(ns.A)))
+  nnz_b = nnz(ns.B)
+  if nnz_a != nnz_b
+    @info "Updating PETSc Matrix to increase nonzeros from $(nnz_b) to $(nnz_a)"
+    ns.B = convert(PETScMatrix,A)
+    # @check_error_code PETSC.KSPSetOperators(ns.ksp[],ns.B.mat[],ns.B.mat[])
+  else
+    GridapPETSc._copy!(ns.B.mat[], ns.A)
+  end
   return ns
 end
 
@@ -88,24 +99,27 @@ function Algebra.solve!(x::PartitionedArrays.PVector,vmsns::VMSPETScNS,b::Partit
   B = similar(b,(axes(ns.A)[2],))
   copy!(X,x)
   copy!(B,b)
-  Y = convert(PETScVector,X)
-  solve!(Y,vmsns,B)
-  copy!(x,Y)
-  x
+  if !isassigned(vmsns.Y)
+    vmsns.Y[] = convert(PETScVector,X)
+  else
+    GridapPETSc._copy!(vmsns.Y[].vec[], X)
+  end
+  
+  solve!(vmsns.Y[],vmsns,B)
+  copy!(x,vmsns.Y[])
+  return x
 end
 
 function Algebra.solve!(x::PETScVector,vmsns::VMSPETScNS,b::AbstractVector)
-  # if MPI.Initialized()
-  #   if petsc_gc && (x.comm != MPI.COMM_SELF)
-  #     # gridap_petsc_gc() # Do garbage collection of PETSc objects
-  #   end
-  # end
-
   ns = vmsns.ns
 
-  B = convert(PETScVector,b)
-  solve!(x,ns,B)
-  x
+  if !isassigned(vmsns.B)
+    vmsns.B[] = convert(PETScVector,b)
+  else
+    GridapPETSc._copy!(vmsns.B[].vec[], b)
+  end
+
+  solve!(x,ns,vmsns.B[])
   return x
 end
 

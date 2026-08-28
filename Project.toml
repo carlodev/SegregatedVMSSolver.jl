@@ -1,7 +1,7 @@
 name = "SegregatedVMSSolver"
 uuid = "90220dfc-fac3-4908-b895-51c1a1f4cb85"
-authors = ["Carlo Brunelli"]
 version = "3.0.1"
+authors = ["Carlo Brunelli"]
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -28,6 +28,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 SyntheticEddyMethod = "57cf2c78-4fcb-4d27-9f1f-369b8b08b789"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 Trapz = "592b5752-818d-11e9-1e9a-2b8ca4a44cd1"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
@@ -42,7 +43,7 @@ FillArrays = "=1.13.0"
 Gridap = "=0.18.12"
 GridapDistributed = "=0.4.7"
 GridapGmsh = "=0.7.2"
-GridapPETSc = "=0.5.3"
+GridapPETSc = "0.5"
 LinearAlgebra = "1.11.0"
 MPI = "=0.20.22"
 NearestNeighbors = "=0.4.21"
@@ -56,5 +57,6 @@ SparseArrays = "1.11.0"
 Statistics = "1.11.1"
 SyntheticEddyMethod = "=0.4.4"
 Test = "1.11.0"
+TimerOutputs = "0.5.29"
 Trapz = "=2.0.3"
 UnPack = "=1.0.2"
