@@ -84,7 +84,7 @@ function Algebra.numerical_setup!(vmsns::VMSPETScNS,A::AbstractMatrix)
   nnz_a = sum(map(x -> count(!iszero, nonzeros(x)), partition(ns.A)))
   nnz_b = nnz(ns.B)
   if nnz_a != nnz_b
-    @info "Updating PETSc Matrix"
+    @info "Updating PETSc Matrix to increase nonzeros from $(nnz_b) to $(nnz_a)"
     ns.B = convert(PETScMatrix,A)
     # @check_error_code PETSC.KSPSetOperators(ns.ksp[],ns.B.mat[],ns.B.mat[])
   else

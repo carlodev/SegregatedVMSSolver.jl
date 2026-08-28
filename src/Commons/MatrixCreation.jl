@@ -115,6 +115,11 @@ function allocate_all_matrices_vectors(u_adv, params, simcase)
     Vec_Ap     = Vec_Apu + Vec_App
     Vec_Au     = Vec_Auu + Vec_Aup
 
+    nnzM = sum(map(x -> nnz(x), partition(Mat_ML)))
+    nnzS = sum(map(x -> nnz(x), partition(Mat_S)))
+
+    @info "Allocated matrices with $(size(Mat_ML,1)) equations and $nnzM nonzeros for velocity and $(size(Mat_S,1)) equations and $nnzS nonzeros for pressure."
+
     return Mat_Tuu, Mat_Tpu, Mat_Auu, Mat_Aup, Mat_Apu, Mat_App,
            Mat_ML, Mat_inv_ML, Mat_S,
            Vec_Auu, Vec_Aup, Vec_Apu, Vec_App, Vec_Au, Vec_Ap
