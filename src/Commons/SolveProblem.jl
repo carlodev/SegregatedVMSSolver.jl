@@ -28,36 +28,36 @@ export solve_case
 
 @inline function _unpack_matrices(matrices::Tuple)
     (
-        Tuu     = matrices[1],
-        Tpu     = matrices[2],
-        Auu     = matrices[3],
-        Aup     = matrices[4],
-        Apu     = matrices[5],
-        App     = matrices[6],
-        ML      = matrices[7],
-        inv_ML  = matrices[8],
-        S       = matrices[9],
-        Vec_Auu = matrices[10],
-        Vec_Aup = matrices[11],
-        Vec_Apu = matrices[12],
-        Vec_App = matrices[13],
-        Vec_Au  = matrices[14],
-        Vec_Ap  = matrices[15],
+        Tuu=matrices[1],
+        Tpu=matrices[2],
+        Auu=matrices[3],
+        Aup=matrices[4],
+        Apu=matrices[5],
+        App=matrices[6],
+        ML=matrices[7],
+        inv_ML=matrices[8],
+        S=matrices[9],
+        Vec_Auu=matrices[10],
+        Vec_Aup=matrices[11],
+        Vec_Apu=matrices[12],
+        Vec_App=matrices[13],
+        Vec_Au=matrices[14],
+        Vec_Ap=matrices[15],
     )
 end
 
 @inline function _unpack_vectors(vectors::Tuple)
     (
-        pm       = vectors[1],
-        um       = vectors[2],
-        am       = vectors[3],
-        sum_pm   = vectors[4],
-        Δa_star  = vectors[5],
-        Δpm1     = vectors[6],
-        Δa       = vectors[7],
-        b1       = vectors[8],
-        b2       = vectors[9],
-        ũ_vector = vectors[10],
+        pm=vectors[1],
+        um=vectors[2],
+        am=vectors[3],
+        sum_pm=vectors[4],
+        Δa_star=vectors[5],
+        Δpm1=vectors[6],
+        Δa=vectors[7],
+        b1=vectors[8],
+        b2=vectors[9],
+        ũ_vector=vectors[10],
     )
 end
 
@@ -68,8 +68,8 @@ function initialize_solve(simcase::SimulationCase, params::Dict{Symbol,Any})
 
     @sunpack t0, dt, save_sim_dir = simcase
 
-    Ut0   = U(t0)
-    Pt0   = P(t0)
+    Ut0 = U(t0)
+    Pt0 = P(t0)
     Ut0_1 = U(t0 + dt)
     Pt0_1 = P(t0 + dt)
 
@@ -79,7 +79,7 @@ function initialize_solve(simcase::SimulationCase, params::Dict{Symbol,Any})
     @info "Initial Conditions Created"
 
     matrices = initialize_matrices(uh0, params, simcase)
-    vectors  = initialize_vectors(matrices, uh0, ph0)
+    vectors = initialize_vectors(matrices, uh0, ph0)
 
     initialize_export_nodes(params, simcase)
     mkpath(save_sim_dir)
@@ -105,21 +105,21 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
 
     @sunpack t0, dt, tF = simcase.simulationp.timep
     @sunpack petsc_options, matrix_freq_update, M,
-             a_err_threshold, θ, Number_Skip_Expansion = simcase.simulationp.solverp
+    a_err_threshold, θ, Number_Skip_Expansion = simcase.simulationp.solverp
 
-    time_step = collect(t0 + dt : dt : tF)
+    time_step = collect(t0+dt:dt:tF)
 
     matrices, vectors, (uh_avg, ph_avg) = initialize_solve(simcase, params)
     @unpack Utn, Utn1, Ptn, Ptn1 = params
 
-    GridapPETSc.with(args = split(petsc_options)) do
+    GridapPETSc.with(args=split(petsc_options)) do
         any(kw -> occursin(kw, petsc_options), ["cuda", "aijcusparse"]) && run(`nvidia-smi`)
 
         M_ = _unpack_matrices(matrices)
         V_ = _unpack_vectors(vectors)
 
         ns1 = create_PETSc_setup(M_.ML, vel_kspsetup)
-        ns2 = create_PETSc_setup(M_.S,  pres_kspsetup)
+        ns2 = create_PETSc_setup(M_.S, pres_kspsetup)
 
         uh_tn_updt = FEFunction(Utn, V_.um)
 
@@ -136,19 +136,17 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
             end
 
             time_solve = @elapsed begin
-                # Reset accumulators for this time step. Use fill! to avoid
-                # allocating a new PVector just to copy zeros into it.
-                fill!(V_.am,     0.0)
+                fill!(V_.am, 0.0)
                 fill!(V_.sum_pm, 0.0)
 
-                m            = 0
-                norm_Δa0     = 10.0
-                norm_Δp0     = 10.0
+                m = 0
+                norm_Δa0 = 10.0
+                norm_Δp0 = 10.0
                 err_norm_Δa0 = 1.0
                 err_norm_Δp0 = 1.0
 
                 while (m <= M) && (err_norm_Δa0 < a_err_threshold)
-                    fill!(V_.Δpm1,    0.0)
+                    fill!(V_.Δpm1, 0.0)
                     fill!(V_.Δa_star, 0.0)
 
                     solve_velocity!(ns1, M_, V_, dt, θ)
@@ -157,27 +155,37 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
                     Δpm1 = GridapDistributed.change_ghost(V_.Δpm1, M_.Aup)
 
                     # Δa = Δa* - θ * inv(ML) * (Aup * Δpm1)
-                    # Use V_.Δa as scratch storage for Aup * Δpm1 to avoid
-                    # an extra allocation; then update in place.
                     mul!(V_.Δa, M_.Aup, Δpm1)
-                    @. V_.Δa = V_.Δa_star - θ * M_.inv_ML * V_.Δa
+                    Δa_cg = GridapDistributed.change_ghost(V_.Δa, M_.ML)
+                    map(own_values(Δa_cg), own_values(V_.Δa_star), own_values(M_.inv_ML)) do da, da_star, iml
+                        @. da = da_star - θ * iml * da
+                    end
+                    # update velocity
+                    map(own_values(V_.um), own_values(Δa_cg)) do u, da
+                        @. u = u + dt * da
+                    end
 
-                    # In-place updates of velocity and pressure free dofs.
-                    axpy!(dt, V_.Δa, V_.um)   # um += dt * Δa
-                    V_.pm .+= Δpm1            # pm += Δpm1   (no temporary)
+                    # update pressure
+                    V_.pm .+= Δpm1
 
                     if m == 0
                         copy!(V_.sum_pm, Δpm1)
-                        copy!(V_.am,     V_.Δa)
-                        norm_Δa0 = norm(V_.Δa)
-                        norm_Δp0 = norm(Δpm1)
+
+                        map(own_values(V_.am), own_values(Δa_cg)) do a, da
+                            @. a = da
+                        end
+
+                        norm_Δa0 = pvnorm(Δa_cg)
+                        norm_Δp0 = pvnorm(Δpm1)
                     else
                         V_.sum_pm .+= Δpm1
-                        V_.am     .+= V_.Δa
+                        map(own_values(V_.am), own_values(Δa_cg)) do a, da
+                            @. a = a + da
+                        end
                     end
 
-                    err_norm_Δa0 = norm_Δa0 / norm(V_.Δa)
-                    err_norm_Δp0 = norm_Δp0 / norm(Δpm1)
+                    err_norm_Δa0 = norm_Δa0 / pvnorm(Δa_cg)
+                    err_norm_Δp0 = norm_Δp0 / pvnorm(Δpm1)
 
                     evaluate_convergence(err_norm_Δa0, "velocity")
                     evaluate_convergence(err_norm_Δp0, "pressure")
@@ -191,9 +199,9 @@ function solve_case(params::Dict{Symbol,Any}, simcase::SimulationCase)
 
             update_ũ_vector!(V_.ũ_vector, V_.um)
 
-            Utn  = Utn1
+            Utn = Utn1
             Utn1 = U(tn + dt)
-            Ptn  = Ptn1
+            Ptn = Ptn1
             Ptn1 = P(tn + dt)
             params[:Ptn1] = Ptn1
             params[:Utn1] = Utn1
@@ -236,17 +244,17 @@ end
 # ---------------------------------------------------------------------------
 
 function _assemble_velocity_rhs!(b1, M_, um, pm, am, sum_pm, dt::Float64, θ::Float64)
-    um     = GridapDistributed.change_ghost(um,     M_.Auu)   # cols: Utn1
-    pm     = GridapDistributed.change_ghost(pm,     M_.Aup)   # cols: Ptn1
-    am     = GridapDistributed.change_ghost(am,     M_.ML)    # cols: Utn1
+    um = GridapDistributed.change_ghost(um, M_.Auu)   # cols: Utn1
+    pm = GridapDistributed.change_ghost(pm, M_.Aup)   # cols: Ptn1
+    am = GridapDistributed.change_ghost(am, M_.ML)    # cols: Utn1
     sum_pm = GridapDistributed.change_ghost(sum_pm, M_.Aup)   # cols: Ptn1
 
     copy!(b1, M_.Vec_Au)                              # b1  =  Vec_Au
-    mul!(b1, M_.Auu, um,     -1.0,    1.0)            # b1 += -Auu·um
-    mul!(b1, M_.Aup, pm,     -1.0,    1.0)            # b1 += -Aup·pm
-    mul!(b1, M_.ML,  am,     -1.0,    1.0)            # b1 += -ML·am
-    mul!(b1, M_.Auu, am,      dt,     1.0)            # b1 +=  dt·Auu·am
-    mul!(b1, M_.Aup, sum_pm,  1 - θ,  1.0)            # b1 += (1-θ)·Aup·Σ Δp
+    mul!(b1, M_.Auu, um, -1.0, 1.0)            # b1 += -Auu·um
+    mul!(b1, M_.Aup, pm, -1.0, 1.0)            # b1 += -Aup·pm
+    mul!(b1, M_.ML, am, -1.0, 1.0)            # b1 += -ML·am
+    mul!(b1, M_.Auu, am, dt, 1.0)            # b1 +=  dt·Auu·am
+    mul!(b1, M_.Aup, sum_pm, 1 - θ, 1.0)            # b1 += (1-θ)·Aup·Σ Δp
     return b1
 end
 
@@ -274,9 +282,9 @@ end
 # ---------------------------------------------------------------------------
 
 function _assemble_pressure_rhs!(b2, M_, um, pm, am, Δa_star, dt::Float64)
-    um      = GridapDistributed.change_ghost(um,      M_.Apu)
-    pm      = GridapDistributed.change_ghost(pm,      M_.App)
-    am      = GridapDistributed.change_ghost(am,      M_.Tpu)
+    um = GridapDistributed.change_ghost(um, M_.Apu)
+    pm = GridapDistributed.change_ghost(pm, M_.App)
+    am = GridapDistributed.change_ghost(am, M_.Tpu)
     Δa_star = GridapDistributed.change_ghost(Δa_star, M_.Tpu)
 
     # b2 starts as −Vec_Ap (continuity sign convention).
@@ -284,10 +292,10 @@ function _assemble_pressure_rhs!(b2, M_, um, pm, am, Δa_star, dt::Float64)
     rmul!(b2, -1.0)
 
     mul!(b2, M_.Tpu, Δa_star, 1.0, 1.0)               # b2 += Tpu·Δa*
-    mul!(b2, M_.Apu, um,      1.0, 1.0)               # b2 += Apu·um
-    mul!(b2, M_.Apu, Δa_star,  dt, 1.0)               # b2 += dt·Apu·Δa*
-    mul!(b2, M_.App, pm,      1.0, 1.0)               # b2 += App·pm
-    mul!(b2, M_.Tpu, am,      1.0, 1.0)               # b2 += Tpu·am
+    mul!(b2, M_.Apu, um, 1.0, 1.0)               # b2 += Apu·um
+    mul!(b2, M_.Apu, Δa_star, dt, 1.0)               # b2 += dt·Apu·Δa*
+    mul!(b2, M_.App, pm, 1.0, 1.0)               # b2 += App·pm
+    mul!(b2, M_.Tpu, am, 1.0, 1.0)               # b2 += Tpu·am
     return b2
 end
 
