@@ -60,6 +60,13 @@ export TensorFormulation
 export VMS
 export SUPG
 
+export TimestepLimiter
+export NoLimiter
+export AdvectiveLimiter
+export DiffusiveLimiter
+export CombinedLimiter
+export CustomLimiter
+
 include("AnalyticalSolution.jl")
 include("Params.jl")
 include("StabilizationStruct.jl")

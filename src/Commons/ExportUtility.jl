@@ -447,35 +447,62 @@ Compute L2 error norm for velocity and pressure for TGV2D case. https://doi.org/
 """
 function compute_error(simcase::TaylorGreen{Periodic}, params::Dict{Symbol,Any},   tn::Float64, fields::Tuple)
     uh, ph = fields
-
+    @unpack U,P,V,Q = params 
     uh_analytic = simcase.bc_type.a_solution[:velocity](tn) # Compute analytic velocity at tn
     ph_analytic = simcase.bc_type.a_solution[:pressure](tn) # Compute analytic pressure at tn
+
+    uha =interpolate(uh_analytic, U(tn))
+    pha = interpolate(ph_analytic, P(tn))
 
     @unpack dΩ,parts = params
     eu = uh_analytic - uh    #error velocity 
     ep = ph_analytic - ph #error pressure
 
+    # m_eu = maximum(norm(eu))
+    m_eu = maximum(norm.(get_free_dof_values((interpolate(eu, V(tn))))))
+    m_ep = maximum(abs.(get_free_dof_values((interpolate(ep, Q(tn))))))
+
+    println(m_eu)
+    println(m_ep)
+
+
     #L2 norm error velocity and pressure
-    l2eu = sqrt(sum(∫(eu ⋅ eu) * dΩ)) ./sqrt(sum(∫(uh ⋅ uh) * dΩ))
-    l2ep = sqrt(sum(∫(ep * ep) * dΩ)) ./ sqrt(sum(∫(ph ⋅ ph) * dΩ))
+    l2eu_rel = sqrt(sum(∫(eu ⋅ eu) * dΩ)) ./sqrt(sum(∫(uha ⋅ uha) * dΩ))
+    l2ep_rel = sqrt(sum(∫(ep * ep) * dΩ)) ./ sqrt(sum(∫(pha ⋅ pha) * dΩ))
+
+    #L2 norm error velocity and pressure
+    l2eu_abs = sqrt(sum(∫(eu ⋅ eu) * dΩ)) 
+    l2ep_abs = sqrt(sum(∫(ep * ep) * dΩ))
+
 
     ALLOWED_EXPORTS = ["VelocityError", "PressureError"]
     selected_exports = intersect(ALLOWED_EXPORTS, simcase.simulationp.exportp.extra_export)
 
     # Construct data array dynamically
-    data = [tn]
+    data_rel = [tn]
+    data_abs = [tn]
+    data_max = [tn]
+
     headers = ["time"]
     if "VelocityError" in selected_exports
-        push!(data, l2eu)
+        push!(data_rel, l2eu_rel)
+        push!(data_abs, l2eu_abs)
+        push!(data_max, m_eu)
+
         push!(headers, "VelocityError")
     end
     if "PressureError" in selected_exports
-        push!(data, l2ep)
+        push!(data_rel, l2ep_rel)
+        push!(data_abs, l2ep_abs)
+        push!(data_max, m_ep)
         push!(headers, "PressureError")
 
     end
 
-    write_to_csv("TGV_ERRRORS.csv", data, headers, parts)
+    write_to_csv("TGV_L2_relative_ERRRORS.csv", data_rel, headers, parts)
+    write_to_csv("TGV_L2_absolute_ERRRORS.csv", data_abs, headers, parts)
+    write_to_csv("TGV_max_absolute_ERRRORS.csv", data_max, headers, parts)
+
     
 end
 

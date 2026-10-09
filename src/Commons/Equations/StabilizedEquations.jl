@@ -7,10 +7,10 @@ Wrapper for the convective term
 cconv(u, ∇u) = (∇u') ⋅ u
 
 function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::SimulationCase)
-  @sunpack skew, ν,dt, θ,D = simcase
+  @sunpack skew, ν,dt, θ,D, order = simcase
   
   sprob = simcase.sprob
-  @unpack dΩ = params
+  @unpack dΩ, Ω = params
   @unpack skew = sprob
     
     skewcoeff = skew * 0.5 # ==0 if skew == false
@@ -50,6 +50,11 @@ function segregated_equations(u_adv,params::Dict{Symbol,Any},simcase::Simulation
 
     rhs(v) = 0.0
     
+    if typeof(simcase) <: TaylorGreen
+      writevtk(Ω, "Stab_$dt", nsubcells=order, cellfields=["tm"=>Tm, "tc"=>Tc] )
+      @info "Exporting Stabilization Parameters"
+    end
+
     return Tuu,Tpu,Auu,Aup,Apu,App,ML,S,rhs
 
 end

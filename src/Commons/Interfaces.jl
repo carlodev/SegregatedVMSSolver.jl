@@ -1,10 +1,11 @@
 module Interfaces
 
 using SyntheticEddyMethod
-
+using PartitionedArrays
+    
 export @sunpack
 export evaluate_convergence
-
+export pvnorm
 
 
 
@@ -36,6 +37,10 @@ function evaluate_convergence(ratio::Float64, field::String)
     end
 end
 
-VirtualBox((-1.0,1.0), (0.0,0.2); σ=0.0125)
+
+function pvnorm(v)
+    sqrt(sum(map(vi -> sum(abs2, vi), own_values(v))))
+end
+
 
 end
